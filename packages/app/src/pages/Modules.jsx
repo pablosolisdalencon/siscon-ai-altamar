@@ -22,7 +22,7 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
     setLoading(true);
     try {
       const { data } = await api.get(endpoint);
-      setItems(data.data);
+      setItems(data.data || []);
     } catch (error) {
       console.error(`Error fetching ${title}:`, error);
     } finally {
@@ -32,23 +32,37 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
-    setFormData(item || fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {}));
+    setFormData(item || fields.reduce((acc, f) => {
+      if (f.type === 'section') return acc;
+      return { ...acc, [f.name]: f.defaultValue || '' };
+    }, {}));
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Filter out section markers and handle numbers
+      const cleanData = {};
+      fields.forEach(f => {
+        if (f.type !== 'section') {
+          let val = formData[f.name];
+          if (f.type === 'number') val = parseFloat(val) || 0;
+          cleanData[f.name] = val;
+        }
+      });
+
       if (editingItem) {
         const idKey = Object.keys(editingItem).find(k => k.startsWith('id_') || k === 'id');
-        await api.put(`${endpoint}/${editingItem[idKey]}`, formData);
+        await api.put(`${endpoint}/${editingItem[idKey]}`, cleanData);
       } else {
-        await api.post(endpoint, formData);
+        await api.post(endpoint, cleanData);
       }
       setIsModalOpen(false);
       fetchItems();
     } catch (error) {
-      alert('Error guardando datos');
+      console.error('Error saving:', error);
+      alert('Error guardando datos: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -111,30 +125,36 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
                 <Icon size={24} />
               </div>
               <div className="flex flex-col items-end mr-12">
-                <span className="text-[10px] font-black text-slate-300 uppercase">ID</span>
-                <span className="text-xs font-bold text-slate-500">{item.rut || item.id || item.user}</span>
+                <span className="text-[10px] font-black text-slate-300 uppercase">RUT / ID</span>
+                <span className="text-xs font-bold text-slate-500 truncate max-w-[100px]">{item.rut || item.id || item.user}</span>
               </div>
             </div>
             
             <h3 className="text-lg font-black text-slate-800 mb-4 truncate">{item.nombre || item.razon || item.user}</h3>
 
             <div className="space-y-3">
-              {(item.mail || item.comercial_mail || item.pago_mail) && (
+              {(item.mail || item.pago_mail || item.comercial_mail) && (
                 <div className="flex items-center gap-3 text-slate-500">
                   <Mail size={14} className="text-slate-300" />
-                  <span className="text-xs font-medium truncate">{item.mail || item.comercial_mail || item.pago_mail}</span>
+                  <span className="text-xs font-medium truncate">{item.mail || item.pago_mail || item.comercial_mail}</span>
                 </div>
               )}
-              {item.fono && (
+              {(item.fono || item.pago_fono || item.comercial_fono) && (
                 <div className="flex items-center gap-3 text-slate-500">
                   <Phone size={14} className="text-slate-300" />
-                  <span className="text-xs font-medium">{item.fono}</span>
+                  <span className="text-xs font-medium">{item.fono || item.pago_fono || item.comercial_fono}</span>
                 </div>
               )}
               {item.comision_default !== undefined && (
                 <div className="flex items-center gap-3">
                   <DollarSign size={14} className="text-green-500" />
                   <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">Comisión: {item.comision_default}%</span>
+                </div>
+              )}
+              {item.role && (
+                <div className="flex items-center gap-3">
+                  <Briefcase size={14} className="text-slate-300" />
+                  <span className="text-[10px] font-black text-slate-400 uppercase bg-slate-50 px-2 py-0.5 rounded">Rol: {item.role}</span>
                 </div>
               )}
             </div>
@@ -145,26 +165,49 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="bg-white w-full max-w-2xl rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-slate-800">{editingItem ? 'Editar' : 'Nuevo'} {title}</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><X size={24}/></button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {fields.map(field => (
-                <div key={field.name} className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase ml-2">{field.label}</label>
-                  <input 
-                    type={field.type || 'text'}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary/50 text-sm font-bold"
-                    value={formData[field.name] || ''}
-                    onChange={(e) => setFormData({...formData, [field.name]: e.target.value})}
-                    placeholder={field.label}
-                    required={field.required}
-                  />
-                </div>
-              ))}
-              <div className="flex justify-end gap-4 mt-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {fields.map((field, i) => {
+                  if (field.type === 'section') {
+                    return (
+                      <div key={i} className="col-span-full border-b border-slate-100 pb-2 mt-4">
+                        <h3 className="text-xs font-black text-primary uppercase tracking-widest">{field.label}</h3>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={field.name} className={cn("space-y-1", field.fullWidth && "col-span-full")}>
+                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">{field.label}</label>
+                      {field.type === 'select' ? (
+                        <select
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary/50 text-sm font-bold appearance-none"
+                          value={formData[field.name] || ''}
+                          onChange={(e) => setFormData({...formData, [field.name]: e.target.value})}
+                          required={field.required}
+                        >
+                          <option value="">Seleccionar...</option>
+                          {field.options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                        </select>
+                      ) : (
+                        <input 
+                          type={field.type || 'text'}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary/50 text-sm font-bold"
+                          value={formData[field.name] || ''}
+                          onChange={(e) => setFormData({...formData, [field.name]: e.target.value})}
+                          placeholder={field.placeholder || field.label}
+                          required={field.required}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-end gap-4 pt-6 border-t border-slate-50 mt-8">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">Cancelar</button>
                 <button type="submit" className="btn-primary flex items-center gap-2 px-8">
                   <Save size={18} />
@@ -180,35 +223,60 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
 };
 
 const AGENT_FIELDS = [
-  { name: 'nombre', label: 'Nombre Completo', required: true },
+  { type: 'section', label: 'Información Básica' },
+  { name: 'nombre', label: 'Nombre Completo', required: true, fullWidth: true },
   { name: 'rut', label: 'RUT' },
   { name: 'mail', label: 'Email' },
   { name: 'fono', label: 'Teléfono' },
-  { name: 'comision_default', label: 'Comisión Base (%)', type: 'number' }
+  { name: 'comision_default', label: 'Comisión Base (%)', type: 'number', defaultValue: 0 }
 ];
 
 const CLIENT_FIELDS = [
-  { name: 'razon', label: 'Razón Social / Nombre', required: true },
-  { name: 'rut', label: 'RUT' },
-  { name: 'direccion', label: 'Dirección' },
+  { type: 'section', label: 'Datos de la Empresa' },
+  { name: 'razon', label: 'Razón Social', required: true, fullWidth: true },
+  { name: 'rut', label: 'RUT', required: true },
+  { name: 'giro', label: 'Giro / Actividad' },
+  { name: 'direccion', label: 'Dirección Comercial', fullWidth: true },
+  { type: 'section', label: 'Contacto de Pagos' },
+  { name: 'pago_nombre', label: 'Nombre Contacto Pagos' },
   { name: 'pago_mail', label: 'Email Pagos' },
-  { name: 'fono', label: 'Teléfono' }
+  { name: 'pago_fono', label: 'Teléfono Pagos' },
+  { type: 'section', label: 'Contacto Comercial' },
+  { name: 'comercial_nombre', label: 'Nombre Contacto Comercial' },
+  { name: 'comercial_mail', label: 'Email Comercial' },
+  { name: 'comercial_fono', label: 'Teléfono Comercial' },
+  { type: 'section', label: 'Otros' },
+  { name: 'mensaje_cobro', label: 'Mensaje Personalizado Cobro', fullWidth: true }
 ];
 
 const PROVIDER_FIELDS = [
-  { name: 'razon', label: 'Proveedor / Razón Social', required: true },
-  { name: 'rut', label: 'RUT' },
-  { name: 'mail', label: 'Email' },
-  { name: 'fono', label: 'Teléfono' },
-  { name: 'rubro', label: 'Rubro / Giro' }
+  { type: 'section', label: 'Datos del Proveedor' },
+  { name: 'razon', label: 'Nombre / Razón Social', required: true, fullWidth: true },
+  { name: 'rut', label: 'RUT', required: true },
+  { name: 'giro', label: 'Giro / Rubro' },
+  { name: 'direccion', label: 'Dirección', fullWidth: true },
+  { type: 'section', label: 'Contacto Comercial' },
+  { name: 'comercial_nombre', label: 'Nombre Contacto' },
+  { name: 'comercial_mail', label: 'Email' },
+  { name: 'comercial_fono', label: 'Teléfono' },
+  { type: 'section', label: 'Contacto de Pagos' },
+  { name: 'pago_nombre', label: 'Nombre Tesorería' },
+  { name: 'pago_mail', label: 'Email Pagos' },
+  { name: 'pago_fono', label: 'Teléfono Pagos' }
 ];
 
 const USER_FIELDS = [
+  { type: 'section', label: 'Credenciales de Acceso' },
   { name: 'user', label: 'Nombre de Usuario', required: true },
-  { name: 'pass', label: 'Contraseña', type: 'password', required: true }
+  { name: 'pass', label: 'Contraseña', type: 'password', required: true },
+  { name: 'role', label: 'Rol del Sistema', type: 'select', defaultValue: 'user', options: [
+    { label: 'Administrador', value: 'admin' },
+    { label: 'Usuario', value: 'user' },
+    { label: 'Visualizador', value: 'viewer' }
+  ]}
 ];
 
 export const Agentes = () => <ModuleManager title="Gestión de Agentes" endpoint="/agents" icon={Users} fields={AGENT_FIELDS} />;
-export const Clientes = () => <ModuleManager title="Clientes" endpoint="/clients" icon={Users} fields={CLIENT_FIELDS} />;
+export const Clientes = () => <ModuleManager title="Clientes" endpoint="/clients" icon={Briefcase} fields={CLIENT_FIELDS} />;
 export const Proveedores = () => <ModuleManager title="Proveedores" endpoint="/providers" icon={Truck} fields={PROVIDER_FIELDS} />;
 export const Usuarios = () => <ModuleManager title="Usuarios" endpoint="/users" icon={User} fields={USER_FIELDS} />;
