@@ -1,0 +1,44 @@
+services:
+  # 1. SISCON-AI API (Backend)
+  - type: web
+    name: siscon-ai-api-preprod
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build --workspaces --if-present
+    startCommand: npm run preprod --workspace=@siscon-ai/api
+    envVars:
+      - key: NODE_ENV
+        value: preprod
+      - key: PORT
+        value: 4000
+      - key: DB_HOST
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASS
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+
+  # 2. SISCON-AI App (Frontend)
+  - type: static
+    name: siscon-ai-app-preprod
+    env: static
+    plan: free
+    buildCommand: npm install && npm run build --workspace=@siscon-ai/app
+    staticPublishPath: ./packages/app/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: siscon-ai-api-preprod
+          property: host
+    rewriteRules:
+      - source: /*
+        destination: /index.html

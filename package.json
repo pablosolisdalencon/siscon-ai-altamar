@@ -1,0 +1,21 @@
+{
+  "name": "siscon-ai",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "preprod": "npm run preprod --workspaces --if-present",
+    "prod": "npm run prod --workspaces --if-present",
+    "start": "npm run start --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "SISCON-AI: Modernización del sistema Altamar",
+  "main": "index.js",
+  "type": "commonjs"
+}
