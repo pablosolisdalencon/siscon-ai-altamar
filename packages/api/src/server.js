@@ -50,6 +50,9 @@ app.post('/api/users', modulesController.createUser);
 app.put('/api/users/:id', modulesController.updateUser);
 app.delete('/api/users/:id', modulesController.deleteUser);
 
+// Sale States
+app.get('/api/sale-states', modulesController.getSaleStates);
+
 // Start Server
 const startServer = async () => {
   await connectDB();
