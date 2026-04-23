@@ -12,6 +12,8 @@ const Ventas = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedSaleId, setSelectedSaleId] = useState(null);
   const [auxData, setAuxData] = useState({ clients: [], agents: [], states: [] });
   const [filters, setFilters] = useState({
     nFactura: '',
@@ -86,12 +88,61 @@ const Ventas = () => {
     }
   };
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (sale = null) => {
+    if (sale) {
+      setIsEditMode(true);
+      setSelectedSaleId(sale.id_venta);
+      setFormData({
+        fecha: sale.fecha,
+        n_factura: sale.n_factura || 0,
+        n_cot: sale.n_cot || 0,
+        n_oc: sale.n_oc || 0,
+        id_cliente: sale.id_cliente,
+        id_agente: sale.id_agente || '',
+        item: sale.item || '',
+        detalle: sale.detalle || '',
+        monto: sale.monto || 0,
+        estado: sale.estado,
+        pagado: sale.pagado || 'NO',
+        entregado: sale.entregado || 'NO',
+        fecha_entrega: sale.fecha_entrega || '',
+        fecha_pago: sale.fecha_pago || '',
+        comicion: sale.comicion || 0,
+        f_factura: sale.f_factura || '',
+        f_cot: sale.f_cot || '',
+        f_oc: sale.f_oc || ''
+      });
+    } else {
+      setIsEditMode(false);
+      setSelectedSaleId(null);
+      setFormData({
+        fecha: new Date().toISOString().split('T')[0],
+        n_factura: 0,
+        n_cot: 0,
+        n_oc: 0,
+        id_cliente: '',
+        id_agente: '',
+        item: '',
+        detalle: '',
+        monto: 0,
+        estado: 1,
+        pagado: 'NO',
+        entregado: 'NO',
+        fecha_entrega: '',
+        fecha_pago: '',
+        comicion: 0,
+        f_factura: '',
+        f_cot: '',
+        f_oc: ''
+      });
+    }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setIsEditMode(false);
+    setSelectedSaleId(null);
   };
 
   const handleFileUpload = async (file, type) => {
@@ -127,13 +178,19 @@ const Ventas = () => {
         f_oc: f_oc || formData.f_oc
       };
 
-      await api.post('/sales', dataToSave);
+      if (isEditMode) {
+        await api.put(`/sales/${selectedSaleId}`, dataToSave);
+        alert('Venta actualizada con éxito');
+      } else {
+        await api.post('/sales', dataToSave);
+        alert('Venta creada con éxito');
+      }
+
       setIsModalOpen(false);
       setUploadingFiles({ cotizacion: null, factura: null, oc: null });
       fetchSales();
-      alert('Venta creada con éxito');
     } catch (err) {
-      alert(err.message || 'Error al crear venta');
+      alert(err.message || 'Error al guardar venta');
     } finally {
       setLoading(false);
     }
@@ -336,9 +393,26 @@ const Ventas = () => {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex justify-end gap-2">
-                      <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-green-600 transition-all"><Save size={14} /></button>
+                      <button
+                        onClick={() => handleOpenModal(sale)}
+                        className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all"
+                        title="Editar Venta"
+                      >
+                        <Save size={14} />
+                      </button>
                       <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all"><FileText size={14} /></button>
-                      <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all"><Trash2 size={14} /></button>
+                      <button
+                        onClick={async () => {
+                          if (confirm('¿Estás seguro de eliminar esta venta?')) {
+                            await api.delete(`/sales/${sale.id_venta}`);
+                            fetchSales();
+                          }
+                        }}
+                        className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all"
+                        title="Eliminar Venta"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -365,8 +439,10 @@ const Ventas = () => {
           <div className="bg-white w-full max-w-4xl rounded-[40px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-3xl font-black text-slate-800">Nueva Venta</h2>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Registro de transacción comercial</p>
+                <h2 className="text-3xl font-black text-slate-800">{isEditMode ? 'Editar Venta' : 'Nueva Venta'}</h2>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">
+                  {isEditMode ? `Editando registro N° ${selectedSaleId}` : 'Registro de transacción comercial'}
+                </p>
               </div>
               <button onClick={handleCloseModal} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><Trash2 size={24} /></button>
             </div>
@@ -514,7 +590,7 @@ const Ventas = () => {
                 <button type="button" onClick={handleCloseModal} className="px-8 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">Cancelar</button>
                 <button type="submit" className="btn-primary flex items-center gap-3 px-12 py-4 text-lg">
                   <Save size={24} />
-                  Confirmar y Crear Venta
+                  {isEditMode ? 'Actualizar Venta' : 'Confirmar y Crear Venta'}
                 </button>
               </div>
             </form>
