@@ -9,6 +9,7 @@ const cn = (...inputs) => twMerge(clsx(inputs));
 const Cobros = () => {
   const [collections, setCollections] = useState([]);
   const [clients, setClients] = useState([]);
+  const [states, setStates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMailModalOpen, setIsMailModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
@@ -18,7 +19,9 @@ const Cobros = () => {
     from: '',
     to: '',
     clientSearch: '',
-    pagado: 'NO'
+    pagado: 'NO',
+    estado: '',
+    sort: 'id_venta'
   });
 
   useEffect(() => {
@@ -27,6 +30,7 @@ const Cobros = () => {
 
   useEffect(() => {
     fetchClients();
+    fetchStates();
   }, []);
 
   const fetchCollections = async () => {
@@ -47,6 +51,15 @@ const Cobros = () => {
       setClients(data.data);
     } catch (err) {
       console.error('Error fetching clients:', err);
+    }
+  };
+
+  const fetchStates = async () => {
+    try {
+      const { data } = await api.get('/modules/sale-states');
+      setStates(data.data);
+    } catch (err) {
+      console.error('Error fetching states:', err);
     }
   };
 
@@ -132,6 +145,33 @@ const Cobros = () => {
               <span>{opt}</span>
             </label>
           ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span>Estado:</span>
+          <select
+            className="px-2 py-1 border border-slate-300 rounded bg-white"
+            value={filters.estado}
+            onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
+          >
+            <option value="">TODAS</option>
+            {states.map(s => (
+              <option key={s.id_estado} value={s.id_estado}>{s.estado}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span>Orden:</span>
+          <select
+            className="px-2 py-1 border border-slate-300 rounded bg-white font-bold"
+            value={filters.sort}
+            onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
+          >
+            <option value="id_venta">ID VENTA (DESC)</option>
+            <option value="fecha_pago">FECHA PAGO (DESC)</option>
+            <option value="fecha_entrega">FECHA ENTREGA (DESC)</option>
+          </select>
         </div>
       </div>
 
