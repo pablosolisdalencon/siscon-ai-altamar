@@ -1,19 +1,42 @@
-const { Sale, Client, Company } = require('../models');
+const { Sale, Client, Company, SaleState } = require('../models/associations');
 const { successResponse, errorResponse } = require('../utils/response');
-const { sequelize } = require('../config/database');
 const { Op } = require('sequelize');
 
 exports.getCollectionsDashboard = async (req, res) => {
   try {
+    const { nFactura, nCot, from, to, clientSearch, pagado } = req.query;
+
+    const saleWhere = {
+      n_factura: { [Op.ne]: 0 }
+    };
+
+    if (nFactura) saleWhere.n_factura = nFactura;
+    if (nCot) saleWhere.n_cot = nCot;
+    if (from && to) {
+      saleWhere.fecha = { [Op.between]: [from, to] };
+    }
+    if (pagado && pagado !== 'TODAS') {
+      saleWhere.pagado = pagado;
+    } else if (!pagado) {
+      saleWhere.pagado = 'NO';
+    }
+
+    const clientWhere = {};
+    if (clientSearch) {
+      clientWhere[Op.or] = [
+        { razon: { [Op.like]: `%${clientSearch}%` } },
+        { rut: { [Op.like]: `%${clientSearch}%` } }
+      ];
+    }
+
     const clients = await Client.findAll({
+      where: clientWhere,
       include: [
         {
           model: Sale,
-          where: {
-            pagado: 'NO',
-            n_factura: { [Op.ne]: 0 }
-          },
-          required: true // Only clients with pending sales
+          where: saleWhere,
+          required: true,
+          include: [{ model: SaleState, as: 'status', constraints: false }]
         }
       ]
     });

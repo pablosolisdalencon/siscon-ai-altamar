@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Mail, Clock, AlertTriangle, ChevronRight, ChevronDown, DollarSign, Search, Filter, Save, Trash2, X, Send, FileText } from 'lucide-react';
+import { Mail, Clock, AlertTriangle, ChevronRight, ChevronDown, DollarSign, Search, Filter, Save, Trash2, X, Send, FileText, User as UserIcon, Settings } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -8,20 +8,31 @@ const cn = (...inputs) => twMerge(clsx(inputs));
 
 const Cobros = () => {
   const [collections, setCollections] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedClient, setExpandedClient] = useState(null);
   const [isMailModalOpen, setIsMailModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [mailContent, setMailContent] = useState('');
+  const [filters, setFilters] = useState({
+    nFactura: '',
+    nCot: '',
+    from: '',
+    to: '',
+    clientSearch: '',
+    pagado: 'NO'
+  });
 
   useEffect(() => {
     fetchCollections();
+  }, [filters]);
+
+  useEffect(() => {
+    fetchClients();
   }, []);
 
   const fetchCollections = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/collections/dashboard');
+      const { data } = await api.get('/collections/dashboard', { params: filters });
       setCollections(data.data);
     } catch (error) {
       console.error('Error fetching collections:', error);
@@ -30,17 +41,24 @@ const Cobros = () => {
     }
   };
 
-  const handleOpenCobros = (client) => {
+  const fetchClients = async () => {
+    try {
+      const { data } = await api.get('/clients');
+      setClients(data.data);
+    } catch (err) {
+      console.error('Error fetching clients:', err);
+    }
+  };
+
+  const handleOpenMailModal = (client) => {
     setSelectedClient(client);
-    const template = `Estimados ${client.razon},\n\nNos ponemos en contacto para informarles que registran un saldo pendiente en nuestra contabilidad.\n\nA continuación detallamos las facturas con pago atrasado:\n\nEsperamos su pronta respuesta o comprobante de pago.\n\nAtentamente,\nEquipo de Finanzas Altamar`;
-    setMailContent(template);
     setIsMailModalOpen(true);
   };
 
   const handleSendCollection = async () => {
     try {
-      // Mocking send email
-      alert(`Enviando cobro a ${selectedClient.razon}...\n\nContenido: ${mailContent.substring(0, 50)}...`);
+      await api.post('/collections/send-email', { clientId: selectedClient.id });
+      alert(`Cobro enviado con éxito a ${selectedClient.razon}`);
       setIsMailModalOpen(false);
     } catch (error) {
       alert('Error enviando correo');
@@ -49,184 +67,247 @@ const Cobros = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-20">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-black text-slate-800">Módulo de Cobranza Proactiva</h1>
-          <p className="text-slate-400 text-sm font-medium mt-1 uppercase tracking-widest">Gestión de Facturación Vencida</p>
+      {/* Filter Bar (Matches Screenshot 1) */}
+      <div className="bg-white p-4 border-b border-slate-200 flex flex-wrap gap-4 items-center text-xs font-bold text-slate-600">
+        <div className="flex items-center gap-1">
+          <span>N FAC</span>
+          <input
+            type="text"
+            className="w-20 px-2 py-1 border border-slate-300 rounded"
+            value={filters.nFactura}
+            onChange={(e) => setFilters({ ...filters, nFactura: e.target.value })}
+          />
         </div>
-        <div className="bg-red-50 px-6 py-3 rounded-2xl border border-red-100 text-right">
-          <p className="text-[10px] font-black text-red-400 uppercase">Mora Total Global</p>
-          <p className="text-2xl font-black text-red-600">$ {collections.reduce((acc, c) => acc + c.stats.totalTotal, 0).toLocaleString()}</p>
+        <div className="flex items-center gap-1">
+          <span>N COT</span>
+          <input
+            type="text"
+            className="w-20 px-2 py-1 border border-slate-300 rounded"
+            value={filters.nCot}
+            onChange={(e) => setFilters({ ...filters, nCot: e.target.value })}
+          />
+        </div>
+        <div className="flex items-center gap-1">
+          <span>Desde</span>
+          <input
+            type="date"
+            className="px-2 py-1 border border-slate-300 rounded"
+            value={filters.from}
+            onChange={(e) => setFilters({ ...filters, from: e.target.value })}
+          />
+        </div>
+        <div className="flex items-center gap-1">
+          <span>Hasta</span>
+          <input
+            type="date"
+            className="px-2 py-1 border border-slate-300 rounded"
+            value={filters.to}
+            onChange={(e) => setFilters({ ...filters, to: e.target.value })}
+          />
+        </div>
+        <div className="flex items-center gap-1 flex-1">
+          <span>Cliente</span>
+          <div className="relative flex-1 max-w-sm">
+            <input
+              type="text"
+              placeholder="Buscar cliente..."
+              className="w-full px-2 py-1 border border-slate-300 rounded pr-8"
+              value={filters.clientSearch}
+              onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
+            />
+            <Search size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" />
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span>Pagados:</span>
+          {['SI', 'NO', 'TODAS'].map(opt => (
+            <label key={opt} className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="pagado"
+                value={opt}
+                checked={filters.pagado === opt}
+                onChange={(e) => setFilters({ ...filters, pagado: e.target.value })}
+              />
+              <span>{opt}</span>
+            </label>
+          ))}
         </div>
       </div>
 
-      {/* Client Cards Grid */}
-      <div className="grid grid-cols-1 gap-6">
+      {/* List (Matches Screenshot 1 Grouping) */}
+      <div className="space-y-8">
         {loading ? (
-          [...Array(3)].map((_, i) => <div key={i} className="h-40 bg-slate-100 rounded-3xl animate-pulse" />)
+          <div className="flex justify-center p-20"><Clock className="animate-spin text-primary" size={48} /></div>
+        ) : collections.length === 0 ? (
+          <div className="text-center p-20 text-slate-400 font-bold uppercase tracking-widest">No se encontraron cobros pendientes</div>
         ) : collections.map((client) => (
-          <div key={client.id} className="glass-card overflow-hidden group border-l-4 border-l-red-500">
-            <div className="p-6 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="w-14 h-14 bg-red-100/50 rounded-2xl flex items-center justify-center text-red-600">
-                  <AlertTriangle size={24} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black text-slate-800 uppercase tracking-tighter">{client.razon}</h2>
-                  <p className="text-xs font-bold text-slate-400 tracking-widest">{client.rut}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-12">
-                <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-300 uppercase">Vencido</p>
-                  <p className="text-2xl font-black text-red-500">$ {client.stats.totalTotal.toLocaleString()}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">{client.items.length} DOCUMENTOS</p>
-                </div>
-                <div className="flex gap-3">
-                   <button 
-                    onClick={() => handleOpenCobros(client)}
-                    className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-2xl font-bold text-sm hover:bg-slate-700 transition-all shadow-lg shadow-slate-200"
-                   >
-                     <Mail size={18} />
-                     COBRAR
-                   </button>
-                   <button 
-                    onClick={() => setExpandedClient(expandedClient === client.id ? null : client.id)}
-                    className="p-3 bg-slate-100 text-slate-400 rounded-2xl hover:bg-slate-200 transition-all"
-                   >
-                     {expandedClient === client.id ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                   </button>
-                </div>
+          <div key={client.id} className="border border-slate-300">
+            {/* Group Header */}
+            <div className="bg-[#3a3a3a] text-white p-3 flex justify-between items-center bg-gradient-to-r from-slate-700 to-slate-800">
+              <h2 className="text-2xl font-black tracking-tight mx-auto uppercase">{client.razon} ({client.rut})</h2>
+              <div className="flex gap-4">
+                <button className="p-1 hover:text-yellow-400 transition-colors"><UserIcon size={20} fill="currentColor" /></button>
+                <button
+                  onClick={() => handleOpenMailModal(client)}
+                  className="p-1 hover:text-yellow-400 transition-colors"
+                >
+                  <Mail size={20} fill="currentColor" />
+                </button>
               </div>
             </div>
 
-            {/* Expandable Table */}
-            {expandedClient === client.id && (
-              <div className="p-6 pt-0 animate-in slide-in-from-top duration-300">
-                <div className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
-                  <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-slate-400">
-                      <tr>
-                        <th className="px-6 py-3 text-[10px] font-black uppercase">Fecha</th>
-                        <th className="px-6 py-3 text-[10px] font-black uppercase">Documento</th>
-                        <th className="px-6 py-3 text-[10px] font-black uppercase">Detalle</th>
-                        <th className="px-6 py-3 text-[10px] font-black uppercase text-right">Días Mora</th>
-                        <th className="px-6 py-3 text-[10px] font-black uppercase text-right">Monto</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      {client.items.map((sale) => (
-                        <tr key={sale.id_venta}>
-                          <td className="px-6 py-4 text-xs font-bold text-slate-500">{sale.fecha}</td>
-                          <td className="px-6 py-4">
-                            <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded">FAC: {sale.n_factura}</span>
-                          </td>
-                          <td className="px-6 py-4">
-                             <p className="text-xs font-bold text-slate-700">{sale.item}</p>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                             <span className="text-xs font-black text-red-500">{sale.daysOverdue} d.</span>
-                          </td>
-                          <td className="px-6 py-4 text-right text-sm font-black text-slate-900">${sale.total?.toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-[10px] sm:text-xs">
+                <thead className="bg-[#666666] text-white uppercase font-black">
+                  <tr>
+                    <th className="px-2 py-1 text-left w-6"></th>
+                    <th className="px-2 py-1 text-left">fecha</th>
+                    <th className="px-2 py-1 text-center">N° Cot</th>
+                    <th className="px-2 py-1 text-center">N° OC</th>
+                    <th className="px-2 py-1 text-center">N° Fac</th>
+                    <th className="px-2 py-1 text-left">Item</th>
+                    <th className="px-2 py-1 text-left">Detalle</th>
+                    <th className="px-2 py-1 text-right">Monto $</th>
+                    <th className="px-2 py-1 text-right">IVA $</th>
+                    <th className="px-2 py-1 text-right">Total $</th>
+                    <th className="px-2 py-1 text-center">Fecha de pago</th>
+                    <th className="px-2 py-1 text-center">Dias Vencidos</th>
+                    <th className="px-2 py-1 text-center w-8"><Settings size={14} className="mx-auto" /></th>
+                  </tr>
+                </thead>
+                <tbody className="border border-slate-300">
+                  {client.items.map((sale) => (
+                    <tr key={sale.id_venta} className="border-b border-slate-200 hover:bg-slate-50">
+                      <td className="px-2 py-1">
+                        <div className="w-4 h-4 rounded" style={{ backgroundColor: sale.status?.color || '#cccccc' }} />
+                      </td>
+                      <td className="px-2 py-1 font-bold text-slate-600">{sale.fecha}</td>
+                      <td className="px-2 py-1 text-center"><span className="text-blue-500 font-bold border-b border-blue-200">{sale.n_cot}</span></td>
+                      <td className="px-2 py-1 text-center">{sale.n_oc}</td>
+                      <td className="px-2 py-1 text-center"><span className="text-blue-500 font-bold border-b border-blue-200">{sale.n_factura}</span></td>
+                      <td className="px-2 py-1 font-bold text-slate-700">{sale.item}</td>
+                      <td className="px-2 py-1 text-slate-500 italic max-w-xs">{sale.detalle}</td>
+                      <td className="px-2 py-1 text-right font-medium">${sale.monto?.toLocaleString()}</td>
+                      <td className="px-2 py-1 text-right font-medium">${sale.iva?.toLocaleString()}</td>
+                      <td className="px-2 py-1 text-right font-black text-slate-900">${sale.total?.toLocaleString()}</td>
+                      <td className="px-2 py-1 text-center font-bold text-slate-500">{sale.fecha_pago}</td>
+                      <td className="px-2 py-1 text-center font-black text-red-600">{sale.daysOverdue}</td>
+                      <td className="px-2 py-1 text-center">
+                        <button className="p-1 hover:bg-slate-200 rounded transition-colors"><Settings size={12} className="text-slate-400" /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="bg-white border-t border-slate-300 font-black text-slate-700">
+                  <tr>
+                    <td colSpan={6} className="px-2 py-1 text-xs">Registros: {client.items.length}</td>
+                    <td className="px-2 py-1 text-right uppercase">Total :</td>
+                    <td className="px-2 py-1 text-right">${client.stats.totalMonto.toLocaleString()}</td>
+                    <td className="px-2 py-1 text-right">${client.stats.totalIva.toLocaleString()}</td>
+                    <td className="px-2 py-1 text-right text-sm text-blue-600">${client.stats.totalTotal.toLocaleString()}</td>
+                    <td colSpan={3}></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Collection Email Modal */}
+      {/* Email Preview Modal (Matches Screenshot 2) */}
       {isMailModalOpen && selectedClient && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-4xl rounded-[40px] shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
-            {/* Modal Header */}
-            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-[40px]">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                  <Send size={20} />
-                </div>
-                <div>
-                   <h2 className="text-2xl font-black text-slate-800 tracking-tight">Preparar Cobro por Email</h2>
-                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                     <Mail size={12}/> {selectedClient.pago_mail || 'sin-correo@configurado.cl'}
-                   </p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setIsMailModalOpen(false)}
-                className="w-12 h-12 rounded-2xl hover:bg-white flex items-center justify-center text-slate-400 hover:text-slate-600 transition-all border border-transparent hover:border-slate-100"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="flex-1 overflow-y-auto p-8 flex flex-col lg:flex-row gap-8">
-              {/* Message Editor */}
-              <div className="flex-1 space-y-4">
-                <div className="flex justify-between items-center">
-                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Cuerpo del Mensaje</h3>
-                   <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded uppercase">Mensaje Editable</span>
-                </div>
-                <textarea 
-                  className="w-full h-[400px] p-6 bg-slate-50 border border-slate-100 rounded-[32px] outline-none focus:border-primary/50 text-sm font-medium leading-relaxed resize-none shadow-inner"
-                  value={mailContent}
-                  onChange={(e) => setMailContent(e.target.value)}
-                />
+        <div className="fixed inset-0 z-[200] flex flex-col bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full bg-[#f0f0f0] flex flex-col flex-1 p-8 overflow-y-auto">
+            <div className="max-w-6xl mx-auto w-full space-y-6">
+              {/* Email Technical Headers */}
+              <div className="bg-white p-4 border border-slate-200 text-xs font-mono space-y-1 text-slate-500">
+                <p>MIME-Version: 1.0</p>
+                <p>Content-type: text/html; charset=iso-8859-1</p>
+                <p>From: ALTAMAR MKT czuniga@altamarmkt.cl</p>
+                <p>Reply-To: czuniga@altamarmkt.cl</p>
+                <p>Return-path: czuniga@altamarmkt.cl</p>
+                <p>asunto: Pagos Pendientes a la fecha</p>
               </div>
 
-              {/* Debt Preview Table */}
-              <div className="w-full lg:w-[400px] space-y-4">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Resumen de Deuda a Adjuntar</h3>
-                <div className="bg-slate-900 rounded-[32px] p-6 text-white shadow-xl">
-                  <p className="text-[10px] font-black text-slate-400 uppercase mb-4">Detalle de Facturas</p>
-                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                    {selectedClient.items.map(item => (
-                      <div key={item.id_venta} className="flex justify-between items-center pb-3 border-b border-white/10 last:border-0">
-                         <div>
-                            <p className="text-xs font-black tracking-tight">FAC {item.n_factura}</p>
-                            <p className="text-[10px] text-slate-400 font-bold">{item.fecha}</p>
-                         </div>
-                         <div className="text-right">
-                            <p className="text-sm font-black">$ {item.total?.toLocaleString()}</p>
-                            <p className="text-[10px] text-red-400 font-bold uppercase">{item.daysOverdue} DÍAS MORA</p>
-                         </div>
-                      </div>
-                    ))}
+              {/* Email Content Area */}
+              <div className="bg-white border border-slate-300 p-8 shadow-sm">
+                <div className="border border-slate-300 mb-8">
+                  <div className="bg-[#3a3a3a] text-white p-3 text-center">
+                    <h2 className="text-2xl font-black uppercase">{selectedClient.razon} ({selectedClient.rut})</h2>
                   </div>
-                  <div className="mt-6 pt-6 border-t border-white/20 flex justify-between items-center">
-                     <p className="text-xs font-black uppercase text-slate-400 tracking-widest">Total a Cobrar</p>
-                     <p className="text-2xl font-black text-white">$ {selectedClient.stats.totalTotal.toLocaleString()}</p>
-                  </div>
+                  <table className="w-full text-[10px] border-collapse">
+                    <thead className="bg-[#666666] text-white font-black uppercase">
+                      <tr>
+                        <th className="px-2 py-1 text-left w-6"></th>
+                        <th className="px-2 py-1 text-left">fecha</th>
+                        <th className="px-2 py-1 text-center">N° Cot</th>
+                        <th className="px-2 py-1 text-center">N° OC</th>
+                        <th className="px-2 py-1 text-center">N° Fac</th>
+                        <th className="px-2 py-1 text-left">Item</th>
+                        <th className="px-2 py-1 text-left">Detalle</th>
+                        <th className="px-2 py-1 text-right">Monto $</th>
+                        <th className="px-2 py-1 text-right">IVA $</th>
+                        <th className="px-2 py-1 text-right">Total $</th>
+                        <th className="px-2 py-1 text-center">Fecha de pago</th>
+                        <th className="px-2 py-1 text-center">Dias Vencidos</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {selectedClient.items.map(item => (
+                        <tr key={item.id_venta}>
+                          <td className="px-2 py-1"><div className="w-4 h-4 rounded" style={{ backgroundColor: item.status?.color || '#ccc' }} /></td>
+                          <td className="px-2 py-2 font-bold">{item.fecha}</td>
+                          <td className="px-2 py-2 text-center text-blue-600">{item.n_cot}</td>
+                          <td className="px-2 py-2 text-center">{item.n_oc}</td>
+                          <td className="px-2 py-2 text-center text-blue-600">{item.n_factura}</td>
+                          <td className="px-2 py-2 font-bold">{item.item}</td>
+                          <td className="px-2 py-2 italic text-slate-500">{item.detalle}</td>
+                          <td className="px-2 py-2 text-right">${item.monto?.toLocaleString()}</td>
+                          <td className="px-2 py-2 text-right">${item.iva?.toLocaleString()}</td>
+                          <td className="px-2 py-2 text-right font-bold">${item.total?.toLocaleString()}</td>
+                          <td className="px-2 py-2 text-center font-bold">{item.fecha_pago}</td>
+                          <td className="px-2 py-2 text-center font-black text-red-600">{item.daysOverdue}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-slate-50 font-black border-t border-slate-300">
+                      <tr>
+                        <td colSpan={6} className="px-2 py-2 text-[8px]">Registros: {selectedClient.items.length}</td>
+                        <td className="px-2 py-2 text-right uppercase">Total :</td>
+                        <td className="px-2 py-2 text-right">${selectedClient.stats.totalMonto.toLocaleString()}</td>
+                        <td className="px-2 py-2 text-right">${selectedClient.stats.totalIva.toLocaleString()}</td>
+                        <td className="px-2 py-2 text-right text-xs text-blue-600">${selectedClient.stats.totalTotal.toLocaleString()}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex gap-3 text-blue-600">
-                  <FileText size={20} className="shrink-0" />
-                  <p className="text-[10px] font-bold leading-relaxed uppercase">Se adjuntará un PDF detallado de las facturas seleccionadas automáticamente al enviar.</p>
+
+                {/* Placeholder for Signature Image as seen in screenshot */}
+                <div className="mt-12">
+                  <div className="w-full max-w-[400px] h-[150px] bg-slate-100 flex items-center justify-center border border-dashed border-slate-300">
+                    <span className="text-slate-400 font-bold italic">Logo Altamar / Firma Digital</span>
+                  </div>
+                  {/* Real image would be here: ![Signature](/signature.png) */}
                 </div>
               </div>
-            </div>
 
-            {/* Modal Footer */}
-            <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/50 rounded-b-[40px]">
-               <button 
-                onClick={() => setIsMailModalOpen(false)}
-                className="px-8 py-4 text-sm font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-all"
-               >
-                 CANCELAR
-               </button>
-               <button 
-                onClick={handleSendCollection}
-                className="px-10 py-4 bg-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center gap-3 active:scale-95"
-               >
-                 <Send size={18} />
-                 ENVIAR COBRO
-               </button>
+              {/* Modal Actions */}
+              <div className="flex justify-center gap-8 py-10">
+                <button
+                  onClick={() => setIsMailModalOpen(false)}
+                  className="px-12 py-3 bg-red-600 text-white font-black text-xl uppercase tracking-widest shadow-lg hover:bg-red-700 transition-all rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSendCollection}
+                  className="px-12 py-3 bg-green-700 text-white font-black text-xl uppercase tracking-widest shadow-lg hover:bg-green-800 transition-all rounded"
+                >
+                  Enviar Cobro
+                </button>
+              </div>
             </div>
           </div>
         </div>
