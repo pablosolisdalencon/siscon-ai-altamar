@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Mail, Clock, AlertTriangle, ChevronRight, ChevronDown, DollarSign, Search, Filter, Save, Trash2, X, Send, FileText, User as UserIcon, Settings } from 'lucide-react';
+import { Mail, Clock, AlertTriangle, ChevronRight, ChevronDown, DollarSign, Search, Filter, Save, Trash2, X, Send, FileText, User as UserIcon, Settings, Download } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
 const Cobros = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const baseUrl = apiUrl.replace(/\/api$/, '');
   const [collections, setCollections] = useState([]);
   const [clients, setClients] = useState([]);
   const [states, setStates] = useState([]);
@@ -224,9 +226,36 @@ const Cobros = () => {
                         <div className="w-4 h-4 rounded" style={{ backgroundColor: sale.status?.color || '#cccccc' }} />
                       </td>
                       <td className="px-2 py-1 font-bold text-slate-600">{sale.fecha}</td>
-                      <td className="px-2 py-1 text-center"><span className="text-blue-500 font-bold border-b border-blue-200">{sale.n_cot}</span></td>
-                      <td className="px-2 py-1 text-center">{sale.n_oc}</td>
-                      <td className="px-2 py-1 text-center"><span className="text-blue-500 font-bold border-b border-blue-200">{sale.n_factura}</span></td>
+                      <td className="px-2 py-1 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-blue-500 font-bold border-b border-blue-200">{sale.n_cot}</span>
+                          {sale.f_cot && (
+                            <a href={`${baseUrl}/docs/COTIZACIONES/${sale.f_cot}`} target="_blank" rel="noreferrer" className="text-blue-400">
+                              <Download size={10} />
+                            </a>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-2 py-1 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                          <span>{sale.n_oc}</span>
+                          {sale.f_oc && (
+                            <a href={`${baseUrl}/docs/ORDENES-DE-COMPRA/${sale.f_oc}`} target="_blank" rel="noreferrer" className="text-slate-400">
+                              <Download size={10} />
+                            </a>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-2 py-1 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-blue-500 font-bold border-b border-blue-200">{sale.n_factura}</span>
+                          {sale.f_factura && (
+                            <a href={`${baseUrl}/docs/FACTURAS/${sale.f_factura}`} target="_blank" rel="noreferrer" className="text-red-400">
+                              <Download size={10} />
+                            </a>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-2 py-1 font-bold text-slate-700">{sale.item}</td>
                       <td className="px-2 py-1 text-slate-500 italic max-w-xs">{sale.detalle}</td>
                       <td className="px-2 py-1 text-right font-medium">${sale.monto?.toLocaleString()}</td>

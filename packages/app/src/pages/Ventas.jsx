@@ -7,17 +7,19 @@ import { twMerge } from 'tailwind-merge';
 const cn = (...inputs) => twMerge(clsx(inputs));
 
 const Ventas = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const baseUrl = apiUrl.replace(/\/api$/, '');
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [auxData, setAuxData] = useState({ clients: [], agents: [], states: [] });
-  const [filters, setFilters] = useState({ 
-    nFactura: '', 
-    nCot: '', 
-    from: '', 
-    to: '', 
-    clientSearch: '', 
-    pagado: 'TODAS' 
+  const [filters, setFilters] = useState({
+    nFactura: '',
+    nCot: '',
+    from: '',
+    to: '',
+    clientSearch: '',
+    pagado: 'TODAS'
   });
 
   const [formData, setFormData] = useState({
@@ -35,7 +37,16 @@ const Ventas = () => {
     entregado: 'NO',
     fecha_entrega: '',
     fecha_pago: '',
-    comicion: 0
+    comicion: 0,
+    f_factura: '',
+    f_cot: '',
+    f_oc: ''
+  });
+
+  const [uploadingFiles, setUploadingFiles] = useState({
+    cotizacion: null,
+    factura: null,
+    oc: null
   });
 
   useEffect(() => {
@@ -83,15 +94,48 @@ const Ventas = () => {
     setIsModalOpen(false);
   };
 
+  const handleFileUpload = async (file, type) => {
+    if (!file) return '';
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+    try {
+      const { data } = await api.post('/uploads/sale-document', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return data.data.filename;
+    } catch (error) {
+      console.error(`Error uploading ${type}:`, error);
+      throw new Error(`Error subiendo ${type}`);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/sales', formData);
+      setLoading(true);
+
+      // Upload files first
+      const f_cot = await handleFileUpload(uploadingFiles.cotizacion, 'COTIZACION');
+      const f_factura = await handleFileUpload(uploadingFiles.factura, 'FACTURA');
+      const f_oc = await handleFileUpload(uploadingFiles.oc, 'OC');
+
+      const dataToSave = {
+        ...formData,
+        f_cot: f_cot || formData.f_cot,
+        f_factura: f_factura || formData.f_factura,
+        f_oc: f_oc || formData.f_oc
+      };
+
+      await api.post('/sales', dataToSave);
       setIsModalOpen(false);
+      setUploadingFiles({ cotizacion: null, factura: null, oc: null });
       fetchSales();
       alert('Venta creada con éxito');
     } catch (err) {
-      alert('Error al crear venta');
+      alert(err.message || 'Error al crear venta');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,48 +169,48 @@ const Ventas = () => {
 
       {/* Legacy Filter Bar */}
       <div className="glass-card p-6 flex flex-wrap gap-4 items-center">
-        <input 
-          type="text" placeholder="N° FAC" 
+        <input
+          type="text" placeholder="N° FAC"
           className="w-24 px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:border-primary/50 text-sm font-bold"
-          value={filters.nFactura} onChange={(e) => setFilters({...filters, nFactura: e.target.value})}
+          value={filters.nFactura} onChange={(e) => setFilters({ ...filters, nFactura: e.target.value })}
         />
-        <input 
-          type="text" placeholder="N° COT" 
+        <input
+          type="text" placeholder="N° COT"
           className="w-24 px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:border-primary/50 text-sm font-bold"
-          value={filters.nCot} onChange={(e) => setFilters({...filters, nCot: e.target.value})}
+          value={filters.nCot} onChange={(e) => setFilters({ ...filters, nCot: e.target.value })}
         />
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-400 uppercase">Desde</span>
-          <input 
+          <input
             type="date"
             className="px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none text-xs font-bold"
-            value={filters.from} onChange={(e) => setFilters({...filters, from: e.target.value})}
+            value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })}
           />
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-400 uppercase">Hasta</span>
-          <input 
+          <input
             type="date"
             className="px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none text-xs font-bold"
-            value={filters.to} onChange={(e) => setFilters({...filters, to: e.target.value})}
+            value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })}
           />
         </div>
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-          <input 
-            type="text" placeholder="Buscar Cliente..." 
+          <input
+            type="text" placeholder="Buscar Cliente..."
             className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:border-primary/50 text-sm font-bold"
-            value={filters.clientSearch} onChange={(e) => setFilters({...filters, clientSearch: e.target.value})}
+            value={filters.clientSearch} onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
           />
         </div>
         <div className="flex items-center gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
           <span className="text-xs font-bold text-slate-400 uppercase px-2">Pagado</span>
           {['SI', 'NO', 'TODAS'].map((opt) => (
             <label key={opt} className="flex items-center gap-2 cursor-pointer group">
-              <input 
-                type="radio" name="pagado" value={opt} 
+              <input
+                type="radio" name="pagado" value={opt}
                 checked={filters.pagado === opt}
-                onChange={(e) => setFilters({...filters, pagado: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, pagado: e.target.value })}
                 className="w-4 h-4 text-primary focus:ring-0 border-slate-200"
               />
               <span className={cn("text-xs font-bold transition-colors", filters.pagado === opt ? "text-primary" : "text-slate-400 group-hover:text-slate-600")}>
@@ -201,7 +245,7 @@ const Ventas = () => {
             ) : sales.map((sale) => {
               const deliveryDays = calculateDays(sale.fecha_entrega);
               const overdueDays = calculateOverdue(sale.fecha_pago, sale.pagado);
-              
+
               return (
                 <tr key={sale.id_venta} className="hover:bg-slate-50/80 transition-all group">
                   <td className="px-4 py-4">
@@ -210,9 +254,30 @@ const Ventas = () => {
                   <td className="px-4 py-4 whitespace-nowrap text-xs font-bold text-slate-500">{sale.fecha}</td>
                   <td className="px-4 py-4">
                     <div className="flex flex-col gap-1">
-                      <span className="text-xs text-blue-600 font-bold hover:underline cursor-pointer">COT: {sale.n_cot}</span>
-                      <span className="text-xs text-slate-400">OC: {sale.n_oc}</span>
-                      <span className="text-xs text-slate-900 font-black">FAC: {sale.n_factura}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-blue-600 font-bold">COT: {sale.n_cot}</span>
+                        {sale.f_cot && (
+                          <a href={`${baseUrl}/docs/COTIZACIONES/${sale.f_cot}`} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-600">
+                            <Download size={12} />
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400">OC: {sale.n_oc}</span>
+                        {sale.f_oc && (
+                          <a href={`${baseUrl}/docs/ORDENES-DE-COMPRA/${sale.f_oc}`} target="_blank" rel="noreferrer" className="text-slate-300 hover:text-slate-500">
+                            <Download size={12} />
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-900 font-black">FAC: {sale.n_factura}</span>
+                        {sale.f_factura && (
+                          <a href={`${baseUrl}/docs/FACTURAS/${sale.f_factura}`} target="_blank" rel="noreferrer" className="text-red-400 hover:text-red-600">
+                            <Download size={12} />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="px-4 py-4">
@@ -271,9 +336,9 @@ const Ventas = () => {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex justify-end gap-2">
-                       <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-green-600 transition-all"><Save size={14} /></button>
-                       <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all"><FileText size={14} /></button>
-                       <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all"><Trash2 size={14} /></button>
+                      <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-green-600 transition-all"><Save size={14} /></button>
+                      <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all"><FileText size={14} /></button>
+                      <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all"><Trash2 size={14} /></button>
                     </div>
                   </td>
                 </tr>
@@ -303,7 +368,7 @@ const Ventas = () => {
                 <h2 className="text-3xl font-black text-slate-800">Nueva Venta</h2>
                 <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Registro de transacción comercial</p>
               </div>
-              <button onClick={handleCloseModal} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><Trash2 size={24}/></button>
+              <button onClick={handleCloseModal} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><Trash2 size={24} /></button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -314,15 +379,15 @@ const Ventas = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Fecha Venta</label>
-                      <input type="date" required className="input-modern" value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} />
+                      <input type="date" required className="input-modern" value={formData.fecha} onChange={(e) => setFormData({ ...formData, fecha: e.target.value })} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Fecha Entrega</label>
-                      <input type="date" className="input-modern" value={formData.fecha_entrega} onChange={(e) => setFormData({...formData, fecha_entrega: e.target.value})} />
+                      <input type="date" className="input-modern" value={formData.fecha_entrega} onChange={(e) => setFormData({ ...formData, fecha_entrega: e.target.value })} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Fecha Pago</label>
-                      <input type="date" className="input-modern" value={formData.fecha_pago} onChange={(e) => setFormData({...formData, fecha_pago: e.target.value})} />
+                      <input type="date" className="input-modern" value={formData.fecha_pago} onChange={(e) => setFormData({ ...formData, fecha_pago: e.target.value })} />
                     </div>
                   </div>
                 </div>
@@ -332,42 +397,51 @@ const Ventas = () => {
                   <h3 className="text-xs font-black text-primary uppercase tracking-widest border-b border-primary/10 pb-2">Documentación</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N° Factura</label>
-                      <input type="number" className="input-modern" value={formData.n_factura} onChange={(e) => setFormData({...formData, n_factura: e.target.value})} />
+                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Factura (N° y Archivo)</label>
+                      <div className="flex gap-2">
+                        <input type="number" className="input-modern w-1/3" placeholder="N°" value={formData.n_factura} onChange={(e) => setFormData({ ...formData, n_factura: e.target.value })} />
+                        <input type="file" className="input-modern flex-1 text-[10px]" onChange={(e) => setUploadingFiles({ ...uploadingFiles, factura: e.target.files[0] })} />
+                      </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N° Cotización</label>
-                      <input type="number" className="input-modern" value={formData.n_cot} onChange={(e) => setFormData({...formData, n_cot: e.target.value})} />
+                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Cotización (N° y Archivo)</label>
+                      <div className="flex gap-2">
+                        <input type="number" className="input-modern w-1/3" placeholder="N°" value={formData.n_cot} onChange={(e) => setFormData({ ...formData, n_cot: e.target.value })} />
+                        <input type="file" className="input-modern flex-1 text-[10px]" onChange={(e) => setUploadingFiles({ ...uploadingFiles, cotizacion: e.target.files[0] })} />
+                      </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N° Orden Compra</label>
-                      <input type="number" className="input-modern" value={formData.n_oc} onChange={(e) => setFormData({...formData, n_oc: e.target.value})} />
+                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Orden Compra (N° y Archivo)</label>
+                      <div className="flex gap-2">
+                        <input type="number" className="input-modern w-1/3" placeholder="N°" value={formData.n_oc} onChange={(e) => setFormData({ ...formData, n_oc: e.target.value })} />
+                        <input type="file" className="input-modern flex-1 text-[10px]" onChange={(e) => setUploadingFiles({ ...uploadingFiles, oc: e.target.files[0] })} />
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Entity Selection */}
                 <div className="space-y-4 col-span-full">
-                   <h3 className="text-xs font-black text-primary uppercase tracking-widest border-b border-primary/10 pb-2">Participantes</h3>
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                         <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Cliente</label>
-                         <select required className="input-modern appearance-none" value={formData.id_cliente} onChange={(e) => setFormData({...formData, id_cliente: e.target.value})}>
-                            <option value="">Seleccionar Cliente...</option>
-                            {auxData.clients.map(c => <option key={c.id_cliente} value={c.id_cliente}>{c.razon} ({c.rut})</option>)}
-                         </select>
-                      </div>
-                      <div className="space-y-1">
-                         <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Agente (Comisionista)</label>
-                         <select className="input-modern appearance-none" value={formData.id_agente} onChange={(e) => {
-                            const agent = auxData.agents.find(a => a.id_agente == e.target.value);
-                            setFormData({...formData, id_agente: e.target.value, comicion: agent?.comision_default || 0})
-                         }}>
-                            <option value="">Sin Agente</option>
-                            {auxData.agents.map(a => <option key={a.id_agente} value={a.id_agente}>{a.nombre}</option>)}
-                         </select>
-                      </div>
-                   </div>
+                  <h3 className="text-xs font-black text-primary uppercase tracking-widest border-b border-primary/10 pb-2">Participantes</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Cliente</label>
+                      <select required className="input-modern appearance-none" value={formData.id_cliente} onChange={(e) => setFormData({ ...formData, id_cliente: e.target.value })}>
+                        <option value="">Seleccionar Cliente...</option>
+                        {auxData.clients.map(c => <option key={c.id_cliente} value={c.id_cliente}>{c.razon} ({c.rut})</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Agente (Comisionista)</label>
+                      <select className="input-modern appearance-none" value={formData.id_agente} onChange={(e) => {
+                        const agent = auxData.agents.find(a => a.id_agente == e.target.value);
+                        setFormData({ ...formData, id_agente: e.target.value, comicion: agent?.comision_default || 0 })
+                      }}>
+                        <option value="">Sin Agente</option>
+                        {auxData.agents.map(a => <option key={a.id_agente} value={a.id_agente}>{a.nombre}</option>)}
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Details Section */}
@@ -376,11 +450,11 @@ const Ventas = () => {
                   <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Item Principal</label>
-                      <input type="text" required className="input-modern" placeholder="Ej: Servicio de mantenimiento..." value={formData.item} onChange={(e) => setFormData({...formData, item: e.target.value})} />
+                      <input type="text" required className="input-modern" placeholder="Ej: Servicio de mantenimiento..." value={formData.item} onChange={(e) => setFormData({ ...formData, item: e.target.value })} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Detalle / Especificaciones</label>
-                      <textarea rows={3} className="input-modern py-4" value={formData.detalle} onChange={(e) => setFormData({...formData, detalle: e.target.value})} />
+                      <textarea rows={3} className="input-modern py-4" value={formData.detalle} onChange={(e) => setFormData({ ...formData, detalle: e.target.value })} />
                     </div>
                   </div>
                 </div>
@@ -391,7 +465,7 @@ const Ventas = () => {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Monto Neto ($)</label>
-                      <input type="number" required className="input-modern text-lg font-black text-primary" value={formData.monto} onChange={(e) => setFormData({...formData, monto: e.target.value})} />
+                      <input type="number" required className="input-modern text-lg font-black text-primary" value={formData.monto} onChange={(e) => setFormData({ ...formData, monto: e.target.value })} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">IVA (19%)</label>
@@ -403,7 +477,7 @@ const Ventas = () => {
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">% Comisión Agente</label>
-                      <input type="number" step="0.1" className="input-modern" value={formData.comicion} onChange={(e) => setFormData({...formData, comicion: e.target.value})} />
+                      <input type="number" step="0.1" className="input-modern" value={formData.comicion} onChange={(e) => setFormData({ ...formData, comicion: e.target.value })} />
                     </div>
                   </div>
                 </div>
@@ -414,20 +488,20 @@ const Ventas = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Estado de Venta</label>
-                      <select required className="input-modern appearance-none" value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})}>
+                      <select required className="input-modern appearance-none" value={formData.estado} onChange={(e) => setFormData({ ...formData, estado: e.target.value })}>
                         {auxData.states.map(s => <option key={s.id_estado} value={s.id_estado}>{s.estado}</option>)}
                       </select>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">¿Pagado?</label>
-                      <select className="input-modern appearance-none" value={formData.pagado} onChange={(e) => setFormData({...formData, pagado: e.target.value})}>
+                      <select className="input-modern appearance-none" value={formData.pagado} onChange={(e) => setFormData({ ...formData, pagado: e.target.value })}>
                         <option value="NO">NO</option>
                         <option value="SI">SI</option>
                       </select>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">¿Entregado?</label>
-                      <select className="input-modern appearance-none" value={formData.entregado} onChange={(e) => setFormData({...formData, entregado: e.target.value})}>
+                      <select className="input-modern appearance-none" value={formData.entregado} onChange={(e) => setFormData({ ...formData, entregado: e.target.value })}>
                         <option value="NO">NO</option>
                         <option value="SI">SI</option>
                       </select>
