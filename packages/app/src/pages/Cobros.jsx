@@ -56,7 +56,7 @@ const Cobros = () => {
 
   const fetchStates = async () => {
     try {
-      const { data } = await api.get('/modules/sale-states');
+      const { data } = await api.get('/sale-states');
       setStates(data.data);
     } catch (err) {
       console.error('Error fetching states:', err);
