@@ -1,4 +1,4 @@
-const { Agent, Client, Provider, User, SaleState } = require('../models/associations');
+const { Agent, Client, Provider, User, SaleState, SaleRecord } = require('../models/associations');
 
 const crudFactory = (Model) => ({
   getAll: async (req, res) => {
@@ -51,7 +51,7 @@ module.exports = {
   createAgent: agentsCRUD.create,
   updateAgent: agentsCRUD.update,
   deleteAgent: agentsCRUD.delete,
-  
+
   // Clients
   getClients: clientsCRUD.getAll,
   createClient: clientsCRUD.create,
@@ -71,5 +71,12 @@ module.exports = {
   deleteUser: usersCRUD.delete,
 
   // Sale States
-  getSaleStates: crudFactory(SaleState).getAll
+  getSaleStates: crudFactory(SaleState).getAll,
+  createSaleState: crudFactory(SaleState).create,
+  updateSaleState: crudFactory(SaleState).update,
+  deleteSaleState: crudFactory(SaleState).delete,
+
+  // Sale Records (Pagination config)
+  getSaleRecords: crudFactory(SaleRecord).getAll,
+  updateSaleRecord: crudFactory(SaleRecord).update
 };

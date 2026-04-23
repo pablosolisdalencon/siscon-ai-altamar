@@ -5,9 +5,7 @@ import Ventas from './pages/Ventas';
 import Cobros from './pages/Cobros';
 import Dashboard from './pages/Dashboard';
 import { Agentes, Clientes, Proveedores, Usuarios } from './pages/Modules';
-
-// Mock Pages (to be implemented)
-const Config = () => <div className="p-8"><h1 className="text-3xl font-bold">Configuración</h1><p>Ajustes globales</p></div>;
+import Config from './pages/Config';
 
 function App() {
   return (

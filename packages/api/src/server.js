@@ -52,6 +52,13 @@ app.delete('/users/:id', modulesController.deleteUser);
 
 // Sale States
 app.get('/sale-states', modulesController.getSaleStates);
+app.post('/sale-states', modulesController.createSaleState);
+app.put('/sale-states/:id', modulesController.updateSaleState);
+app.delete('/sale-states/:id', modulesController.deleteSaleState);
+
+// Sale Records
+app.get('/sale-records', modulesController.getSaleRecords);
+app.put('/sale-records/:id', modulesController.updateSaleRecord);
 
 // Start Server
 const startServer = async () => {
