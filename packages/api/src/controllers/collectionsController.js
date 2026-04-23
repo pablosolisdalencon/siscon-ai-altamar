@@ -7,12 +7,14 @@ exports.getCollectionsDashboard = async (req, res) => {
     const { nFactura, nCot, from, to, clientSearch, pagado, estado, sort } = req.query;
 
     const saleWhere = {
-      n_factura: { [Op.ne]: '0' } // Parity with f-cobros.php: $F_WHERE = " WHERE n_factura!='0'"
+      [Op.and]: [
+        { n_factura: { [Op.ne]: '0' } }
+      ]
     };
 
-    if (nFactura) saleWhere.n_factura = nFactura;
-    if (nCot) saleWhere.n_cot = nCot;
-    if (estado) saleWhere.estado = estado;
+    if (nFactura) saleWhere[Op.and].push({ n_factura: nFactura });
+    if (nCot) saleWhere[Op.and].push({ n_cot: nCot });
+    if (estado) saleWhere[Op.and].push({ estado: estado });
 
     // Dates (Full parity with legacy logic)
     if (from && to) {

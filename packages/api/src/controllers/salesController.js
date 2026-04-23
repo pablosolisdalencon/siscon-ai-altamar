@@ -33,7 +33,7 @@ exports.getSales = async (req, res) => {
         { model: SaleState, as: 'status' },
         { model: Agent, as: 'agent' }
       ],
-      order: [['fecha', 'DESC']]
+      order: [['id_venta', 'DESC']]
     });
 
     return successResponse(res, sales);
@@ -128,7 +128,7 @@ exports.getSalesStats = async (req, res) => {
     const pendingCollections = await Sale.sum('total', {
       where: {
         pagado: 'NO',
-        n_factura: { [Op.ne]: 0 }
+        n_factura: { [Op.ne]: '0' }
       }
     }) || 0;
 

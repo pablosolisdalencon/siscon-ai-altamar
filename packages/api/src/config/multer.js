@@ -19,8 +19,31 @@ const storage = multer.diskStorage({
         cb(null, fullPath);
     },
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + '-' + file.originalname);
+        const type = req.body.type;
+        const date = req.body.fecha || new Date().toISOString().split('T')[0];
+        const number = req.body.numero || 'X';
+        const ext = path.extname(file.originalname);
+
+        let prefix = 'DOC';
+        if (type === 'FACTURA') prefix = 'FAC';
+        else if (type === 'COTIZACION') prefix = 'COT';
+        else if (type === 'OC') prefix = 'OC';
+
+        // Legacy format: fecha-DOCnumero.ext (e.g., 2024-04-23-FAC123.pdf)
+        const filename = `${date}-${prefix}${number}${ext}`;
+
+        // If file exists, add a small random string to avoid overwrites
+        const fullPath = path.join(process.cwd(), 'docs',
+            type === 'FACTURA' ? 'FACTURAS' :
+                type === 'COTIZACION' ? 'COTIZACIONES' : 'ORDENES-DE-COMPRA',
+            filename);
+
+        if (fs.existsSync(fullPath)) {
+            const uniqueSuffix = '-' + Math.round(Math.random() * 1E4);
+            cb(null, `${date}-${prefix}${number}${uniqueSuffix}${ext}`);
+        } else {
+            cb(null, filename);
+        }
     }
 });
 

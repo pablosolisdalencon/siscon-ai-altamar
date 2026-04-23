@@ -145,11 +145,13 @@ const Ventas = () => {
     setSelectedSaleId(null);
   };
 
-  const handleFileUpload = async (file, type) => {
+  const handleFileUpload = async (file, type, metadata = {}) => {
     if (!file) return '';
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', type);
+    if (metadata.fecha) formData.append('fecha', metadata.fecha);
+    if (metadata.numero) formData.append('numero', metadata.numero);
     try {
       const { data } = await api.post('/uploads/sale-document', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -166,10 +168,19 @@ const Ventas = () => {
     try {
       setLoading(true);
 
-      // Upload files first
-      const f_cot = await handleFileUpload(uploadingFiles.cotizacion, 'COTIZACION');
-      const f_factura = await handleFileUpload(uploadingFiles.factura, 'FACTURA');
-      const f_oc = await handleFileUpload(uploadingFiles.oc, 'OC');
+      // Upload files first with metadata for legacy naming
+      const f_cot = await handleFileUpload(uploadingFiles.cotizacion, 'COTIZACION', {
+        fecha: formData.fecha,
+        numero: formData.n_cot
+      });
+      const f_factura = await handleFileUpload(uploadingFiles.factura, 'FACTURA', {
+        fecha: formData.fecha,
+        numero: formData.n_factura
+      });
+      const f_oc = await handleFileUpload(uploadingFiles.oc, 'OC', {
+        fecha: formData.fecha,
+        numero: formData.n_oc
+      });
 
       const dataToSave = {
         ...formData,
