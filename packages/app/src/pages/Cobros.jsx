@@ -193,7 +193,9 @@ const Cobros = () => {
                       <td className="px-2 py-1 text-right font-medium">${sale.iva?.toLocaleString()}</td>
                       <td className="px-2 py-1 text-right font-black text-slate-900">${sale.total?.toLocaleString()}</td>
                       <td className="px-2 py-1 text-center font-bold text-slate-500">{sale.fecha_pago}</td>
-                      <td className="px-2 py-1 text-center font-black text-red-600">{sale.daysOverdue}</td>
+                      <td className="px-2 py-1 text-center font-black text-red-600">
+                        {sale.daysOverdue > 0 ? sale.daysOverdue : ''}
+                      </td>
                       <td className="px-2 py-1 text-center">
                         <button className="p-1 hover:bg-slate-200 rounded transition-colors"><Settings size={12} className="text-slate-400" /></button>
                       </td>
@@ -268,7 +270,9 @@ const Cobros = () => {
                           <td className="px-2 py-2 text-right">${item.iva?.toLocaleString()}</td>
                           <td className="px-2 py-2 text-right font-bold">${item.total?.toLocaleString()}</td>
                           <td className="px-2 py-2 text-center font-bold">{item.fecha_pago}</td>
-                          <td className="px-2 py-2 text-center font-black text-red-600">{item.daysOverdue}</td>
+                          <td className="px-2 py-2 text-center font-black text-red-600">
+                            {item.daysOverdue > 0 ? item.daysOverdue : ''}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

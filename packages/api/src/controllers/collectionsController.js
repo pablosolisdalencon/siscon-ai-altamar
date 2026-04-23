@@ -6,9 +6,7 @@ exports.getCollectionsDashboard = async (req, res) => {
   try {
     const { nFactura, nCot, from, to, clientSearch, pagado } = req.query;
 
-    const saleWhere = {
-      n_factura: { [Op.ne]: 0 }
-    };
+    const saleWhere = {};
 
     if (nFactura) saleWhere.n_factura = nFactura;
     if (nCot) saleWhere.n_cot = nCot;
@@ -49,9 +47,16 @@ exports.getCollectionsDashboard = async (req, res) => {
 
       const items = client.ventas.map(sale => {
         const today = new Date();
-        const dueDate = new Date(sale.fecha_pago);
-        const diffTime = today - dueDate;
-        const daysOverdue = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+        const dueDateStr = sale.fecha_pago;
+        let daysOverdue = 0;
+
+        if (dueDateStr && dueDateStr !== '0000-00-00') {
+          const dueDate = new Date(dueDateStr);
+          if (!isNaN(dueDate.getTime())) {
+            const diffTime = today - dueDate;
+            daysOverdue = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+          }
+        }
 
         totalMonto += sale.monto || 0;
         totalIva += sale.iva || 0;
