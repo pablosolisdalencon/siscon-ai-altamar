@@ -10,24 +10,23 @@ const Cobrobot = require('./Cobrobot');
 const SaleRecord = require('./SaleRecord');
 
 // Sales Associations
-Sale.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client' });
-Client.hasMany(Sale, { foreignKey: 'id_cliente' });
+// Disabling physical constraints to match the exact SQL schema (no FKs)
+Sale.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client', constraints: false });
+Client.hasMany(Sale, { foreignKey: 'id_cliente', constraints: false });
 
-Sale.belongsTo(SaleState, { foreignKey: 'estado', as: 'status' });
-SaleState.hasMany(Sale, { foreignKey: 'estado' });
+Sale.belongsTo(SaleState, { foreignKey: 'estado', as: 'status', constraints: false });
+SaleState.hasMany(Sale, { foreignKey: 'estado', constraints: false });
 
-Sale.belongsTo(Agent, { foreignKey: 'id_agente', as: 'agent' });
-Agent.hasMany(Sale, { foreignKey: 'id_agente' });
+Sale.belongsTo(Agent, { foreignKey: 'id_agente', as: 'agent', constraints: false });
+Agent.hasMany(Sale, { foreignKey: 'id_agente', constraints: false });
 
 // Purchase Associations
-// Note: SQL uses id_cliente in compras. We link it to Client following naming, 
-// even if logically it might have been provider in other contexts.
-Purchase.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client' });
-Client.hasMany(Purchase, { foreignKey: 'id_cliente' });
+Purchase.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client', constraints: false });
+Client.hasMany(Purchase, { foreignKey: 'id_cliente', constraints: false });
 
 // Cobrobot Associations
-Cobrobot.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client' });
-Client.hasOne(Cobrobot, { foreignKey: 'id_cliente' });
+Cobrobot.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client', constraints: false });
+Client.hasOne(Cobrobot, { foreignKey: 'id_cliente', constraints: false });
 
 module.exports = {
   Sale,
