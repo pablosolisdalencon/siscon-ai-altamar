@@ -22,41 +22,41 @@ app.get('/', (req, res) => {
 });
 
 // Routes Registration
-app.use('/api/sales', salesRoutes);
-app.use('/api/collections', collectionsRoutes);
+app.use('/sales', salesRoutes);
+app.use('/collections', collectionsRoutes);
 
 // Module Routes
 // Agents
-app.get('/api/agents', modulesController.getAgents);
-app.post('/api/agents', modulesController.createAgent);
-app.put('/api/agents/:id', modulesController.updateAgent);
-app.delete('/api/agents/:id', modulesController.deleteAgent);
+app.get('/agents', modulesController.getAgents);
+app.post('/agents', modulesController.createAgent);
+app.put('/agents/:id', modulesController.updateAgent);
+app.delete('/agents/:id', modulesController.deleteAgent);
 
 // Clients
-app.get('/api/clients', modulesController.getClients);
-app.post('/api/clients', modulesController.createClient);
-app.put('/api/clients/:id', modulesController.updateClient);
-app.delete('/api/clients/:id', modulesController.deleteClient);
+app.get('/clients', modulesController.getClients);
+app.post('/clients', modulesController.createClient);
+app.put('/clients/:id', modulesController.updateClient);
+app.delete('/clients/:id', modulesController.deleteClient);
 
 // Providers
-app.get('/api/providers', modulesController.getProviders);
-app.post('/api/providers', modulesController.createProvider);
-app.put('/api/providers/:id', modulesController.updateProvider);
-app.delete('/api/providers/:id', modulesController.deleteProvider);
+app.get('/providers', modulesController.getProviders);
+app.post('/providers', modulesController.createProvider);
+app.put('/providers/:id', modulesController.updateProvider);
+app.delete('/providers/:id', modulesController.deleteProvider);
 
 // Users
-app.get('/api/users', modulesController.getUsers);
-app.post('/api/users', modulesController.createUser);
-app.put('/api/users/:id', modulesController.updateUser);
-app.delete('/api/users/:id', modulesController.deleteUser);
+app.get('/users', modulesController.getUsers);
+app.post('/users', modulesController.createUser);
+app.put('/users/:id', modulesController.updateUser);
+app.delete('/users/:id', modulesController.deleteUser);
 
 // Sale States
-app.get('/api/sale-states', modulesController.getSaleStates);
+app.get('/sale-states', modulesController.getSaleStates);
 
 // Start Server
 const startServer = async () => {
   await connectDB();
-  
+
   // Test Model Load
   console.log('📦 Models loaded successfully.');
 
