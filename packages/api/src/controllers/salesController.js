@@ -117,12 +117,30 @@ exports.getSalesStats = async (req, res) => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    // Monthly Sales (Current month)
-    const monthlySales = await Sale.sum('total', {
+    let monthlySales = await Sale.sum('total', {
       where: {
         fecha: { [Op.gte]: firstDayOfMonth }
       }
     }) || 0;
+
+    let monthlyLabel = today.toLocaleString('es-CL', { month: 'long', year: 'numeric' });
+
+    // Fallback logic for "Full Epico": if current month is empty, show latest month with activity
+    if (monthlySales === 0) {
+      const lastSale = await Sale.findOne({ order: [['fecha', 'DESC']] });
+      if (lastSale) {
+        const lastDate = new Date(lastSale.fecha);
+        const startOfLastMonth = new Date(lastDate.getFullYear(), lastDate.getMonth(), 1);
+        const endOfLastMonth = new Date(lastDate.getFullYear(), lastDate.getMonth() + 1, 0);
+
+        monthlySales = await Sale.sum('total', {
+          where: {
+            fecha: { [Op.between]: [startOfLastMonth, endOfLastMonth] }
+          }
+        }) || 0;
+        monthlyLabel = lastDate.toLocaleString('es-CL', { month: 'long', year: 'numeric' }) + ' (Última)';
+      }
+    }
 
     // Pending Collections (Pagado = 'NO' and n_factura != '0')
     const pendingCollections = await Sale.sum('total', {
@@ -140,6 +158,7 @@ exports.getSalesStats = async (req, res) => {
 
     return successResponse(res, {
       monthlySales,
+      monthlyLabel,
       pendingCollections,
       activeClients: activeClientsCount
     });

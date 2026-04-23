@@ -28,7 +28,8 @@ app.use('/collections', collectionsRoutes);
 app.use('/uploads', uploadRoutes);
 
 // Static Files (Legacy Parity for Documents)
-app.use('/docs', express.static('docs'));
+const path = require('path');
+app.use('/docs', express.static(path.join(__dirname, '../docs')));
 
 // Module Routes
 // Agents

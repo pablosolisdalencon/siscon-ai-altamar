@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
         else if (type === 'FACTURA') dest += 'FACTURAS';
         else if (type === 'OC') dest += 'ORDENES-DE-COMPRA';
 
-        const fullPath = path.join(process.cwd(), dest);
+        const fullPath = path.join(__dirname, '../../docs', dest.replace('docs/', ''));
 
         if (!fs.existsSync(fullPath)) {
             fs.mkdirSync(fullPath, { recursive: true });
@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
         const filename = `${date}-${prefix}${number}${ext}`;
 
         // If file exists, add a small random string to avoid overwrites
-        const fullPath = path.join(process.cwd(), 'docs',
+        const fullPath = path.join(__dirname, '../../docs',
             type === 'FACTURA' ? 'FACTURAS' :
                 type === 'COTIZACION' ? 'COTIZACIONES' : 'ORDENES-DE-COMPRA',
             filename);
