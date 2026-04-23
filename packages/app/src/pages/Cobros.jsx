@@ -72,7 +72,7 @@ const Cobros = () => {
 
   const handleSendCollection = async () => {
     try {
-      await api.post('/collections/send-email', { clientId: selectedClient.id });
+      await api.post('/collections/send-email', { clientId: selectedClient.id_cliente });
       alert(`Cobro enviado con éxito a ${selectedClient.razon}`);
       setIsMailModalOpen(false);
     } catch (error) {
@@ -184,7 +184,7 @@ const Cobros = () => {
         ) : collections.length === 0 ? (
           <div className="text-center p-20 text-slate-400 font-bold uppercase tracking-widest">No se encontraron cobros pendientes</div>
         ) : collections.map((client) => (
-          <div key={client.id} className="border border-slate-300">
+          <div key={client.id_cliente} className="border border-slate-300">
             {/* Group Header */}
             <div className="bg-[#3a3a3a] text-white p-3 flex justify-between items-center bg-gradient-to-r from-slate-700 to-slate-800">
               <h2 className="text-2xl font-black tracking-tight mx-auto uppercase">{client.razon} ({client.rut})</h2>

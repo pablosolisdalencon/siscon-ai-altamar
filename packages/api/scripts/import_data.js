@@ -45,9 +45,10 @@ async function importData() {
 
         for (const [tableName, Model] of Object.entries(tables)) {
             const insertRegex = new RegExp(`INSERT INTO \`${tableName}\` VALUES ([\\s\\S]*?);`, 'g');
-            const match = insertRegex.exec(sqlContent);
+            let match;
+            let allDataToInsert = [];
 
-            if (match) {
+            while ((match = insertRegex.exec(sqlContent)) !== null) {
                 const rawValues = match[1].trim();
                 const recordMatches = [];
                 let depth = 0;
@@ -113,16 +114,24 @@ async function importData() {
                     });
                     return obj;
                 });
+                allDataToInsert = allDataToInsert.concat(dataToInsert);
+            }
 
+            if (allDataToInsert.length > 0) {
                 await Model.destroy({ where: {}, truncate: true, cascade: false });
-                await Model.bulkCreate(dataToInsert, { ignoreDuplicates: true });
-                console.log(`✅ ${tableName}: ${recordMatches.length} records imported.`);
+                await Model.bulkCreate(allDataToInsert, { ignoreDuplicates: true });
+                console.log(`✅ ${tableName}: ${allDataToInsert.length} records imported.`);
             }
         }
 
         console.log('✨ Data synchronization complete.');
     } catch (error) {
-        console.error('❌ Error during auto-import:', error);
+        console.error('❌ Error during auto-import:');
+        if (error.errors) {
+            error.errors.forEach(err => console.error(`  - ${err.message} (${err.path})`));
+        } else {
+            console.error(error);
+        }
     }
 }
 

@@ -18,13 +18,13 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const { data } = await api.get('/collections/dashboard');
-      const collections = data.data;
-      
+      const { data } = await api.get('/sales/stats');
+      const statsData = data.data;
+
       setStats({
-        monthlySales: collections.reduce((acc, c) => acc + c.stats.totalTotal, 0) * 1.5, // Mocking total
-        pendingCollections: collections.reduce((acc, c) => acc + c.stats.totalTotal, 0),
-        activeClients: collections.length
+        monthlySales: statsData.monthlySales,
+        pendingCollections: statsData.pendingCollections,
+        activeClients: statsData.activeClients
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -91,7 +91,7 @@ const Dashboard = () => {
         <div className="glass-card relative overflow-hidden p-8 flex flex-col justify-center bg-gradient-to-br from-slate-800 to-slate-900 text-white">
           <h2 className="text-2xl font-bold mb-4">Integridad de Datos</h2>
           <p className="text-slate-400 leading-relaxed">
-            SISCON-AI mantiene sincronización en tiempo real con la base de datos de Altamar. 
+            SISCON-AI mantiene sincronización en tiempo real con la base de datos de Altamar.
             Todas las transacciones se registran con firma digital y validación fiscal.
           </p>
           <div className="mt-8 flex items-center gap-2 text-green-400 font-bold text-sm">

@@ -3,6 +3,7 @@ const router = express.Router();
 const salesController = require('../controllers/salesController');
 
 router.get('/', salesController.getSales);
+router.get('/stats', salesController.getSalesStats);
 router.get('/:id', salesController.getSaleById);
 router.post('/', salesController.createSale);
 router.put('/:id', salesController.updateSale);

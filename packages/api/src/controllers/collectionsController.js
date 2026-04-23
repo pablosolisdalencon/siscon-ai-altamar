@@ -90,7 +90,7 @@ exports.getCollectionsDashboard = async (req, res) => {
       });
 
       return {
-        id: client.id_cliente,
+        id_cliente: client.id_cliente,
         razon: client.razon,
         rut: client.rut,
         mail: client.pago_mail,

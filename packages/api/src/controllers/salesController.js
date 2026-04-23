@@ -24,9 +24,9 @@ exports.getSales = async (req, res) => {
     const sales = await Sale.findAll({
       where,
       include: [
-        { 
-          model: Client, 
-          as: 'client', 
+        {
+          model: Client,
+          as: 'client',
           attributes: ['razon', 'rut'],
           where: clientSearch ? { razon: { [Op.like]: `%${clientSearch}%` } } : undefined
         },
@@ -61,7 +61,7 @@ exports.getSaleById = async (req, res) => {
 exports.createSale = async (req, res) => {
   try {
     const { monto, ...rest } = req.body;
-    
+
     // Auto calculations (Parity with ventas.php)
     const neto = parseFloat(monto) || 0;
     const iva = neto * 0.19;
@@ -109,5 +109,42 @@ exports.deleteSale = async (req, res) => {
     return successResponse(res, null, 'Sale deleted successfully');
   } catch (error) {
     return errorResponse(res, 'Error deleting sale');
+  }
+};
+
+exports.getSalesStats = async (req, res) => {
+  try {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    // Monthly Sales (Current month)
+    const monthlySales = await Sale.sum('total', {
+      where: {
+        fecha: { [Op.gte]: firstDayOfMonth }
+      }
+    }) || 0;
+
+    // Pending Collections (Pagado = 'NO' and n_factura != '0')
+    const pendingCollections = await Sale.sum('total', {
+      where: {
+        pagado: 'NO',
+        n_factura: { [Op.ne]: 0 }
+      }
+    }) || 0;
+
+    // Active Clients (Unique clients in sales)
+    const activeClientsCount = await Sale.count({
+      distinct: true,
+      col: 'id_cliente'
+    });
+
+    return successResponse(res, {
+      monthlySales,
+      pendingCollections,
+      activeClients: activeClientsCount
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    return errorResponse(res, 'Error fetching dashboard stats');
   }
 };
