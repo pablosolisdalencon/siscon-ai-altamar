@@ -22,7 +22,12 @@ async function importData() {
         const { sequelize } = require(dbPath);
 
         await sequelize.authenticate();
-        console.log('📡 Connected to database. Starting 100% data synchronization...');
+        console.log('📡 Connected to database.');
+
+        // Ensure tables exist before trying to truncate/import
+        console.log('🔄 Syncing database schema...');
+        await sequelize.sync({ alter: false });
+        console.log('✅ Schema synchronization complete. Starting data import...');
 
         const sqlContent = fs.readFileSync(SQL_FILE_PATH, 'utf8');
 
@@ -118,8 +123,6 @@ async function importData() {
         console.log('✨ Data synchronization complete.');
     } catch (error) {
         console.error('❌ Error during auto-import:', error);
-        // On Render, we might want to fail the deploy if import fails, but 
-        // it's safer to just log it for now unless explicitly told otherwise.
     }
 }
 
