@@ -13,16 +13,13 @@ const Company = sequelize.define('empresa', {
   razon: {
     type: DataTypes.STRING
   },
-  giro: {
-    type: DataTypes.STRING
-  },
   direccion: {
     type: DataTypes.STRING
   },
-  fono: {
+  giro: {
     type: DataTypes.STRING
   },
-  mail: {
+  CF: {
     type: DataTypes.STRING
   },
   comercial_nombre: {
@@ -44,6 +41,15 @@ const Company = sequelize.define('empresa', {
     type: DataTypes.STRING
   },
   pago_firma: {
+    type: DataTypes.STRING
+  },
+  fono: {
+    type: DataTypes.STRING
+  },
+  mail: {
+    type: DataTypes.STRING
+  },
+  contacto_c: {
     type: DataTypes.STRING
   }
 }, {

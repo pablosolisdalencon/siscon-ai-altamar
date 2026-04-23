@@ -53,16 +53,29 @@ const Sale = sequelize.define('ventas', {
     type: DataTypes.TEXT
   },
   monto: {
-    type: DataTypes.FLOAT
+    type: DataTypes.INTEGER
   },
   iva: {
-    type: DataTypes.FLOAT
+    type: DataTypes.INTEGER
   },
   total: {
-    type: DataTypes.FLOAT
+    type: DataTypes.INTEGER
   },
   estado: {
-    type: DataTypes.INTEGER
+    type: DataTypes.STRING
+  },
+  n_cheque: {
+    type: DataTypes.STRING
+  },
+  razon: {
+    type: DataTypes.STRING
+  },
+  cobros: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  fecha_cobro: {
+    type: DataTypes.DATEONLY
   },
   comicion: {
     type: DataTypes.FLOAT,

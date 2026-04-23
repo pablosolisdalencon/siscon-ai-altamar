@@ -47,6 +47,9 @@ const Client = sequelize.define('clientes', {
   },
   mensaje_cobro: {
     type: DataTypes.TEXT
+  },
+  fecha_cobro: {
+    type: DataTypes.INTEGER
   }
 }, {
   tableName: 'clientes',

@@ -7,24 +7,11 @@ const Purchase = sequelize.define('compras', {
     primaryKey: true,
     autoIncrement: true
   },
-  n_oc: {
-    type: DataTypes.INTEGER
-  },
   fecha: {
     type: DataTypes.DATEONLY
   },
-  fecha_entrega: {
-    type: DataTypes.DATEONLY
-  },
-  fecha_pago: {
-    type: DataTypes.DATEONLY
-  },
-  id_proveedor: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  razon: {
-    type: DataTypes.STRING
+  n_oc: {
+    type: DataTypes.INTEGER
   },
   pagado: {
     type: DataTypes.STRING,
@@ -37,13 +24,26 @@ const Purchase = sequelize.define('compras', {
     type: DataTypes.TEXT
   },
   monto: {
-    type: DataTypes.FLOAT
+    type: DataTypes.INTEGER
   },
   iva: {
-    type: DataTypes.FLOAT
+    type: DataTypes.INTEGER
   },
   total: {
-    type: DataTypes.FLOAT
+    type: DataTypes.INTEGER
+  },
+  fecha_entrega: {
+    type: DataTypes.DATEONLY
+  },
+  fecha_pago: {
+    type: DataTypes.DATEONLY
+  },
+  n_cheque: {
+    type: DataTypes.STRING
+  },
+  id_cliente: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   entregado: {
     type: DataTypes.STRING,

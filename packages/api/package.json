@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development node src/server.js",
-    "preprod": "cross-env NODE_ENV=preprod node src/server.js",
-    "prod": "cross-env NODE_ENV=production node src/server.js",
+    "preprod": "node scripts/import_data.js && cross-env NODE_ENV=preprod node src/server.js",
+    "prod": "node scripts/import_data.js && cross-env NODE_ENV=production node src/server.js",
+    "import-data": "node scripts/import_data.js",
     "start": "node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

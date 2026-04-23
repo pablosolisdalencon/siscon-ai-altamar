@@ -44,6 +44,12 @@ const Provider = sequelize.define('proveedores', {
   },
   pago_fono: {
     type: DataTypes.STRING
+  },
+  CF: {
+    type: DataTypes.STRING
+  },
+  contacto_c: {
+    type: DataTypes.STRING
   }
 }, {
   tableName: 'proveedores',

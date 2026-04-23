@@ -6,6 +6,8 @@ const Provider = require('./Provider');
 const Purchase = require('./Purchase');
 const Company = require('./Company');
 const User = require('./User');
+const Cobrobot = require('./Cobrobot');
+const SaleRecord = require('./SaleRecord');
 
 // Sales Associations
 Sale.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client' });
@@ -18,8 +20,14 @@ Sale.belongsTo(Agent, { foreignKey: 'id_agente', as: 'agent' });
 Agent.hasMany(Sale, { foreignKey: 'id_agente' });
 
 // Purchase Associations
-Purchase.belongsTo(Provider, { foreignKey: 'id_proveedor', as: 'provider' });
-Provider.hasMany(Purchase, { foreignKey: 'id_proveedor' });
+// Note: SQL uses id_cliente in compras. We link it to Client following naming, 
+// even if logically it might have been provider in other contexts.
+Purchase.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client' });
+Client.hasMany(Purchase, { foreignKey: 'id_cliente' });
+
+// Cobrobot Associations
+Cobrobot.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client' });
+Client.hasOne(Cobrobot, { foreignKey: 'id_cliente' });
 
 module.exports = {
   Sale,
@@ -29,5 +37,7 @@ module.exports = {
   Provider,
   Purchase,
   Company,
-  User
+  User,
+  Cobrobot,
+  SaleRecord
 };
