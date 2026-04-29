@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Mail, Clock, AlertTriangle, ChevronRight, ChevronDown, DollarSign, Search, Filter, Save, Trash2, X, Send, FileText, User as UserIcon, Settings, Download } from 'lucide-react';
+import { Mail, Clock, ChevronRight, Search, User as UserIcon, Settings, Download, ChevronLeft } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -25,9 +25,12 @@ const Cobros = () => {
     estado: '',
     sort: 'id_venta'
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     fetchCollections();
+    setCurrentPage(1);
   }, [filters]);
 
   useEffect(() => {
@@ -183,7 +186,7 @@ const Cobros = () => {
           <div className="flex justify-center p-20"><Clock className="animate-spin text-primary" size={48} /></div>
         ) : collections.length === 0 ? (
           <div className="text-center p-20 text-slate-400 font-bold uppercase tracking-widest">No se encontraron cobros pendientes</div>
-        ) : collections.map((client) => (
+        ) : collections.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((client) => (
           <div key={client.id_cliente} className="border border-slate-300">
             {/* Group Header */}
             <div className="bg-[#3a3a3a] text-white p-3 flex justify-between items-center bg-gradient-to-r from-slate-700 to-slate-800">
@@ -286,6 +289,44 @@ const Cobros = () => {
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && collections.length > ITEMS_PER_PAGE && (
+        <div className="bg-white p-4 border border-slate-200 flex justify-between items-center">
+          <span className="text-xs font-bold text-slate-400">
+            Mostrando clientes {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, collections.length)} de {collections.length}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded border border-slate-300 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            {Array.from({ length: Math.ceil(collections.length / ITEMS_PER_PAGE) }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-10 h-10 rounded font-black text-sm transition-all ${
+                  page === currentPage
+                    ? 'bg-slate-800 text-white shadow-lg'
+                    : 'text-slate-400 hover:bg-slate-100 hover:text-slate-800'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(Math.ceil(collections.length / ITEMS_PER_PAGE), p + 1))}
+              disabled={currentPage === Math.ceil(collections.length / ITEMS_PER_PAGE)}
+              className="p-2 rounded border border-slate-300 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Email Preview Modal (Matches Screenshot 2) */}
       {isMailModalOpen && selectedClient && (

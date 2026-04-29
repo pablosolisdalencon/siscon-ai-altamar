@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Search, Filter, Plus, FileText, Download, MoreVertical, Calendar as CalendarIcon, Trash2, Save, ExternalLink } from 'lucide-react';
+import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -23,6 +23,8 @@ const Ventas = () => {
     clientSearch: '',
     pagado: 'TODAS'
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const [formData, setFormData] = useState({
     fecha: new Date().toISOString().split('T')[0],
@@ -53,6 +55,7 @@ const Ventas = () => {
 
   useEffect(() => {
     fetchSales();
+    setCurrentPage(1);
   }, [filters]);
 
   useEffect(() => {
@@ -226,7 +229,7 @@ const Ventas = () => {
       <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
         <div>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
-            Ventas <span className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{sales.length} Registros</span>
+            Ventas <span className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{sales.length} Registros (Pág. {currentPage}/{Math.max(1, Math.ceil(sales.length / ITEMS_PER_PAGE))})</span>
           </h1>
         </div>
         <button className="btn-primary flex items-center gap-2 group" onClick={handleOpenModal}>
@@ -310,7 +313,7 @@ const Ventas = () => {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               [...Array(5)].map((_, i) => <tr key={i} className="animate-pulse h-20 bg-slate-50/10"></tr>)
-            ) : sales.map((sale) => {
+            ) : sales.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((sale) => {
               const deliveryDays = calculateDays(sale.fecha_entrega);
               const overdueDays = calculateOverdue(sale.fecha_pago, sale.pagado);
 
@@ -443,6 +446,44 @@ const Ventas = () => {
           </tfoot>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && sales.length > ITEMS_PER_PAGE && (
+        <div className="glass-card p-4 flex justify-between items-center">
+          <span className="text-xs font-bold text-slate-400">
+            Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, sales.length)} de {sales.length}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-xl border border-slate-200 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            {Array.from({ length: Math.ceil(sales.length / ITEMS_PER_PAGE) }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-10 h-10 rounded-xl font-black text-sm transition-all ${
+                  page === currentPage
+                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                    : 'text-slate-400 hover:bg-slate-100 hover:text-primary'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(Math.ceil(sales.length / ITEMS_PER_PAGE), p + 1))}
+              disabled={currentPage === Math.ceil(sales.length / ITEMS_PER_PAGE)}
+              className="p-2 rounded-xl border border-slate-200 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Create Sale Modal */}
       {isModalOpen && (
