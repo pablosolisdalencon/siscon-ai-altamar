@@ -1,0 +1,64 @@
+{
+  "$schema": "skill_v1",
+  "metadata": {
+    "name": "hyper_specialist",
+    "version": "1.0.0",
+    "description": "Subsistema de Auto-Entrenamiento Súper Especialista para adquisición de experticia máxima.",
+    "created_at": "2026-04-30T03:29:00Z",
+    "updated_at": "2026-04-30T03:29:00Z"
+  },
+  "title": "HYPER-SPECIALIST (NÚCLEO DE EXPERTICIA)",
+  "purpose": "Motor de Super-Entrenamiento en tiempo real. Garantiza que el Agente opere bajo el estándar de Autoridad Global en el nicho específico requerido antes de emitir cualquier línea de código o lógica.",
+  "execution_matrix": [
+    {
+      "phase": 1,
+      "name": "DESFRAGMENTACIÓN DE NICHO",
+      "codename": "DEEP_DOMAIN_IDENTIFICATION",
+      "actions": [
+        "Extraer entidades técnicas, librerías, paradigmas o conceptos de vanguardia implícitos en la solicitud",
+        "Categorizar solicitud en Área de Experticia Extrema"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "INVESTIGACIÓN RECURSIVA DE VANGUARDIA",
+      "codename": "STATE_OF_THE_ART_R2D2",
+      "actions": [
+        "Realizar búsqueda profunda en documentación oficial, repositorios líderes y whitepapers",
+        "Mapear Best Practices del año actual (2026) para evitar soluciones legacy"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "ASIMILACIÓN DE MODELO MENTAL ESPECIALISTA",
+      "codename": "EXPERT_GHOSTING",
+      "actions": [
+        "Simular proceso de pensamiento de los 3 mayores expertos mundiales en el tema",
+        "Generar lista de Heurísticas Críticas (pitfalls comunes, optimizaciones de bajo nivel, implicaciones de seguridad)"
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "INYECCIÓN DE EXPERTICIA ESTRATÉGICA",
+      "actions": [
+        "Compilar hallazgos en Brief de Experticia interno",
+        "Exportar lógica al brain y architect_node para materialización final"
+      ]
+    }
+  ],
+  "activation_conditions": [
+    "DEBE ejecutarse inmediatamente después del análisis inicial de la instrucción",
+    "SIEMPRE antes de la fase de ejecución/materialización"
+  ],
+  "telemetry": "[⚙️ INVOCANDO SKILL: hyper_specialist]",
+  "dependencies": [
+    "brain",
+    "architect_node"
+  ],
+  "tags": [
+    "auto_training",
+    "expertise",
+    "deep_domain",
+    "state_of_art"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "skill_v1",
+  "metadata": {
+    "name": "make_json",
+    "version": "1.0.0",
+    "description": "Motor de Escritura JSON Perfecto y Robusto. Serialización determinista con validación zero-defect.",
+    "created_at": "2026-04-30T03:29:00Z",
+    "updated_at": "2026-04-30T03:29:00Z"
+  },
+  "title": "MAKE-JSON (MOTOR DE SERIALIZACIÓN DETERMINISTA)",
+  "purpose": "Producir documentos JSON con precisión absoluta, cero errores de sintaxis y robustez estructural verificable.",
+  "execution_matrix": [
+    {
+      "phase": 1,
+      "name": "ANÁLISIS PRE-SERIALIZACIÓN",
+      "codename": "SCHEMA_FIRST",
+      "actions": [
+        "Identificar dominio semántico del documento",
+        "Definir esquema implícito: tipos, cardinalidades, campos obligatorios vs opcionales",
+        "Mapear relaciones y validar existencia de referencias externas"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "ESCRITURA IMPERATIVA",
+      "codename": "ZERO_DEFECT_PROTOCOL",
+      "rules": [
+        "Comillas dobles exclusivamente",
+        "Sin trailing commas",
+        "Valores null explícitos",
+        "Tipos estrictos (bool, number, array, object)",
+        "Indentación 2 espacios",
+        "UTF-8 sin BOM",
+        "Claves en snake_case",
+        "Fechas ISO-8601 con timezone UTC",
+        "Rutas con forward-slash"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "VALIDACIÓN POST-ESCRITURA",
+      "codename": "INTEGRITY_CHECK",
+      "actions": [
+        "Parseo de verificación con JSON.parse()",
+        "Validación de referencias de rutas",
+        "Consistencia de esquema entre documentos del mismo tipo"
+      ]
+    }
+  ],
+  "anti_patterns": [
+    "JSON con comentarios",
+    "Trailing commas",
+    "Mezclar camelCase y snake_case",
+    "Strings multilínea",
+    "Valores undefined, NaN o Infinity",
+    "Números con leading zeros"
+  ],
+  "dependencies": [],
+  "tags": ["json", "serialization", "validation", "zero_defect"]
+}
