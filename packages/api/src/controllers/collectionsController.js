@@ -4,7 +4,8 @@ const { Op } = require('sequelize');
 
 exports.getCollectionsDashboard = async (req, res) => {
   try {
-    const { nFactura, nCot, from, to, clientSearch, pagado, estado, sort } = req.query;
+    const { nFactura, nCot, from, to, clientSearch, pagado, estado, sort, page = 1, limit = 10 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
     // Legacy f-cobros.php base filter: WHERE n_factura!='0'
     const saleWhere = {
@@ -18,10 +19,6 @@ exports.getCollectionsDashboard = async (req, res) => {
     if (estado) saleWhere[Op.and].push({ estado: estado });
 
     // Dates – Full parity with legacy f-cobros.php switch(true) logic:
-    //   Both set  => BETWEEN from AND to
-    //   Only from => BETWEEN from AND from  (single day)
-    //   Only to   => BETWEEN to AND to      (single day)
-    //   Neither   => fecha != ''             (legacy base condition)
     if (from && to) {
       saleWhere.fecha = { [Op.between]: [from, to] };
     } else if (from) {
@@ -29,12 +26,9 @@ exports.getCollectionsDashboard = async (req, res) => {
     } else if (to) {
       saleWhere.fecha = to;
     } else {
-      // Legacy: AND fecha!='' — exclude records with empty fecha
       saleWhere[Op.and].push({ fecha: { [Op.ne]: '' } });
     }
 
-    // Pagado filter – legacy defaults to showing ALL when radio is unset,
-    // but frontend defaults pagado='NO' for UX consistency with f-cobros module
     if (pagado && pagado !== 'TODAS') {
       saleWhere.pagado = pagado;
     } else if (!pagado) {
@@ -54,7 +48,7 @@ exports.getCollectionsDashboard = async (req, res) => {
       ];
     }
 
-    const clients = await Client.findAll({
+    const { count, rows: clients } = await Client.findAndCountAll({
       where: clientWhere,
       include: [
         {
@@ -67,7 +61,10 @@ exports.getCollectionsDashboard = async (req, res) => {
       order: [
         ['razon', 'ASC'], // Group by client name
         [{ model: Sale, as: 'ventas' }, ...order[0]] // Sort sales within each client
-      ]
+      ],
+      limit: parseInt(limit),
+      offset: offset,
+      distinct: true // Required for correct count with includes
     });
 
     // Process collections logic (Parity with f-cobros.php)
@@ -115,7 +112,12 @@ exports.getCollectionsDashboard = async (req, res) => {
       };
     });
 
-    return successResponse(res, dashboard);
+    return successResponse(res, {
+      data: dashboard,
+      total: count,
+      page: parseInt(page),
+      totalPages: Math.ceil(count / parseInt(limit))
+    });
   } catch (error) {
     console.error('Error fetching collections:', error);
     return errorResponse(res, 'Error fetching collections dashboard');

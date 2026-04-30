@@ -25,13 +25,13 @@ const Cobros = () => {
     estado: '',
     sort: 'id_venta'
   });
-  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     fetchCollections();
-    setCurrentPage(1);
-  }, [filters]);
+  }, [filters, currentPage]);
 
   useEffect(() => {
     fetchClients();
@@ -41,8 +41,12 @@ const Cobros = () => {
   const fetchCollections = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/collections/dashboard', { params: filters });
-      setCollections(data.data);
+      const { data } = await api.get('/collections/dashboard', { 
+        params: { ...filters, page: currentPage, limit: ITEMS_PER_PAGE } 
+      });
+      setCollections(data.data.data);
+      setTotalItems(data.data.total);
+      setTotalPages(data.data.totalPages);
     } catch (error) {
       console.error('Error fetching collections:', error);
     } finally {
@@ -186,7 +190,7 @@ const Cobros = () => {
           <div className="flex justify-center p-20"><Clock className="animate-spin text-primary" size={48} /></div>
         ) : collections.length === 0 ? (
           <div className="text-center p-20 text-slate-400 font-bold uppercase tracking-widest">No se encontraron cobros pendientes</div>
-        ) : collections.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((client) => (
+        ) : collections.map((client) => (
           <div key={client.id_cliente} className="border border-slate-300">
             {/* Group Header */}
             <div className="bg-[#3a3a3a] text-white p-3 flex justify-between items-center bg-gradient-to-r from-slate-700 to-slate-800">
@@ -291,10 +295,10 @@ const Cobros = () => {
       </div>
 
       {/* Pagination Controls */}
-      {!loading && collections.length > ITEMS_PER_PAGE && (
+      {!loading && totalItems > ITEMS_PER_PAGE && (
         <div className="bg-white p-4 border border-slate-200 flex justify-between items-center">
           <span className="text-xs font-bold text-slate-400">
-            Mostrando clientes {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, collections.length)} de {collections.length}
+            Mostrando clientes {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} de {totalItems}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -304,7 +308,7 @@ const Cobros = () => {
             >
               <ChevronLeft size={18} />
             </button>
-            {Array.from({ length: Math.ceil(collections.length / ITEMS_PER_PAGE) }, (_, i) => i + 1).map(page => (
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
@@ -318,8 +322,8 @@ const Cobros = () => {
               </button>
             ))}
             <button
-              onClick={() => setCurrentPage(p => Math.min(Math.ceil(collections.length / ITEMS_PER_PAGE), p + 1))}
-              disabled={currentPage === Math.ceil(collections.length / ITEMS_PER_PAGE)}
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
               className="p-2 rounded border border-slate-300 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
             >
               <ChevronRight size={18} />

@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 4000;
 // Routes Imports
 const salesRoutes = require('./routes/sales');
 const collectionsRoutes = require('./routes/collections');
+const purchasesRoutes = require('./routes/purchases');
 const uploadRoutes = require('./routes/uploadRoutes');
 const modulesController = require('./controllers/modulesController');
 
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 // Routes Registration
 app.use('/sales', salesRoutes);
 app.use('/collections', collectionsRoutes);
+app.use('/purchases', purchasesRoutes);
 app.use('/uploads', uploadRoutes);
 
 // Static Files (Legacy Parity for Documents)

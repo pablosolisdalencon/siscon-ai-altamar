@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Ventas from './pages/Ventas';
 import Cobros from './pages/Cobros';
+import Compras from './pages/Compras';
 import Dashboard from './pages/Dashboard';
 import { Agentes, Clientes, Proveedores, Usuarios } from './pages/Modules';
 import Config from './pages/Config';
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/ventas" element={<Ventas />} />
             <Route path="/cobros" element={<Cobros />} />
+            <Route path="/compras" element={<Compras />} />
             <Route path="/agentes" element={<Agentes />} />
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/proveedores" element={<Proveedores />} />

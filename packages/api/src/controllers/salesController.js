@@ -4,8 +4,9 @@ const { Op } = require('sequelize');
 
 exports.getSales = async (req, res) => {
   try {
-    const { from, to, clientId, status, nFactura, nCot, pagado, clientSearch } = req.query;
+    const { from, to, clientId, status, nFactura, nCot, pagado, clientSearch, page = 1, limit = 10 } = req.query;
     const where = {};
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
     if (from && to) {
       where.fecha = { [Op.between]: [from, to] };
@@ -21,7 +22,7 @@ exports.getSales = async (req, res) => {
     if (nCot) where.n_cot = nCot;
     if (pagado && pagado !== 'TODAS') where.pagado = pagado;
 
-    const sales = await Sale.findAll({
+    const { count, rows: sales } = await Sale.findAndCountAll({
       where,
       include: [
         {
@@ -33,10 +34,17 @@ exports.getSales = async (req, res) => {
         { model: SaleState, as: 'status' },
         { model: Agent, as: 'agent' }
       ],
-      order: [['id_venta', 'DESC']]
+      order: [['id_venta', 'DESC']],
+      limit: parseInt(limit),
+      offset: offset
     });
 
-    return successResponse(res, sales);
+    return successResponse(res, {
+      data: sales,
+      total: count,
+      page: parseInt(page),
+      totalPages: Math.ceil(count / parseInt(limit))
+    });
   } catch (error) {
     console.error('Error fetching sales:', error);
     return errorResponse(res, 'Error fetching sales');

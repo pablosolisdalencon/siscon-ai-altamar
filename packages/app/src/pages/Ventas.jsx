@@ -24,6 +24,8 @@ const Ventas = () => {
     pagado: 'TODAS'
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
   const [formData, setFormData] = useState({
@@ -55,8 +57,7 @@ const Ventas = () => {
 
   useEffect(() => {
     fetchSales();
-    setCurrentPage(1);
-  }, [filters]);
+  }, [filters, currentPage]);
 
   useEffect(() => {
     fetchAuxData();
@@ -65,8 +66,12 @@ const Ventas = () => {
   const fetchSales = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/sales', { params: filters });
-      setSales(data.data);
+      const { data } = await api.get('/sales', { 
+        params: { ...filters, page: currentPage, limit: ITEMS_PER_PAGE } 
+      });
+      setSales(data.data.data);
+      setTotalItems(data.data.total);
+      setTotalPages(data.data.totalPages);
     } catch (error) {
       console.error('Error fetching sales:', error);
     } finally {
@@ -229,7 +234,7 @@ const Ventas = () => {
       <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
         <div>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
-            Ventas <span className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{sales.length} Registros (Pág. {currentPage}/{Math.max(1, Math.ceil(sales.length / ITEMS_PER_PAGE))})</span>
+            Ventas <span className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{totalItems} Registros (Pág. {currentPage}/{totalPages})</span>
           </h1>
         </div>
         <button className="btn-primary flex items-center gap-2 group" onClick={handleOpenModal}>
@@ -313,7 +318,7 @@ const Ventas = () => {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               [...Array(5)].map((_, i) => <tr key={i} className="animate-pulse h-20 bg-slate-50/10"></tr>)
-            ) : sales.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((sale) => {
+            ) : sales.map((sale) => {
               const deliveryDays = calculateDays(sale.fecha_entrega);
               const overdueDays = calculateOverdue(sale.fecha_pago, sale.pagado);
 
@@ -435,7 +440,7 @@ const Ventas = () => {
           </tbody>
           <tfoot className="bg-slate-50 border-t border-slate-200">
             <tr>
-              <td colSpan={5} className="px-6 py-4 text-xs font-bold text-slate-400">Totales Globales ({sales.length} registros)</td>
+              <td colSpan={5} className="px-6 py-4 text-xs font-bold text-slate-400">Totales Globales ({totalItems} registros)</td>
               <td className="px-4 py-4 text-right">
                 <div className="text-sm font-black text-slate-800">
                   ${sales.reduce((acc, s) => acc + (s.total || 0), 0).toLocaleString()}
@@ -448,10 +453,10 @@ const Ventas = () => {
       </div>
 
       {/* Pagination Controls */}
-      {!loading && sales.length > ITEMS_PER_PAGE && (
+      {!loading && totalItems > ITEMS_PER_PAGE && (
         <div className="glass-card p-4 flex justify-between items-center">
           <span className="text-xs font-bold text-slate-400">
-            Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, sales.length)} de {sales.length}
+            Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} de {totalItems}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -461,7 +466,7 @@ const Ventas = () => {
             >
               <ChevronLeft size={18} />
             </button>
-            {Array.from({ length: Math.ceil(sales.length / ITEMS_PER_PAGE) }, (_, i) => i + 1).map(page => (
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
@@ -475,8 +480,8 @@ const Ventas = () => {
               </button>
             ))}
             <button
-              onClick={() => setCurrentPage(p => Math.min(Math.ceil(sales.length / ITEMS_PER_PAGE), p + 1))}
-              disabled={currentPage === Math.ceil(sales.length / ITEMS_PER_PAGE)}
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
               className="p-2 rounded-xl border border-slate-200 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
             >
               <ChevronRight size={18} />
