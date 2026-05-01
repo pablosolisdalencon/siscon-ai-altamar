@@ -26,7 +26,7 @@ const Ventas = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [formData, setFormData] = useState({
     fecha: new Date().toISOString().split('T')[0],
@@ -57,7 +57,7 @@ const Ventas = () => {
 
   useEffect(() => {
     fetchSales();
-  }, [filters, currentPage]);
+  }, [filters, currentPage, itemsPerPage]);
 
   useEffect(() => {
     fetchAuxData();
@@ -67,7 +67,7 @@ const Ventas = () => {
     try {
       setLoading(true);
       const { data } = await api.get('/sales', { 
-        params: { ...filters, page: currentPage, limit: ITEMS_PER_PAGE } 
+        params: { ...filters, page: currentPage, limit: itemsPerPage } 
       });
       setSales(data.data.data);
       setTotalItems(data.data.total);
@@ -81,16 +81,24 @@ const Ventas = () => {
 
   const fetchAuxData = async () => {
     try {
-      const [c, a, s] = await Promise.all([
+      const [c, a, s, r] = await Promise.all([
         api.get('/clients'),
         api.get('/agents'),
-        api.get('/sale-states')
+        api.get('/sale-states'),
+        api.get('/sale-records')
       ]);
       setAuxData({
         clients: c.data.data,
         agents: a.data.data,
         states: s.data.data
       });
+      // Set pagination limit from config
+      if (r.data.data && r.data.data.length > 0) {
+        const configCantidad = parseInt(r.data.data[0].cantidad);
+        if (configCantidad > 0) {
+          setItemsPerPage(configCantidad);
+        }
+      }
     } catch (err) {
       console.error('Error fetching aux data:', err);
     }
@@ -453,10 +461,10 @@ const Ventas = () => {
       </div>
 
       {/* Pagination Controls */}
-      {!loading && totalItems > ITEMS_PER_PAGE && (
+      {!loading && totalItems > itemsPerPage && (
         <div className="glass-card p-4 flex justify-between items-center">
           <span className="text-xs font-bold text-slate-400">
-            Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} de {totalItems}
+            Mostrando {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} de {totalItems}
           </span>
           <div className="flex items-center gap-2">
             <button
