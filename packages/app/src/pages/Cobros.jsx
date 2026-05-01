@@ -25,6 +25,7 @@ const Cobros = () => {
     estado: '',
     sort: 'id_venta'
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
