@@ -35,14 +35,18 @@ const sequelize = new Sequelize(
   }
 );
 
-console.log(`📡 Attempting to connect to ${process.env.NODE_ENV} database...`);
+console.log(`\n--- Environment Check ---`);
+console.log(`Mode: ${process.env.NODE_ENV || 'development (default)'}`);
+console.log(`Config: ${envFile}`);
+console.log(`Target Host: ${process.env.DB_HOST ? process.env.DB_HOST.split('.')[0] + '...' : 'NONE'}`);
+console.log(`------------------------\n`);
 
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅ Connection to legacy database has been established successfully.');
+    console.log(`✅ [${process.env.NODE_ENV}] Connection to database established.`);
   } catch (error) {
-    console.error('❌ Unable to connect to the database:', error);
+    console.error(`❌ [${process.env.NODE_ENV}] Unable to connect to the database:`, error);
     process.exit(1);
   }
 };

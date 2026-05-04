@@ -27,7 +27,8 @@ exports.getPurchases = async (req, res) => {
           model: Client,
           as: 'client',
           attributes: ['razon', 'rut']
-        }
+        },
+        { model: SaleState, as: 'status' }
       ],
       order: [['id_compra', 'DESC']],
       limit: parseInt(limit),
@@ -49,7 +50,10 @@ exports.getPurchases = async (req, res) => {
 exports.getPurchaseById = async (req, res) => {
   try {
     const purchase = await Purchase.findByPk(req.params.id, {
-      include: [{ model: Client, as: 'client' }]
+      include: [
+        { model: Client, as: 'client' },
+        { model: SaleState, as: 'status' }
+      ]
     });
     if (!purchase) return errorResponse(res, 'Purchase not found', 404);
     return successResponse(res, purchase);

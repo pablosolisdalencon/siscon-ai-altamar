@@ -26,7 +26,9 @@ exports.getCollectionsDashboard = async (req, res) => {
     } else if (to) {
       saleWhere.fecha = to;
     } else {
-      saleWhere[Op.and].push({ fecha: { [Op.ne]: '' } });
+      // Default: exclude records with empty or invalid dates if needed
+      // To avoid Sequelize "Invalid date" error, we use [Op.ne]: null or just skip
+      saleWhere[Op.and].push({ fecha: { [Op.gt]: '1900-01-01' } });
     }
 
     if (pagado && pagado !== 'TODAS') {
@@ -48,11 +50,13 @@ exports.getCollectionsDashboard = async (req, res) => {
       ];
     }
 
+
     const { count, rows: clients } = await Client.findAndCountAll({
       where: clientWhere,
       include: [
         {
           model: Sale,
+          as: 'ventas',
           where: saleWhere,
           required: true,
           include: [{ model: SaleState, as: 'status', constraints: false }]
@@ -66,6 +70,7 @@ exports.getCollectionsDashboard = async (req, res) => {
       offset: offset,
       distinct: true // Required for correct count with includes
     });
+
 
     // Process collections logic (Parity with f-cobros.php)
     const dashboard = clients.map(client => {

@@ -48,6 +48,10 @@ const Purchase = sequelize.define('compras', {
   entregado: {
     type: DataTypes.STRING,
     defaultValue: 'NO'
+  },
+  estado: {
+    type: DataTypes.STRING,
+    defaultValue: '5'
   }
 }, {
   tableName: 'compras',

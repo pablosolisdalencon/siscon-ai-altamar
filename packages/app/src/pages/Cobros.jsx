@@ -1,10 +1,118 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
 import { Mail, Clock, ChevronRight, Search, User as UserIcon, Settings, Download, ChevronLeft } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '../utils/cn';
 
-const cn = (...inputs) => twMerge(clsx(inputs));
+const StatusDropdown = ({ currentStatus, states, onSelect }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative inline-block text-left w-full" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full gap-2 px-2 py-1.5 text-[10px] font-black uppercase bg-white/50 border border-slate-100 rounded-xl hover:bg-white transition-all shadow-sm group"
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" style={{ backgroundColor: currentStatus?.color || '#cbd5e1' }} />
+          <span className="text-slate-700 truncate">{currentStatus?.estado || '---'}</span>
+        </div>
+        <ChevronRight size={12} className={cn("text-slate-400 transition-transform duration-200 rotate-90", isOpen && "-rotate-90")} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-[1000] mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top overflow-hidden">
+          <div className="max-h-60 overflow-y-auto custom-scrollbar">
+            {states.map((state) => (
+              <button
+                key={state.id_estado}
+                onClick={() => {
+                  onSelect(state.id_estado);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "flex items-center gap-3 w-full px-4 py-2.5 text-[10px] font-bold uppercase transition-colors text-left hover:bg-slate-50",
+                  currentStatus?.id_estado === state.id_estado ? "bg-primary/5 text-primary" : "text-slate-600"
+                )}
+              >
+                <div className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" style={{ backgroundColor: state.color }} />
+                {state.estado}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FormSelect = ({ label, value, options, onChange, showCircle = false, currentStatus = null }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(o => o.value == value);
+
+  return (
+    <div className="space-y-1 relative" ref={containerRef}>
+      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">{label}</label>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn("input-modern flex items-center justify-between text-left", isOpen && "border-primary/50 ring-4 ring-primary/5")}
+      >
+        <div className="flex items-center gap-3 truncate">
+          {showCircle && (
+            <div className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" style={{ backgroundColor: currentStatus?.color || (value === 'SI' ? '#22c55e' : value === 'NO' ? '#ef4444' : '#cbd5e1') }} />
+          )}
+          <span className="truncate">{selectedOption?.label || `Seleccionar ${label}...`}</span>
+        </div>
+        <ChevronRight size={18} className={cn("text-slate-400 transition-transform duration-200 rotate-90", isOpen && "-rotate-90")} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-[1000] mt-2 w-full bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top overflow-hidden">
+          <div className="max-h-60 overflow-y-auto custom-scrollbar">
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "flex items-center gap-3 w-full px-4 py-3 text-sm font-bold transition-colors text-left hover:bg-slate-50",
+                  value == opt.value ? "text-primary bg-primary/5" : "text-slate-600"
+                )}
+              >
+                {showCircle && (
+                  <div className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" style={{ backgroundColor: opt.color || (opt.value === 'SI' ? '#22c55e' : opt.value === 'NO' ? '#ef4444' : '#cbd5e1') }} />
+                )}
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Cobros = () => {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
@@ -30,6 +138,8 @@ const Cobros = () => {
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
+  const [company, setCompany] = useState(null);
+
   useEffect(() => {
     fetchCollections();
   }, [filters, currentPage]);
@@ -37,7 +147,17 @@ const Cobros = () => {
   useEffect(() => {
     fetchClients();
     fetchStates();
+    fetchCompany();
   }, []);
+
+  const fetchCompany = async () => {
+    try {
+      const { data } = await api.get('/company');
+      setCompany(data.data);
+    } catch (err) {
+      console.error('Error fetching company:', err);
+    }
+  };
 
   const fetchCollections = async () => {
     setLoading(true);
@@ -73,6 +193,16 @@ const Cobros = () => {
     }
   };
 
+  const handleUpdateStatus = async (id_venta, id_estado) => {
+    try {
+      await api.put(`/sale-records/${id_venta}`, { estado: id_estado });
+      fetchCollections(); // Refresh
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Error al actualizar el estado');
+    }
+  };
+
   const handleOpenMailModal = (client) => {
     setSelectedClient(client);
     setIsMailModalOpen(true);
@@ -90,98 +220,97 @@ const Cobros = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-20">
-      {/* Filter Bar (Matches Screenshot 1) */}
-      <div className="bg-white p-4 border-b border-slate-200 flex flex-wrap gap-4 items-center text-xs font-bold text-slate-600">
-        <div className="flex items-center gap-1">
-          <span>N FAC</span>
+      {/* Filter Bar */}
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-wrap gap-6 items-end">
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N FAC</label>
           <input
             type="text"
-            className="w-20 px-2 py-1 border border-slate-300 rounded"
+            className="input-modern w-24"
             value={filters.nFactura}
             onChange={(e) => setFilters({ ...filters, nFactura: e.target.value })}
+            placeholder="0000"
           />
         </div>
-        <div className="flex items-center gap-1">
-          <span>N COT</span>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N COT</label>
           <input
             type="text"
-            className="w-20 px-2 py-1 border border-slate-300 rounded"
+            className="input-modern w-24"
             value={filters.nCot}
             onChange={(e) => setFilters({ ...filters, nCot: e.target.value })}
+            placeholder="0000"
           />
         </div>
-        <div className="flex items-center gap-1">
-          <span>Desde</span>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Desde</label>
           <input
             type="date"
-            className="px-2 py-1 border border-slate-300 rounded"
+            className="input-modern"
             value={filters.from}
             onChange={(e) => setFilters({ ...filters, from: e.target.value })}
           />
         </div>
-        <div className="flex items-center gap-1">
-          <span>Hasta</span>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Hasta</label>
           <input
             type="date"
-            className="px-2 py-1 border border-slate-300 rounded"
+            className="input-modern"
             value={filters.to}
             onChange={(e) => setFilters({ ...filters, to: e.target.value })}
           />
         </div>
-        <div className="flex items-center gap-1 flex-1">
-          <span>Cliente</span>
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex-1 space-y-1 min-w-[200px]">
+          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Buscar Cliente</label>
+          <div className="relative">
             <input
               type="text"
-              placeholder="Buscar cliente..."
-              className="w-full px-2 py-1 border border-slate-300 rounded pr-8"
+              placeholder="RUT o Razón Social..."
+              className="input-modern w-full pr-10"
               value={filters.clientSearch}
               onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
             />
-            <Search size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span>Pagados:</span>
-          {['SI', 'NO', 'TODAS'].map(opt => (
-            <label key={opt} className="flex items-center gap-1 cursor-pointer">
-              <input
-                type="radio"
-                name="pagado"
-                value={opt}
-                checked={filters.pagado === opt}
-                onChange={(e) => setFilters({ ...filters, pagado: e.target.value })}
-              />
-              <span>{opt}</span>
-            </label>
-          ))}
+
+        <div className="w-32">
+          <FormSelect
+            label="Pagados"
+            value={filters.pagado}
+            options={[
+              { value: 'SI', label: 'SÍ' },
+              { value: 'NO', label: 'NO' },
+              { value: 'TODAS', label: 'TODAS' }
+            ]}
+            onChange={(val) => setFilters({ ...filters, pagado: val })}
+            showCircle
+          />
         </div>
 
-        <div className="flex items-center gap-2">
-          <span>Estado:</span>
-          <select
-            className="px-2 py-1 border border-slate-300 rounded bg-white"
+        <div className="w-48">
+          <FormSelect
+            label="Estado"
             value={filters.estado}
-            onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-          >
-            <option value="">TODAS</option>
-            {states.map(s => (
-              <option key={s.id_estado} value={s.id_estado}>{s.estado}</option>
-            ))}
-          </select>
+            options={[
+              { value: '', label: 'TODOS LOS ESTADOS' },
+              ...states.map(s => ({ value: s.id_estado, label: s.estado, color: s.color }))
+            ]}
+            onChange={(val) => setFilters({ ...filters, estado: val })}
+          />
         </div>
 
-        <div className="flex items-center gap-2">
-          <span>Orden:</span>
-          <select
-            className="px-2 py-1 border border-slate-300 rounded bg-white font-bold"
+        <div className="w-56">
+          <FormSelect
+            label="Orden"
             value={filters.sort}
-            onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
-          >
-            <option value="id_venta">ID VENTA (DESC)</option>
-            <option value="fecha_pago">FECHA PAGO (DESC)</option>
-            <option value="fecha_entrega">FECHA ENTREGA (DESC)</option>
-          </select>
+            options={[
+              { value: 'id_venta', label: 'ID VENTA (DESC)' },
+              { value: 'fecha_pago', label: 'FECHA PAGO (DESC)' },
+              { value: 'fecha_entrega', label: 'FECHA ENTREGA (DESC)' }
+            ]}
+            onChange={(val) => setFilters({ ...filters, sort: val })}
+          />
         </div>
       </div>
 
@@ -229,9 +358,13 @@ const Cobros = () => {
                 </thead>
                 <tbody className="border border-slate-300">
                   {client.items.map((sale) => (
-                    <tr key={sale.id_venta} className="border-b border-slate-200 hover:bg-slate-50">
-                      <td className="px-2 py-1">
-                        <div className="w-4 h-4 rounded" style={{ backgroundColor: sale.status?.color || '#cccccc' }} />
+                    <tr key={sale.id_venta} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-2 py-3 w-40">
+                        <StatusDropdown
+                          currentStatus={sale.status}
+                          states={states}
+                          onSelect={(id) => handleUpdateStatus(sale.id_venta, id)}
+                        />
                       </td>
                       <td className="px-2 py-1 font-bold text-slate-600">{sale.fecha}</td>
                       <td className="px-2 py-1 text-center">
@@ -270,7 +403,13 @@ const Cobros = () => {
                       <td className="px-2 py-1 text-right font-medium">${sale.iva?.toLocaleString()}</td>
                       <td className="px-2 py-1 text-right font-black text-slate-900">${sale.total?.toLocaleString()}</td>
                       <td className="px-2 py-1 text-center font-bold text-slate-500">{sale.fecha_pago}</td>
-                      <td className="px-2 py-1 text-center font-black text-red-600">
+                      <td className={cn(
+                        "px-2 py-1 text-center font-black",
+                        sale.daysOverdue >= 10 ? "text-red-600" :
+                        sale.daysOverdue >= 5 ? "text-orange-500" :
+                        sale.daysOverdue >= 1 ? "text-yellow-600" :
+                        "text-green-600"
+                      )}>
                         {sale.daysOverdue > 0 ? sale.daysOverdue : ''}
                       </td>
                       <td className="px-2 py-1 text-center">
@@ -403,12 +542,22 @@ const Cobros = () => {
                   </table>
                 </div>
 
-                {/* Placeholder for Signature Image as seen in screenshot */}
-                <div className="mt-12">
-                  <div className="w-full max-w-[400px] h-[150px] bg-slate-100 flex items-center justify-center border border-dashed border-slate-300">
-                    <span className="text-slate-400 font-bold italic">Logo Altamar / Firma Digital</span>
+                <div className="mt-12 flex flex-col items-center border-t border-slate-200 pt-8">
+                  {company?.pago_firma ? (
+                    <img 
+                      src={`${baseUrl}/docs/FIRMAS/${company.pago_firma}`} 
+                      alt="Firma" 
+                      className="max-h-32 object-contain"
+                    />
+                  ) : (
+                    <div className="w-full max-w-[400px] h-[150px] bg-slate-100 flex items-center justify-center border border-dashed border-slate-300">
+                      <span className="text-slate-400 font-bold italic">Sin Firma Digital</span>
+                    </div>
+                  )}
+                  <div className="mt-4 text-center">
+                    <p className="font-black text-slate-800 text-lg">{company?.razon || 'Altamar MKT'}</p>
+                    <p className="text-slate-500 font-bold">{company?.pago_mail || 'czuniga@altamarmkt.cl'}</p>
                   </div>
-                  {/* Real image would be here: ![Signature](/signature.png) */}
                 </div>
               </div>
 

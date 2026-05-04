@@ -7,6 +7,7 @@ import Compras from './pages/Compras';
 import Dashboard from './pages/Dashboard';
 import { Agentes, Clientes, Proveedores, Usuarios } from './pages/Modules';
 import Config from './pages/Config';
+import Empresa from './pages/Empresa';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/proveedores" element={<Proveedores />} />
             <Route path="/usuarios" element={<Usuarios />} />
             <Route path="/config" element={<Config />} />
+            <Route path="/empresa" element={<Empresa />} />
           </Routes>
         </main>
       </div>

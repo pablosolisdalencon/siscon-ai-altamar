@@ -1,10 +1,136 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight, ShoppingBag, ChevronDown } from 'lucide-react';
+import { cn } from '../utils/cn';
 
-const cn = (...inputs) => twMerge(clsx(inputs));
+const StatusDropdown = ({ currentStatus, states, onSelect }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative inline-block text-left w-full" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full gap-2 px-2 py-1.5 text-[10px] font-black uppercase bg-white/50 border border-slate-100 rounded-xl hover:bg-white transition-all shadow-sm group"
+      >
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" 
+            style={{ backgroundColor: currentStatus?.color || '#cbd5e1' }}
+          />
+          <span className="text-slate-700 truncate">{currentStatus?.estado || '---'}</span>
+        </div>
+        <ChevronDown size={12} className={cn("text-slate-400 transition-transform duration-200", isOpen && "rotate-180")} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-[1000] mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top overflow-hidden">
+          <div className="max-h-60 overflow-y-auto custom-scrollbar">
+            {states.map((state) => (
+              <button
+                key={state.id_estado}
+                onClick={() => {
+                  onSelect(state.id_estado);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "flex items-center gap-3 w-full px-4 py-2.5 text-[10px] font-bold uppercase transition-colors text-left hover:bg-slate-50",
+                  currentStatus?.id_estado === state.id_estado ? "bg-primary/5 text-primary" : "text-slate-600"
+                )}
+              >
+                <div 
+                  className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" 
+                  style={{ backgroundColor: state.color }}
+                />
+                {state.estado}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FormSelect = ({ label, value, options, onChange, required = false, showCircle = false, currentStatus = null }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(o => o.value == value);
+
+  return (
+    <div className="space-y-1 relative" ref={containerRef}>
+      <label className="text-[10px] font-black text-slate-400 uppercase ml-2">{label}</label>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "input-modern flex items-center justify-between text-left",
+          isOpen && "border-primary/50 ring-4 ring-primary/5"
+        )}
+      >
+        <div className="flex items-center gap-3 truncate">
+          {showCircle && (
+            <div 
+              className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" 
+              style={{ backgroundColor: currentStatus?.color || (value === 'SI' ? '#22c55e' : value === 'NO' ? '#ef4444' : '#cbd5e1') }}
+            />
+          )}
+          <span className="truncate">{selectedOption?.label || `Seleccionar ${label}...`}</span>
+        </div>
+        <ChevronDown size={18} className={cn("text-slate-400 transition-transform duration-200", isOpen && "rotate-180")} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-[1100] mt-2 w-full bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top">
+          <div className="max-h-60 overflow-y-auto custom-scrollbar">
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "flex items-center gap-3 w-full px-4 py-3 text-sm font-bold transition-colors text-left hover:bg-slate-50",
+                  value == opt.value ? "text-primary bg-primary/5" : "text-slate-600"
+                )}
+              >
+                {showCircle && (
+                  <div 
+                    className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" 
+                    style={{ backgroundColor: opt.color || (opt.value === 'SI' ? '#22c55e' : opt.value === 'NO' ? '#ef4444' : '#cbd5e1') }}
+                  />
+                )}
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Compras = () => {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
@@ -14,7 +140,7 @@ const Compras = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedPurchaseId, setSelectedPurchaseId] = useState(null);
-  const [auxData, setAuxData] = useState({ clients: [] });
+  const [auxData, setAuxData] = useState({ clients: [], states: [] });
   const [filters, setFilters] = useState({
     nOc: '',
     from: '',
@@ -38,7 +164,8 @@ const Compras = () => {
     entregado: 'NO',
     fecha_entrega: '',
     fecha_pago: '',
-    n_cheque: ''
+    n_cheque: '',
+    estado: '5'
   });
 
   useEffect(() => {
@@ -67,10 +194,25 @@ const Compras = () => {
 
   const fetchAuxData = async () => {
     try {
-      const { data } = await api.get('/clients');
-      setAuxData({ clients: data.data });
+      const [c, s] = await Promise.all([
+        api.get('/clients'),
+        api.get('/sale-states')
+      ]);
+      setAuxData({ clients: c.data.data, states: s.data.data });
     } catch (err) {
       console.error('Error fetching clients:', err);
+    }
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await api.put(`/purchases/${id}`, { estado: newStatus });
+      setPurchases(prevPurchases => prevPurchases.map(purchase => 
+        purchase.id_compra === id ? { ...purchase, estado: newStatus, status: auxData.states.find(s => s.id_estado == newStatus) } : purchase
+      ));
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Error al actualizar el estado');
     }
   };
 
@@ -89,7 +231,8 @@ const Compras = () => {
         entregado: purchase.entregado || 'NO',
         fecha_entrega: purchase.fecha_entrega || '',
         fecha_pago: purchase.fecha_pago || '',
-        n_cheque: purchase.n_cheque || ''
+        n_cheque: purchase.n_cheque || '',
+        estado: purchase.estado || '5'
       });
     } else {
       setIsEditMode(false);
@@ -105,7 +248,8 @@ const Compras = () => {
         entregado: 'NO',
         fecha_entrega: '',
         fecha_pago: '',
-        n_cheque: ''
+        n_cheque: '',
+        estado: '5'
       });
     }
     setIsModalOpen(true);
@@ -207,6 +351,7 @@ const Compras = () => {
               <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">Item / Detalle</th>
               <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-right">Montos</th>
               <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Entrega</th>
+              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Estado</th>
               <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Pago</th>
               <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-right">Acción</th>
             </tr>
@@ -239,6 +384,13 @@ const Compras = () => {
                     {purchase.entregado}
                   </span>
                   <p className="text-[10px] text-slate-400 mt-1">{purchase.fecha_entrega}</p>
+                </td>
+                <td className="px-4 py-4 text-center min-w-[140px]">
+                  <StatusDropdown 
+                    currentStatus={purchase.status} 
+                    states={auxData.states} 
+                    onSelect={(newStatusId) => handleStatusChange(purchase.id_compra, newStatusId)} 
+                  />
                 </td>
                 <td className="px-4 py-4 text-center">
                   <span className={cn("text-[10px] font-black px-2 py-0.5 rounded", purchase.pagado === 'SI' ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
@@ -302,13 +454,13 @@ const Compras = () => {
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N° Orden Compra</label>
                   <input type="number" required className="input-modern" value={formData.n_oc} onChange={(e) => setFormData({ ...formData, n_oc: e.target.value })} />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Cliente Destino</label>
-                  <select required className="input-modern appearance-none" value={formData.id_cliente} onChange={(e) => setFormData({ ...formData, id_cliente: e.target.value })}>
-                    <option value="">Seleccionar Cliente...</option>
-                    {auxData.clients.map(c => <option key={c.id_cliente} value={c.id_cliente}>{c.razon}</option>)}
-                  </select>
-                </div>
+                <FormSelect 
+                  label="Cliente Destino"
+                  value={formData.id_cliente}
+                  options={auxData.clients.map(c => ({ value: c.id_cliente, label: c.razon }))}
+                  onChange={(val) => setFormData({ ...formData, id_cliente: val })}
+                  required
+                />
                 <div className="col-span-full space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Item</label>
                   <input type="text" required className="input-modern" value={formData.item} onChange={(e) => setFormData({ ...formData, item: e.target.value })} />
@@ -321,20 +473,35 @@ const Compras = () => {
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Monto Neto ($)</label>
                   <input type="number" required className="input-modern" value={formData.monto} onChange={(e) => setFormData({ ...formData, monto: e.target.value })} />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase ml-2">¿Pagado?</label>
-                  <select className="input-modern" value={formData.pagado} onChange={(e) => setFormData({ ...formData, pagado: e.target.value })}>
-                    <option value="NO">NO</option>
-                    <option value="SI">SI</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase ml-2">¿Entregado?</label>
-                  <select className="input-modern" value={formData.entregado} onChange={(e) => setFormData({ ...formData, entregado: e.target.value })}>
-                    <option value="NO">NO</option>
-                    <option value="SI">SI</option>
-                  </select>
-                </div>
+                <FormSelect 
+                  label="Estado"
+                  value={formData.estado}
+                  showCircle
+                  currentStatus={auxData.states.find(s => s.id_estado == formData.estado)}
+                  options={auxData.states.map(s => ({ value: s.id_estado, label: s.estado, color: s.color }))}
+                  onChange={(val) => setFormData({ ...formData, estado: val })}
+                  required
+                />
+                <FormSelect 
+                  label="¿Pagado?"
+                  value={formData.pagado}
+                  showCircle
+                  options={[
+                    { value: 'NO', label: 'NO', color: '#ef4444' },
+                    { value: 'SI', label: 'SI', color: '#22c55e' }
+                  ]}
+                  onChange={(val) => setFormData({ ...formData, pagado: val })}
+                />
+                <FormSelect 
+                  label="¿Entregado?"
+                  value={formData.entregado}
+                  showCircle
+                  options={[
+                    { value: 'NO', label: 'NO', color: '#ef4444' },
+                    { value: 'SI', label: 'SI', color: '#22c55e' }
+                  ]}
+                  onChange={(val) => setFormData({ ...formData, entregado: val })}
+                />
               </div>
               <div className="flex justify-end gap-4 pt-10 border-t border-slate-50">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-8 py-4 text-sm font-bold text-slate-400 uppercase tracking-widest">Cancelar</button>
