@@ -275,6 +275,19 @@ const Compras = () => {
     }
   };
 
+  const calculateDays = (dateStr) => {
+    if (!dateStr || dateStr === '0000-00-00') return null;
+    const diff = new Date(dateStr) - new Date();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const calculateOverdue = (dateStr, isPaid) => {
+    if (!dateStr || dateStr === '0000-00-00' || isPaid === 'SI') return null;
+    const diff = new Date() - new Date(dateStr);
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return days > 0 ? days : null;
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-20">
       {/* Header */}
@@ -342,81 +355,151 @@ const Compras = () => {
 
       {/* Data Table */}
       <div className="glass-card overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[1200px]">
+        <table className="w-full text-left border-collapse min-w-[1400px]">
           <thead className="bg-slate-800 text-white select-none">
             <tr>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">Fecha</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">OC</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">Cliente</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">Item / Detalle</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-right">Montos</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Entrega</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Estado</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Pago</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-right">Acción</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider"></th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">fecha</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° Cot</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° OC</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° Fac</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Cliente</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Rut</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Item</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Detalle</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">Monto $</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">IVA $</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">Total $</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Fecha Entrega</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Dias Entrega</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Estado</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Fecha de pago</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Pagado</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Dias Vencidos</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Accion</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               [...Array(5)].map((_, i) => <tr key={i} className="animate-pulse h-20 bg-slate-50/10"></tr>)
-            ) : purchases.map((purchase) => (
-              <tr key={purchase.id_compra} className="hover:bg-slate-50/80 transition-all group">
-                <td className="px-4 py-4 whitespace-nowrap text-xs font-bold text-slate-500">{purchase.fecha}</td>
-                <td className="px-4 py-4 text-xs font-black text-slate-700">{purchase.n_oc}</td>
-                <td className="px-4 py-4">
-                  <p className="text-sm font-bold text-slate-800 truncate">{purchase.client?.razon}</p>
-                  <p className="text-[10px] text-slate-400 font-bold">{purchase.client?.rut}</p>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="max-w-[300px]">
-                    <p className="text-xs font-bold text-slate-700 uppercase">{purchase.item}</p>
-                    <p className="text-[10px] text-slate-400 italic line-clamp-1">{purchase.detalle}</p>
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-right">
-                  <div className="space-y-1">
-                    <p className="text-[10px] text-slate-400">Neto: ${purchase.monto?.toLocaleString()}</p>
-                    <p className="text-sm font-black text-slate-900">${purchase.total?.toLocaleString()}</p>
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-center">
-                  <span className={cn("text-[10px] font-black px-2 py-0.5 rounded", purchase.entregado === 'SI' ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
-                    {purchase.entregado}
-                  </span>
-                  <p className="text-[10px] text-slate-400 mt-1">{purchase.fecha_entrega}</p>
-                </td>
-                <td className="px-4 py-4 text-center min-w-[140px]">
-                  <StatusDropdown 
-                    currentStatus={purchase.status} 
-                    states={auxData.states} 
-                    onSelect={(newStatusId) => handleStatusChange(purchase.id_compra, newStatusId)} 
-                  />
-                </td>
-                <td className="px-4 py-4 text-center">
-                  <span className={cn("text-[10px] font-black px-2 py-0.5 rounded", purchase.pagado === 'SI' ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
-                    {purchase.pagado}
-                  </span>
-                  <p className="text-[10px] text-slate-400 mt-1">{purchase.fecha_pago}</p>
-                </td>
-                <td className="px-4 py-4 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button onClick={() => handleOpenModal(purchase)} className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600"><Save size={14} /></button>
-                    <button 
-                      onClick={async () => {
-                        if (confirm('¿Eliminar esta compra?')) {
-                          await api.delete(`/purchases/${purchase.id_compra}`);
-                          fetchPurchases();
-                        }
-                      }}
-                      className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-red-600"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            ) : purchases.map((purchase) => {
+              const deliveryDays = calculateDays(purchase.fecha_entrega);
+              const overdueDays = calculateOverdue(purchase.fecha_pago, purchase.pagado);
+
+              return (
+                <tr key={purchase.id_compra} className="hover:bg-slate-50/80 transition-all group">
+                  <td className="px-2 py-3">
+                    <div className="w-4 h-4 rounded shadow-sm" style={{ backgroundColor: purchase.status?.color || '#cbd5e1' }} />
+                  </td>
+                  <td className="px-2 py-3 whitespace-nowrap text-[11px] font-bold text-slate-500">{purchase.fecha}</td>
+                  
+                  <td className="px-2 py-3 text-center">
+                    <div className="flex items-center gap-1 justify-center">
+                      <span className="text-[11px] text-blue-600 font-bold">{purchase.n_cot || 0}</span>
+                    </div>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-center">
+                    <div className="flex items-center gap-1 justify-center">
+                      <span className="text-[11px] text-slate-600">{purchase.n_oc || 0}</span>
+                    </div>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-center">
+                    <div className="flex items-center gap-1 justify-center">
+                      <span className="text-[11px] text-slate-900 font-black">{purchase.n_factura || 0}</span>
+                    </div>
+                  </td>
+
+                  <td className="px-2 py-3">
+                    <p className="text-[11px] font-bold text-slate-800 uppercase max-w-[120px] truncate" title={purchase.client?.razon}>{purchase.client?.razon}</p>
+                  </td>
+                  
+                  <td className="px-2 py-3">
+                    <p className="text-[11px] text-slate-500 whitespace-nowrap">{purchase.client?.rut}</p>
+                  </td>
+
+                  <td className="px-2 py-3">
+                    <p className="text-[11px] font-bold text-slate-700 uppercase max-w-[120px] truncate" title={purchase.item}>{purchase.item}</p>
+                  </td>
+                  
+                  <td className="px-2 py-3">
+                    <p className="text-[10px] text-slate-500 max-w-[150px] truncate" title={purchase.detalle}>{purchase.detalle}</p>
+                  </td>
+
+                  <td className="px-2 py-3 text-right">
+                    <p className="text-[11px] text-slate-600">${purchase.monto?.toLocaleString()}</p>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-right">
+                    <p className="text-[11px] text-slate-600">${purchase.iva ? purchase.iva.toLocaleString() : (purchase.monto * 0.19).toLocaleString()}</p>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-right">
+                    <p className="text-[11px] font-black text-slate-900">${purchase.total ? purchase.total.toLocaleString() : (purchase.monto * 1.19).toLocaleString()}</p>
+                  </td>
+
+                  <td className="px-2 py-3 text-center whitespace-nowrap">
+                    <span className="text-[11px] text-slate-600 font-medium">{purchase.fecha_entrega === '0000-00-00' ? '' : purchase.fecha_entrega}</span>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-center">
+                    {deliveryDays !== null && (
+                      <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", deliveryDays >= 0 ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
+                        {deliveryDays}
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="px-2 py-3 text-center min-w-[120px]">
+                    <StatusDropdown 
+                      currentStatus={purchase.status} 
+                      states={auxData.states} 
+                      onSelect={(newStatusId) => handleStatusChange(purchase.id_compra, newStatusId)} 
+                    />
+                  </td>
+
+                  <td className="px-2 py-3 text-center whitespace-nowrap">
+                    <span className="text-[11px] text-slate-600 font-medium">{purchase.fecha_pago === '0000-00-00' ? '' : purchase.fecha_pago}</span>
+                  </td>
+
+                  <td className="px-2 py-3 text-center">
+                    <span className={cn("text-[10px] font-black px-1.5 py-0.5 rounded", purchase.pagado === 'SI' ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
+                      {purchase.pagado}
+                    </span>
+                  </td>
+
+                  <td className="px-2 py-3 text-center">
+                    {overdueDays !== null && overdueDays > 0 ? (
+                      <span className="text-[10px] font-bold text-red-500">-{overdueDays}</span>
+                    ) : null}
+                  </td>
+
+                  <td className="px-2 py-3">
+                    <div className="flex justify-center gap-1">
+                      <button onClick={() => handleOpenModal(purchase)} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all" title="Editar">
+                        <Save size={12} />
+                      </button>
+                      <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta compra?')) { await api.delete(`/purchases/${purchase.id_compra}`); fetchPurchases(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
+          <tfoot className="bg-slate-50 border-t border-slate-200">
+            <tr>
+              <td colSpan={11} className="px-6 py-4 text-xs font-bold text-slate-400 text-right">Totales Globales ({totalItems} registros)</td>
+              <td className="px-2 py-3 text-right">
+                <div className="text-[11px] font-black text-slate-800">
+                  ${purchases.reduce((acc, p) => acc + (p.total || (p.monto * 1.19)), 0).toLocaleString()}
+                </div>
+              </td>
+              <td colSpan={7}></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 

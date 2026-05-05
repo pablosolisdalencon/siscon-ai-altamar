@@ -448,17 +448,25 @@ const Ventas = () => {
         <table className="w-full text-left border-collapse min-w-[1400px]">
           <thead className="bg-slate-800 text-white select-none">
             <tr>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider"></th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">Fecha</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">Docs (COT/OC/FAC)</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">Cliente / Rut</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider">Item / Detalle</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-right">Montos</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Entrega</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Estado</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Agente / Com.</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-center">Pago</th>
-              <th className="px-4 py-4 text-[10px] font-black uppercase tracking-wider text-right">Acción</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider"></th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">fecha</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° Cot</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° OC</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° Fac</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Cliente</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Rut</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Item</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Detalle</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">Monto $</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">IVA $</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">Total $</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Fecha Entrega</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Dias Entrega</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Estado</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Fecha de pago</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Pagado</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Dias Vencidos</th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Accion</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -470,115 +478,118 @@ const Ventas = () => {
 
               return (
                 <tr key={sale.id_venta} className="hover:bg-slate-50/80 transition-all group">
-                  <td className="px-4 py-4">
+                  <td className="px-2 py-3">
                     <div className="w-4 h-4 rounded shadow-sm" style={{ backgroundColor: sale.status?.color || '#cbd5e1' }} />
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-xs font-bold text-slate-500">{sale.fecha}</td>
-                  <td className="px-4 py-4">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-blue-600 font-bold">COT: {sale.n_cot}</span>
-                        {sale.f_cot && (
-                          <a href={`${baseUrl}/docs/COTIZACIONES/${sale.f_cot}`} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-600">
-                            <Download size={12} />
-                          </a>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-400">OC: {sale.n_oc}</span>
-                        {sale.f_oc && (
-                          <a href={`${baseUrl}/docs/ORDENES-DE-COMPRA/${sale.f_oc}`} target="_blank" rel="noreferrer" className="text-slate-300 hover:text-slate-500">
-                            <Download size={12} />
-                          </a>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-900 font-black">FAC: {sale.n_factura}</span>
-                        {sale.f_factura && (
-                          <a href={`${baseUrl}/docs/FACTURAS/${sale.f_factura}`} target="_blank" rel="noreferrer" className="text-red-400 hover:text-red-600">
-                            <Download size={12} />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="max-w-[200px]">
-                      <p className="text-sm font-bold text-slate-800 truncate">{sale.client?.razon}</p>
-                      <p className="text-[10px] text-slate-400 font-bold">{sale.client?.rut}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="max-w-[250px]">
-                      <p className="text-xs font-bold text-slate-700 uppercase">{sale.item}</p>
-                      <p className="text-[10px] text-slate-400 italic line-clamp-1">{sale.detalle}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    <div className="space-y-1">
-                      <p className="text-[10px] text-slate-400">Neto: ${sale.monto?.toLocaleString()}</p>
-                      <p className="text-[10px] text-slate-400">IVA: ${sale.iva?.toLocaleString()}</p>
-                      <p className="text-sm font-black text-slate-900">${sale.total?.toLocaleString()}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-center">
-                    <div className="flex flex-col items-center">
-                      <span className="text-xs text-slate-600 font-medium">{sale.fecha_entrega}</span>
-                      {deliveryDays !== null && (
-                        <span className={cn("text-[10px] font-bold mt-1 px-2 py-0.5 rounded", deliveryDays > 0 ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
-                          {deliveryDays} días
-                        </span>
+                  <td className="px-2 py-3 whitespace-nowrap text-[11px] font-bold text-slate-500">{sale.fecha}</td>
+                  
+                  <td className="px-2 py-3 text-center">
+                    <div className="flex items-center gap-1 justify-center">
+                      <span className="text-[11px] text-blue-600 font-bold">{sale.n_cot || 0}</span>
+                      {sale.f_cot && (
+                        <a href={`${baseUrl}/docs/COTIZACIONES/${sale.f_cot}`} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-600">
+                          <Download size={10} />
+                        </a>
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-center min-w-[140px]">
+                  
+                  <td className="px-2 py-3 text-center">
+                    <div className="flex items-center gap-1 justify-center">
+                      <span className="text-[11px] text-slate-600">{sale.n_oc || 0}</span>
+                      {sale.f_oc && (
+                        <a href={`${baseUrl}/docs/ORDENES-DE-COMPRA/${sale.f_oc}`} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-600">
+                          <Download size={10} />
+                        </a>
+                      )}
+                    </div>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-center">
+                    <div className="flex items-center gap-1 justify-center">
+                      <span className="text-[11px] text-slate-900 font-black">{sale.n_factura || 0}</span>
+                      {sale.f_factura && (
+                        <a href={`${baseUrl}/docs/FACTURAS/${sale.f_factura}`} target="_blank" rel="noreferrer" className="text-red-400 hover:text-red-600">
+                          <Download size={10} />
+                        </a>
+                      )}
+                    </div>
+                  </td>
+
+                  <td className="px-2 py-3">
+                    <p className="text-[11px] font-bold text-slate-800 uppercase max-w-[120px] truncate" title={sale.client?.razon}>{sale.client?.razon}</p>
+                  </td>
+                  
+                  <td className="px-2 py-3">
+                    <p className="text-[11px] text-slate-500 whitespace-nowrap">{sale.client?.rut}</p>
+                  </td>
+
+                  <td className="px-2 py-3">
+                    <p className="text-[11px] font-bold text-slate-700 uppercase max-w-[120px] truncate" title={sale.item}>{sale.item}</p>
+                  </td>
+                  
+                  <td className="px-2 py-3">
+                    <p className="text-[10px] text-slate-500 max-w-[150px] truncate" title={sale.detalle}>{sale.detalle}</p>
+                  </td>
+
+                  <td className="px-2 py-3 text-right">
+                    <p className="text-[11px] text-slate-600">${sale.monto?.toLocaleString()}</p>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-right">
+                    <p className="text-[11px] text-slate-600">${sale.iva?.toLocaleString()}</p>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-right">
+                    <p className="text-[11px] font-black text-slate-900">${sale.total?.toLocaleString()}</p>
+                  </td>
+
+                  <td className="px-2 py-3 text-center whitespace-nowrap">
+                    <span className="text-[11px] text-slate-600 font-medium">{sale.fecha_entrega === '0000-00-00' ? '' : sale.fecha_entrega}</span>
+                  </td>
+                  
+                  <td className="px-2 py-3 text-center">
+                    {deliveryDays !== null && (
+                      <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", deliveryDays >= 0 ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
+                        {deliveryDays}
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="px-2 py-3 text-center min-w-[120px]">
                     <StatusDropdown 
                       currentStatus={sale.status} 
                       states={auxData.states} 
                       onSelect={(newStatusId) => handleStatusChange(sale.id_venta, newStatusId)} 
                     />
                   </td>
-                  <td className="px-4 py-4 text-center">
-                    {sale.agent ? (
-                      <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-black text-slate-700 uppercase">{sale.agent.nombre}</span>
-                        <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 rounded">
-                          {sale.comicion}% (${((sale.total * sale.comicion) / 100).toLocaleString()})
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] text-slate-300">Sin Agente</span>
-                    )}
+
+                  <td className="px-2 py-3 text-center whitespace-nowrap">
+                    <span className="text-[11px] text-slate-600 font-medium">{sale.fecha_pago === '0000-00-00' ? '' : sale.fecha_pago}</span>
                   </td>
-                  <td className="px-4 py-4">
-                    <div className="flex flex-col items-center">
-                      <span className={cn("text-[10px] font-black px-2 py-0.5 rounded", sale.pagado === 'SI' ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
-                        {sale.pagado}
-                      </span>
-                      {overdueDays && <span className="text-[10px] text-red-500 font-bold mt-1">{overdueDays} d. venc.</span>}
-                    </div>
+
+                  <td className="px-2 py-3 text-center">
+                    <span className={cn("text-[10px] font-black px-1.5 py-0.5 rounded", sale.pagado === 'SI' ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
+                      {sale.pagado}
+                    </span>
                   </td>
-                  <td className="px-4 py-4">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => handleOpenModal(sale)}
-                        className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all"
-                        title="Editar Venta"
-                      >
-                        <Save size={14} />
+
+                  <td className="px-2 py-3 text-center">
+                    {overdueDays !== null && overdueDays > 0 ? (
+                      <span className="text-[10px] font-bold text-red-500">-{overdueDays}</span>
+                    ) : null}
+                  </td>
+
+                  <td className="px-2 py-3">
+                    <div className="flex justify-center gap-1">
+                      <button onClick={() => handleOpenModal(sale)} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all" title="Editar">
+                        <Save size={12} />
                       </button>
-                      <button className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all"><FileText size={14} /></button>
-                      <button
-                        onClick={async () => {
-                          if (confirm('¿Estás seguro de eliminar esta venta?')) {
-                            await api.delete(`/sales/${sale.id_venta}`);
-                            fetchSales();
-                          }
-                        }}
-                        className="p-2 hover:bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all"
-                        title="Eliminar Venta"
-                      >
-                        <Trash2 size={14} />
+                      <button className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all" title="Documento">
+                        <FileText size={12} />
+                      </button>
+                      <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta venta?')) { await api.delete(`/sales/${sale.id_venta}`); fetchSales(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   </td>
@@ -588,13 +599,13 @@ const Ventas = () => {
           </tbody>
           <tfoot className="bg-slate-50 border-t border-slate-200">
             <tr>
-              <td colSpan={5} className="px-6 py-4 text-xs font-bold text-slate-400">Totales Globales ({totalItems} registros)</td>
-              <td className="px-4 py-4 text-right">
-                <div className="text-sm font-black text-slate-800">
+              <td colSpan={11} className="px-6 py-4 text-xs font-bold text-slate-400 text-right">Totales Globales ({totalItems} registros)</td>
+              <td className="px-2 py-3 text-right">
+                <div className="text-[11px] font-black text-slate-800">
                   ${sales.reduce((acc, s) => acc + (s.total || 0), 0).toLocaleString()}
                 </div>
               </td>
-              <td colSpan={4}></td>
+              <td colSpan={7}></td>
             </tr>
           </tfoot>
         </table>
