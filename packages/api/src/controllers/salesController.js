@@ -1,11 +1,22 @@
-const { Sale, Client, SaleState, Agent } = require('../models/associations');
+const { Sale, Client, SaleState, Agent, SaleRecord } = require('../models/associations');
 const { successResponse, errorResponse } = require('../utils/response');
 const { Op } = require('sequelize');
+const { sequelize } = require('../config/database');
 
 exports.getSales = async (req, res) => {
   try {
-    const { from, to, clientId, status, nFactura, nCot, pagado, clientSearch, page = 1, limit = 10 } = req.query;
-    const where = {};
+    const { from, to, clientId, status, nFactura, nCot, pagado, clientSearch, page = 1, limit: queryLimit } = req.query;
+    
+    // Fetch default limit from SaleRecord if not provided in query
+    let limit = queryLimit;
+    if (!limit) {
+      const config = await SaleRecord.findOne();
+      limit = config ? config.cantidad : 50;
+    }
+
+    const where = {
+      fecha: { [Op.ne]: '' }
+    };
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
     if (from && to) {
@@ -23,6 +34,12 @@ exports.getSales = async (req, res) => {
     if (pagado && pagado !== 'TODAS') where.pagado = pagado;
 
     const { count, rows: sales } = await Sale.findAndCountAll({
+      attributes: {
+        include: [
+          [sequelize.literal("TO_DAYS(fecha_entrega) - TO_DAYS(CURDATE())"), 'dias'],
+          [sequelize.literal("TO_DAYS(CURDATE()) - TO_DAYS(fecha_pago)"), 'dias_pago']
+        ]
+      },
       where,
       include: [
         {

@@ -472,9 +472,6 @@ const Ventas = () => {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               [...Array(5)].map((_, i) => <tr key={i} className="animate-pulse h-20 bg-slate-50/10"></tr>)
-            ) : sales.map((sale) => {
-              const deliveryDays = calculateDays(sale.fecha_entrega);
-              const overdueDays = calculateOverdue(sale.fecha_pago, sale.pagado);
 
               return (
                 <tr key={sale.id_venta} className="hover:bg-slate-50/80 transition-all group">
