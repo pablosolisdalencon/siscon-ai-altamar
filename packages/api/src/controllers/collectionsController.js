@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 
 exports.getCollectionsDashboard = async (req, res) => {
   try {
-    const { nFactura, nCot, from, to, clientSearch, pagado, estado, sort, page = 1, limit = 10 } = req.query;
+    const { nFactura, nCot, from, to, clientSearch, pagado, estado, sortBy = 'razon', sortOrder = 'ASC', page = 1, limit = 10 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
     // Legacy f-cobros.php base filter: WHERE n_factura!='0'
@@ -26,8 +26,6 @@ exports.getCollectionsDashboard = async (req, res) => {
     } else if (to) {
       saleWhere.fecha = to;
     } else {
-      // Default: exclude records with empty or invalid dates if needed
-      // To avoid Sequelize "Invalid date" error, we use [Op.ne]: null or just skip
       saleWhere[Op.and].push({ fecha: { [Op.gt]: '1900-01-01' } });
     }
 
@@ -37,10 +35,11 @@ exports.getCollectionsDashboard = async (req, res) => {
       saleWhere.pagado = 'NO';
     }
 
-    // Sort mapping (Legacy parity)
-    let order = [['id_venta', 'DESC']]; // Default
-    if (sort === 'fecha_pago') order = [['fecha_pago', 'DESC']];
-    if (sort === 'fecha_entrega') order = [['fecha_entrega', 'DESC']];
+    // Sort mapping
+    const direction = sortOrder?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    let clientOrder = [['razon', direction]];
+    if (sortBy === 'rut') clientOrder = [['rut', direction]];
+    if (sortBy === 'mail') clientOrder = [['pago_mail', direction]];
 
     const clientWhere = {};
     if (clientSearch) {
@@ -49,7 +48,6 @@ exports.getCollectionsDashboard = async (req, res) => {
         { rut: { [Op.like]: `%${clientSearch}%` } }
       ];
     }
-
 
     const { count, rows: clients } = await Client.findAndCountAll({
       where: clientWhere,
@@ -63,8 +61,8 @@ exports.getCollectionsDashboard = async (req, res) => {
         }
       ],
       order: [
-        ['razon', 'ASC'], // Group by client name
-        [{ model: Sale, as: 'ventas' }, ...order[0]] // Sort sales within each client
+        ...clientOrder,
+        [{ model: Sale, as: 'ventas' }, 'fecha_pago', 'DESC']
       ],
       limit: parseInt(limit),
       offset: offset,

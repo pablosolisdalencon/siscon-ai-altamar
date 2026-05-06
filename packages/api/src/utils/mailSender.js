@@ -1,29 +1,31 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
+
+if (process.env.SENDGRID_API_KEY) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+} else {
+    console.warn('SENDGRID_API_KEY is not defined in environment variables');
+}
 
 const sendEmail = async ({ to, subject, html, fromName, fromEmail }) => {
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: process.env.SMTP_PORT || 587,
-        secure: process.env.SMTP_PORT == 465,
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
-    });
-
-    const mailOptions = {
-        from: `"${fromName || 'Altamar MKT'}" <${fromEmail || process.env.SMTP_USER}>`,
+    const msg = {
         to,
+        from: {
+            email: fromEmail || process.env.SMTP_USER || 'noreply@siscon-ai.com',
+            name: fromName || 'Altamar MKT'
+        },
         subject,
         html,
     };
 
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent: ' + info.response);
-        return info;
+        const response = await sgMail.send(msg);
+        console.log('Email sent successfully via SendGrid:', response[0].statusCode);
+        return response;
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Error sending email via SendGrid:', error);
+        if (error.response) {
+            console.error(error.response.body);
+        }
         throw error;
     }
 };

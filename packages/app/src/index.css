@@ -43,6 +43,11 @@
            hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95;
   }
 
+  .btn-glass {
+    @apply px-4 py-2 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold
+           text-slate-600 hover:bg-white hover:shadow-md transition-all active:scale-95;
+  }
+
   .input-modern {
     @apply w-full px-4 py-3 bg-white border border-slate-100 rounded-2xl outline-none 
            focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all 
@@ -56,4 +61,36 @@
     background-position: right 1rem center;
     background-size: 1.25rem;
   }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
+
+/* Responsiveness helpers */
+@media (max-width: 768px) {
+  .glass-card {
+    @apply rounded-xl p-4;
+  }
+  
+  .input-modern {
+    @apply px-3 py-2 text-xs;
+  }
+
+  .btn-primary, .btn-glass {
+    @apply px-3 py-2 text-xs;
+  }
+}
+
+.table-container {
+  @apply overflow-x-auto custom-scrollbar rounded-2xl border border-slate-100;
 }

@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 
 exports.getPurchases = async (req, res) => {
   try {
-    const { from, to, clientId, nOc, pagado, providerSearch, page = 1, limit = 10 } = req.query;
+    const { from, to, clientId, nOc, pagado, providerSearch, page = 1, limit = 10, sortBy = 'id_compra', sortOrder = 'DESC' } = req.query;
     const where = {};
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
@@ -20,6 +20,18 @@ exports.getPurchases = async (req, res) => {
     if (nOc) where.n_oc = nOc;
     if (pagado && pagado !== 'TODAS') where.pagado = pagado;
 
+    // Sorting Logic
+    let order = [['id_compra', 'DESC']];
+    if (sortBy) {
+      const direction = sortOrder?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+      const validColumns = ['id_compra', 'fecha', 'n_oc', 'monto', 'iva', 'total', 'pagado'];
+      if (validColumns.includes(sortBy)) {
+        order = [[sortBy, direction]];
+      } else if (sortBy === 'cliente') {
+        order = [[{ model: Client, as: 'client' }, 'razon', direction]];
+      }
+    }
+
     const { count, rows: purchases } = await Purchase.findAndCountAll({
       where,
       include: [
@@ -27,10 +39,9 @@ exports.getPurchases = async (req, res) => {
           model: Client,
           as: 'client',
           attributes: ['razon', 'rut']
-        },
-        { model: SaleState, as: 'status' }
+        }
       ],
-      order: [['id_compra', 'DESC']],
+      order,
       limit: parseInt(limit),
       offset: offset
     });

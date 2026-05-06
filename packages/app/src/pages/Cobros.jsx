@@ -131,7 +131,8 @@ const Cobros = () => {
     clientSearch: '',
     pagado: 'NO',
     estado: '',
-    sort: 'id_venta'
+    sortBy: 'razon',
+    sortOrder: 'ASC'
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -303,13 +304,13 @@ const Cobros = () => {
         <div className="w-56">
           <FormSelect
             label="Orden"
-            value={filters.sort}
+            value={filters.sortBy}
             options={[
-              { value: 'id_venta', label: 'ID VENTA (DESC)' },
-              { value: 'fecha_pago', label: 'FECHA PAGO (DESC)' },
-              { value: 'fecha_entrega', label: 'FECHA ENTREGA (DESC)' }
+              { value: 'razon', label: 'RAZON SOCIAL' },
+              { value: 'rut', label: 'RUT' },
+              { value: 'mail', label: 'EMAIL' }
             ]}
-            onChange={(val) => setFilters({ ...filters, sort: val })}
+            onChange={(val) => setFilters({ ...filters, sortBy: val })}
           />
         </div>
       </div>
@@ -435,7 +436,6 @@ const Cobros = () => {
       </div>
 
       {/* Pagination Controls */}
-      {!loading && totalItems > ITEMS_PER_PAGE && (
         <div className="bg-white p-4 border border-slate-200 flex justify-between items-center">
           <span className="text-xs font-bold text-slate-400">
             Mostrando clientes {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} de {totalItems}
@@ -444,33 +444,65 @@ const Cobros = () => {
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded border border-slate-300 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+              className="px-4 h-10 rounded-xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
             >
-              <ChevronLeft size={18} />
+              Anterior
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-10 h-10 rounded font-black text-sm transition-all ${
-                  page === currentPage
-                    ? 'bg-slate-800 text-white shadow-lg'
-                    : 'text-slate-400 hover:bg-slate-100 hover:text-slate-800'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            {(() => {
+              const pages = [];
+              const windowSize = 5;
+              
+              // Fixed First 5
+              for (let i = 1; i <= Math.min(5, totalPages); i++) {
+                pages.push(i);
+              }
+
+              // Mobile Window (5 before, 5 after)
+              const startWindow = Math.max(1, currentPage - windowSize);
+              const endWindow = Math.min(totalPages, currentPage + windowSize);
+              for (let i = startWindow; i <= endWindow; i++) {
+                if (!pages.includes(i)) pages.push(i);
+              }
+
+              // Fixed Last 5
+              for (let i = Math.max(1, totalPages - 4); i <= totalPages; i++) {
+                if (!pages.includes(i)) pages.push(i);
+              }
+
+              pages.sort((a, b) => a - b);
+              const finalPages = [];
+              for (let i = 0; i < pages.length; i++) {
+                if (i > 0 && pages[i] - pages[i-1] > 1) finalPages.push('...');
+                finalPages.push(pages[i]);
+              }
+
+              return finalPages.map((page, idx) => (
+                page === '...' ? (
+                  <span key={`ellipsis-${idx}`} className="px-2 text-slate-300 font-black">...</span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded font-black text-sm transition-all ${
+                      page === currentPage
+                        ? 'bg-slate-800 text-white shadow-lg'
+                        : 'text-slate-400 hover:bg-slate-100 hover:text-slate-800'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              ));
+            })()}
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded border border-slate-300 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+              className="px-4 h-10 rounded-xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
             >
-              <ChevronRight size={18} />
+              Siguiente
             </button>
           </div>
         </div>
-      )}
 
       {/* Email Preview Modal (Matches Screenshot 2) */}
       {isMailModalOpen && selectedClient && (

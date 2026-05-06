@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const StatusDropdown = ({ currentStatus, states, onSelect }) => {
@@ -147,7 +147,9 @@ const Ventas = () => {
     from: '',
     to: '',
     clientSearch: '',
-    pagado: 'TODAS'
+    pagado: 'TODAS',
+    sortBy: 'id_venta',
+    sortOrder: 'DESC'
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -189,6 +191,15 @@ const Ventas = () => {
     fetchAuxData();
   }, []);
 
+  const handleSort = (key) => {
+    setFilters(prev => ({
+      ...prev,
+      sortBy: key,
+      sortOrder: prev.sortBy === key && prev.sortOrder === 'DESC' ? 'ASC' : 'DESC'
+    }));
+    setCurrentPage(1);
+  };
+
   const fetchSales = async () => {
     try {
       setLoading(true);
@@ -203,6 +214,11 @@ const Ventas = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExportExcel = () => {
+    const params = new URLSearchParams({ ...filters }).toString();
+    window.open(`${apiUrl}/sales/export?${params}`, '_blank');
   };
 
   const fetchAuxData = async () => {
@@ -383,10 +399,19 @@ const Ventas = () => {
             Ventas <span className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{totalItems} Registros (Pág. {currentPage}/{totalPages})</span>
           </h1>
         </div>
-        <button className="btn-primary flex items-center gap-2 group" onClick={handleOpenModal}>
-          <Plus size={20} className="group-hover:rotate-90 transition-transform" />
-          Nueva Venta
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            className="btn-glass text-green-600 border-green-100 hover:bg-green-50 flex items-center gap-2" 
+            onClick={handleExportExcel}
+          >
+            <Download size={20} />
+            Exportar Excel
+          </button>
+          <button className="btn-primary flex items-center gap-2 group" onClick={handleOpenModal}>
+            <Plus size={20} className="group-hover:rotate-90 transition-transform" />
+            Nueva Venta
+          </button>
+        </div>
       </div>
 
       {/* Legacy Filter Bar */}
@@ -449,150 +474,180 @@ const Ventas = () => {
           <thead className="bg-slate-800 text-white select-none">
             <tr>
               <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider"></th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">fecha</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° Cot</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° OC</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° Fac</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Cliente</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Rut</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Item</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Detalle</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">Monto $</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">IVA $</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">Total $</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Fecha Entrega</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Dias Entrega</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Estado</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Fecha de pago</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Pagado</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Dias Vencidos</th>
+              {[
+                { label: 'fecha', key: 'fecha' },
+                { label: 'N° Cot', key: 'n_cot', center: true },
+                { label: 'N° OC', key: 'n_oc', center: true },
+                { label: 'N° Fac', key: 'n_factura', center: true },
+                { label: 'Cliente', key: 'cliente' },
+                { label: 'Rut', key: 'rut' },
+                { label: 'Item', key: 'item' },
+                { label: 'Detalle', key: 'detalle' },
+                { label: 'Monto $', key: 'monto', right: true },
+                { label: 'IVA $', key: 'iva', right: true },
+                { label: 'Total $', key: 'total', right: true },
+                { label: 'Fecha Entrega', key: 'fecha_entrega', center: true },
+                { label: 'Dias Entrega', key: 'dias', center: true },
+                { label: 'Estado', key: 'estado', center: true },
+                { label: 'Fecha de pago', key: 'fecha_pago', center: true },
+                { label: 'Pagado', key: 'pagado', center: true },
+                { label: 'Dias Vencidos', key: 'dias_pago', center: true },
+              ].map((col) => (
+                <th 
+                  key={col.key}
+                  onClick={() => handleSort(col.key)}
+                  className={cn(
+                    "px-2 py-3 text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-slate-700 transition-colors group",
+                    col.center && "text-center",
+                    col.right && "text-right"
+                  )}
+                >
+                  <div className={cn(
+                    "flex items-center gap-1",
+                    col.center && "justify-center",
+                    col.right && "justify-end"
+                  )}>
+                    {col.label}
+                    <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronUp size={8} className={cn(filters.sortBy === col.key && filters.sortOrder === 'ASC' ? "text-primary opacity-100" : "text-slate-500")} />
+                      <ChevronDown size={8} className={cn(filters.sortBy === col.key && filters.sortOrder === 'DESC' ? "text-primary opacity-100" : "text-slate-500")} />
+                    </div>
+                  </div>
+                </th>
+              ))}
               <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Accion</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading ? (
-              [...Array(5)].map((_, i) => <tr key={i} className="animate-pulse h-20 bg-slate-50/10"></tr>)
+              [...Array(5)].map((_, i) => (
+                <tr key={i} className="animate-pulse h-20 bg-slate-50/10"></tr>
+              ))
+            ) : (
+              sales.map((sale) => {
+                const deliveryDays = calculateDays(sale.fecha_entrega);
+                const overdueDays = calculateOverdue(sale.fecha_pago, sale.pagado);
+                return (
+                  <tr key={sale.id_venta} className="hover:bg-slate-50/80 transition-all group">
+                    <td className="px-2 py-3">
+                      <div className="w-4 h-4 rounded shadow-sm" style={{ backgroundColor: sale.status?.color || '#cbd5e1' }} />
+                    </td>
+                    <td className="px-2 py-3 whitespace-nowrap text-[11px] font-bold text-slate-500">{sale.fecha}</td>
+                    
+                    <td className="px-2 py-3 text-center">
+                      <div className="flex items-center gap-1 justify-center">
+                        <span className="text-[11px] text-blue-600 font-bold">{sale.n_cot || 0}</span>
+                        {sale.f_cot && (
+                          <a href={`${baseUrl}/docs/COTIZACIONES/${sale.f_cot}`} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-600">
+                            <Download size={10} />
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                    
+                    <td className="px-2 py-3 text-center">
+                      <div className="flex items-center gap-1 justify-center">
+                        <span className="text-[11px] text-slate-600">{sale.n_oc || 0}</span>
+                        {sale.f_oc && (
+                          <a href={`${baseUrl}/docs/ORDENES-DE-COMPRA/${sale.f_oc}`} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-600">
+                            <Download size={10} />
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                    
+                    <td className="px-2 py-3 text-center">
+                      <div className="flex items-center gap-1 justify-center">
+                        <span className="text-[11px] text-slate-900 font-black">{sale.n_factura || 0}</span>
+                        {sale.f_factura && (
+                          <a href={`${baseUrl}/docs/FACTURAS/${sale.f_factura}`} target="_blank" rel="noreferrer" className="text-red-400 hover:text-red-600">
+                            <Download size={10} />
+                          </a>
+                        )}
+                      </div>
+                    </td>
 
-              return (
-                <tr key={sale.id_venta} className="hover:bg-slate-50/80 transition-all group">
-                  <td className="px-2 py-3">
-                    <div className="w-4 h-4 rounded shadow-sm" style={{ backgroundColor: sale.status?.color || '#cbd5e1' }} />
-                  </td>
-                  <td className="px-2 py-3 whitespace-nowrap text-[11px] font-bold text-slate-500">{sale.fecha}</td>
-                  
-                  <td className="px-2 py-3 text-center">
-                    <div className="flex items-center gap-1 justify-center">
-                      <span className="text-[11px] text-blue-600 font-bold">{sale.n_cot || 0}</span>
-                      {sale.f_cot && (
-                        <a href={`${baseUrl}/docs/COTIZACIONES/${sale.f_cot}`} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-600">
-                          <Download size={10} />
-                        </a>
+                    <td className="px-2 py-3">
+                      <p className="text-[11px] font-bold text-slate-800 uppercase max-w-[120px] truncate" title={sale.client?.razon}>{sale.client?.razon}</p>
+                    </td>
+                    
+                    <td className="px-2 py-3">
+                      <p className="text-[11px] text-slate-500 whitespace-nowrap">{sale.client?.rut}</p>
+                    </td>
+
+                    <td className="px-2 py-3">
+                      <p className="text-[11px] font-bold text-slate-700 uppercase max-w-[120px] truncate" title={sale.item}>{sale.item}</p>
+                    </td>
+                    
+                    <td className="px-2 py-3">
+                      <p className="text-[10px] text-slate-500 max-w-[150px] truncate" title={sale.detalle}>{sale.detalle}</p>
+                    </td>
+
+                    <td className="px-2 py-3 text-right">
+                      <p className="text-[11px] text-slate-600">${sale.monto?.toLocaleString()}</p>
+                    </td>
+                    
+                    <td className="px-2 py-3 text-right">
+                      <p className="text-[11px] text-slate-600">${sale.iva?.toLocaleString()}</p>
+                    </td>
+                    
+                    <td className="px-2 py-3 text-right">
+                      <p className="text-[11px] font-black text-slate-900">${sale.total?.toLocaleString()}</p>
+                    </td>
+
+                    <td className="px-2 py-3 text-center whitespace-nowrap">
+                      <span className="text-[11px] text-slate-600 font-medium">{sale.fecha_entrega === '0000-00-00' ? '' : sale.fecha_entrega}</span>
+                    </td>
+                    
+                    <td className="px-2 py-3 text-center">
+                      {deliveryDays !== null && (
+                        <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", deliveryDays >= 0 ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
+                          {deliveryDays}
+                        </span>
                       )}
-                    </div>
-                  </td>
-                  
-                  <td className="px-2 py-3 text-center">
-                    <div className="flex items-center gap-1 justify-center">
-                      <span className="text-[11px] text-slate-600">{sale.n_oc || 0}</span>
-                      {sale.f_oc && (
-                        <a href={`${baseUrl}/docs/ORDENES-DE-COMPRA/${sale.f_oc}`} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-600">
-                          <Download size={10} />
-                        </a>
-                      )}
-                    </div>
-                  </td>
-                  
-                  <td className="px-2 py-3 text-center">
-                    <div className="flex items-center gap-1 justify-center">
-                      <span className="text-[11px] text-slate-900 font-black">{sale.n_factura || 0}</span>
-                      {sale.f_factura && (
-                        <a href={`${baseUrl}/docs/FACTURAS/${sale.f_factura}`} target="_blank" rel="noreferrer" className="text-red-400 hover:text-red-600">
-                          <Download size={10} />
-                        </a>
-                      )}
-                    </div>
-                  </td>
+                    </td>
 
-                  <td className="px-2 py-3">
-                    <p className="text-[11px] font-bold text-slate-800 uppercase max-w-[120px] truncate" title={sale.client?.razon}>{sale.client?.razon}</p>
-                  </td>
-                  
-                  <td className="px-2 py-3">
-                    <p className="text-[11px] text-slate-500 whitespace-nowrap">{sale.client?.rut}</p>
-                  </td>
+                    <td className="px-2 py-3 text-center min-w-[120px]">
+                      <StatusDropdown 
+                        currentStatus={sale.status} 
+                        states={auxData.states} 
+                        onSelect={(newStatusId) => handleStatusChange(sale.id_venta, newStatusId)} 
+                      />
+                    </td>
 
-                  <td className="px-2 py-3">
-                    <p className="text-[11px] font-bold text-slate-700 uppercase max-w-[120px] truncate" title={sale.item}>{sale.item}</p>
-                  </td>
-                  
-                  <td className="px-2 py-3">
-                    <p className="text-[10px] text-slate-500 max-w-[150px] truncate" title={sale.detalle}>{sale.detalle}</p>
-                  </td>
+                    <td className="px-2 py-3 text-center whitespace-nowrap">
+                      <span className="text-[11px] text-slate-600 font-medium">{sale.fecha_pago === '0000-00-00' ? '' : sale.fecha_pago}</span>
+                    </td>
 
-                  <td className="px-2 py-3 text-right">
-                    <p className="text-[11px] text-slate-600">${sale.monto?.toLocaleString()}</p>
-                  </td>
-                  
-                  <td className="px-2 py-3 text-right">
-                    <p className="text-[11px] text-slate-600">${sale.iva?.toLocaleString()}</p>
-                  </td>
-                  
-                  <td className="px-2 py-3 text-right">
-                    <p className="text-[11px] font-black text-slate-900">${sale.total?.toLocaleString()}</p>
-                  </td>
-
-                  <td className="px-2 py-3 text-center whitespace-nowrap">
-                    <span className="text-[11px] text-slate-600 font-medium">{sale.fecha_entrega === '0000-00-00' ? '' : sale.fecha_entrega}</span>
-                  </td>
-                  
-                  <td className="px-2 py-3 text-center">
-                    {deliveryDays !== null && (
-                      <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", deliveryDays >= 0 ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
-                        {deliveryDays}
+                    <td className="px-2 py-3 text-center">
+                      <span className={cn("text-[10px] font-black px-1.5 py-0.5 rounded", sale.pagado === 'SI' ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
+                        {sale.pagado}
                       </span>
-                    )}
-                  </td>
+                    </td>
 
-                  <td className="px-2 py-3 text-center min-w-[120px]">
-                    <StatusDropdown 
-                      currentStatus={sale.status} 
-                      states={auxData.states} 
-                      onSelect={(newStatusId) => handleStatusChange(sale.id_venta, newStatusId)} 
-                    />
-                  </td>
+                    <td className="px-2 py-3 text-center">
+                      {overdueDays !== null && overdueDays > 0 ? (
+                        <span className="text-[10px] font-bold text-red-500">-{overdueDays}</span>
+                      ) : null}
+                    </td>
 
-                  <td className="px-2 py-3 text-center whitespace-nowrap">
-                    <span className="text-[11px] text-slate-600 font-medium">{sale.fecha_pago === '0000-00-00' ? '' : sale.fecha_pago}</span>
-                  </td>
-
-                  <td className="px-2 py-3 text-center">
-                    <span className={cn("text-[10px] font-black px-1.5 py-0.5 rounded", sale.pagado === 'SI' ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50")}>
-                      {sale.pagado}
-                    </span>
-                  </td>
-
-                  <td className="px-2 py-3 text-center">
-                    {overdueDays !== null && overdueDays > 0 ? (
-                      <span className="text-[10px] font-bold text-red-500">-{overdueDays}</span>
-                    ) : null}
-                  </td>
-
-                  <td className="px-2 py-3">
-                    <div className="flex justify-center gap-1">
-                      <button onClick={() => handleOpenModal(sale)} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all" title="Editar">
-                        <Save size={12} />
-                      </button>
-                      <button className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all" title="Documento">
-                        <FileText size={12} />
-                      </button>
-                      <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta venta?')) { await api.delete(`/sales/${sale.id_venta}`); fetchSales(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
+                    <td className="px-2 py-3">
+                      <div className="flex justify-center gap-1">
+                        <button onClick={() => handleOpenModal(sale)} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all" title="Editar">
+                          <Save size={12} />
+                        </button>
+                        <button className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all" title="Documento">
+                          <FileText size={12} />
+                        </button>
+                        <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta venta?')) { await api.delete(`/sales/${sale.id_venta}`); fetchSales(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
           <tfoot className="bg-slate-50 border-t border-slate-200">
             <tr>
@@ -618,29 +673,62 @@ const Ventas = () => {
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-xl border border-slate-200 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+              className="px-4 h-10 rounded-xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
             >
-              <ChevronLeft size={18} />
+              Anterior
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-10 h-10 rounded-xl font-black text-sm transition-all ${
-                  page === currentPage
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                    : 'text-slate-400 hover:bg-slate-100 hover:text-primary'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            {(() => {
+              const pages = [];
+              const windowSize = 5;
+              
+              // Fixed First 5
+              for (let i = 1; i <= Math.min(5, totalPages); i++) {
+                pages.push(i);
+              }
+
+              // Mobile Window (5 before, 5 after)
+              const startWindow = Math.max(1, currentPage - windowSize);
+              const endWindow = Math.min(totalPages, currentPage + windowSize);
+              for (let i = startWindow; i <= endWindow; i++) {
+                if (!pages.includes(i)) pages.push(i);
+              }
+
+              // Fixed Last 5
+              for (let i = Math.max(1, totalPages - 4); i <= totalPages; i++) {
+                if (!pages.includes(i)) pages.push(i);
+              }
+
+              pages.sort((a, b) => a - b);
+              const finalPages = [];
+              for (let i = 0; i < pages.length; i++) {
+                if (i > 0 && pages[i] - pages[i-1] > 1) finalPages.push('...');
+                finalPages.push(pages[i]);
+              }
+
+              return finalPages.map((page, idx) => (
+                page === '...' ? (
+                  <span key={`ellipsis-${idx}`} className="px-2 text-slate-300 font-black">...</span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-xl font-black text-sm transition-all ${
+                      page === currentPage
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                        : 'text-slate-400 hover:bg-slate-100 hover:text-primary'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              ));
+            })()}
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-xl border border-slate-200 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+              className="px-4 h-10 rounded-xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
             >
-              <ChevronRight size={18} />
+              Siguiente
             </button>
           </div>
         </div>

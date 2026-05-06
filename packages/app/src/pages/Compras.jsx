@@ -146,12 +146,23 @@ const Compras = () => {
     from: '',
     to: '',
     clientId: '',
-    pagado: 'TODAS'
+    pagado: 'TODAS',
+    sortBy: 'id_compra',
+    sortOrder: 'DESC'
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  const handleSort = (key) => {
+    setFilters(prev => ({
+      ...prev,
+      sortBy: key,
+      sortOrder: prev.sortBy === key && prev.sortOrder === 'DESC' ? 'ASC' : 'DESC'
+    }));
+    setCurrentPage(1);
+  };
 
   const [formData, setFormData] = useState({
     fecha: new Date().toISOString().split('T')[0],
@@ -359,24 +370,47 @@ const Compras = () => {
           <thead className="bg-slate-800 text-white select-none">
             <tr>
               <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider"></th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">fecha</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° Cot</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° OC</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">N° Fac</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Cliente</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Rut</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Item</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider">Detalle</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">Monto $</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">IVA $</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-right">Total $</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Fecha Entrega</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Dias Entrega</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Estado</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Fecha de pago</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Pagado</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Dias Vencidos</th>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider text-center">Accion</th>
+              {[
+                { label: 'fecha', key: 'fecha' },
+                { label: 'N° OC', key: 'n_oc', center: true },
+                { label: 'Cliente', key: 'cliente' },
+                { label: 'Rut', key: 'rut' },
+                { label: 'Item', key: 'item' },
+                { label: 'Detalle', key: 'detalle' },
+                { label: 'Monto $', key: 'monto', right: true },
+                { label: 'IVA $', key: 'iva', right: true },
+                { label: 'Total $', key: 'total', right: true },
+                { label: 'Fecha Entrega', key: 'fecha_entrega', center: true },
+                { label: 'Estado', key: 'estado', center: true },
+                { label: 'Fecha de pago', key: 'fecha_pago', center: true },
+                { label: 'Pagado', key: 'pagado', center: true },
+                { label: 'Accion', key: 'accion', center: true },
+              ].map((col) => (
+                <th 
+                  key={col.key}
+                  onClick={() => col.key !== 'accion' && handleSort(col.key)}
+                  className={cn(
+                    "px-2 py-3 text-[10px] font-black uppercase tracking-wider transition-colors group",
+                    col.key !== 'accion' && "cursor-pointer hover:bg-slate-700",
+                    col.center && "text-center",
+                    col.right && "text-right"
+                  )}
+                >
+                  <div className={cn(
+                    "flex items-center gap-1",
+                    col.center && "justify-center",
+                    col.right && "justify-end"
+                  )}>
+                    {col.label}
+                    {col.key !== 'accion' && (
+                      <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ChevronUp size={8} className={cn(filters.sortBy === col.key && filters.sortOrder === 'ASC' ? "text-primary opacity-100" : "text-slate-500")} />
+                        <ChevronDown size={8} className={cn(filters.sortBy === col.key && filters.sortOrder === 'DESC' ? "text-primary opacity-100" : "text-slate-500")} />
+                      </div>
+                    )}
+                  </div>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -510,11 +544,66 @@ const Compras = () => {
             Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} de {totalItems}
           </span>
           <div className="flex items-center gap-2">
-            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 rounded-xl border border-slate-200 hover:bg-white hover:shadow-sm disabled:opacity-30 transition-all"><ChevronLeft size={18} /></button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button key={page} onClick={() => setCurrentPage(page)} className={cn("w-10 h-10 rounded-xl font-black text-sm transition-all", page === currentPage ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:bg-slate-100 hover:text-primary')}>{page}</button>
-            ))}
-            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-2 rounded-xl border border-slate-200 hover:bg-white hover:shadow-sm disabled:opacity-30 transition-all"><ChevronRight size={18} /></button>
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 h-10 rounded-xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+            >
+              Anterior
+            </button>
+            {(() => {
+              const pages = [];
+              const windowSize = 5;
+              
+              // Fixed First 5
+              for (let i = 1; i <= Math.min(5, totalPages); i++) {
+                pages.push(i);
+              }
+
+              // Mobile Window (5 before, 5 after)
+              const startWindow = Math.max(1, currentPage - windowSize);
+              const endWindow = Math.min(totalPages, currentPage + windowSize);
+              for (let i = startWindow; i <= endWindow; i++) {
+                if (!pages.includes(i)) pages.push(i);
+              }
+
+              // Fixed Last 5
+              for (let i = Math.max(1, totalPages - 4); i <= totalPages; i++) {
+                if (!pages.includes(i)) pages.push(i);
+              }
+
+              pages.sort((a, b) => a - b);
+              const finalPages = [];
+              for (let i = 0; i < pages.length; i++) {
+                if (i > 0 && pages[i] - pages[i-1] > 1) finalPages.push('...');
+                finalPages.push(pages[i]);
+              }
+
+              return finalPages.map((page, idx) => (
+                page === '...' ? (
+                  <span key={`ellipsis-${idx}`} className="px-2 text-slate-300 font-black">...</span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-xl font-black text-sm transition-all ${
+                      page === currentPage
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                        : 'text-slate-400 hover:bg-slate-100 hover:text-primary'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              ));
+            })()}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 h-10 rounded-xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+            >
+              Siguiente
+            </button>
           </div>
         </div>
       )}

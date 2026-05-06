@@ -5,19 +5,27 @@ const { sequelize } = require('../config/database');
 
 exports.getSales = async (req, res) => {
   try {
-    const { from, to, clientId, status, nFactura, nCot, pagado, clientSearch, page = 1, limit: queryLimit } = req.query;
+    const { from, to, clientId, status, nFactura, nCot, pagado, clientSearch, page = 1, limit: queryLimit, sortBy = 'id_venta', sortOrder = 'DESC' } = req.query;
     
     // Fetch default limit from SaleRecord if not provided in query
-    let limit = queryLimit;
-    if (!limit) {
-      const config = await SaleRecord.findOne();
-      limit = config ? config.cantidad : 50;
+    let limit = parseInt(queryLimit);
+    if (!limit || isNaN(limit)) {
+      try {
+        const config = await SaleRecord.findOne();
+        limit = config ? parseInt(config.cantidad) : 50;
+      } catch (e) {
+        console.error('Error fetching SaleRecord:', e.message);
+        limit = 50;
+      }
     }
+    if (isNaN(limit)) limit = 50;
 
     const where = {
-      fecha: { [Op.ne]: '' }
+      fecha: { [Op.gt]: '1000-01-01' }
     };
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    
+    const pageNum = parseInt(page) || 1;
+    const offset = (pageNum - 1) * limit;
 
     if (from && to) {
       where.fecha = { [Op.between]: [from, to] };
@@ -33,38 +41,77 @@ exports.getSales = async (req, res) => {
     if (nCot) where.n_cot = nCot;
     if (pagado && pagado !== 'TODAS') where.pagado = pagado;
 
+    console.log('Final Where:', JSON.stringify(where));
+    console.log('Limit:', limit, 'Offset:', offset, 'Sort:', sortBy, sortOrder);
+
+    const include = [
+        { model: SaleState, as: 'status' },
+        { model: Agent, as: 'agent' }
+    ];
+
+    const clientInclude = {
+        model: Client,
+        as: 'client',
+        attributes: ['razon', 'rut']
+    };
+    if (clientSearch) {
+        clientInclude.where = { razon: { [Op.like]: `%${clientSearch}%` } };
+    }
+    include.push(clientInclude);
+
+    // Sorting Logic
+    let order = [['id_venta', 'DESC']];
+    if (sortBy) {
+      const direction = sortOrder?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+      
+      switch (sortBy) {
+        case 'cliente':
+          order = [[{ model: Client, as: 'client' }, 'razon', direction]];
+          break;
+        case 'rut':
+          order = [[{ model: Client, as: 'client' }, 'rut', direction]];
+          break;
+        case 'estado':
+          order = [[{ model: SaleState, as: 'status' }, 'estado', direction]];
+          break;
+        case 'dias':
+        case 'dias_pago':
+          order = [[sequelize.literal(sortBy), direction]];
+          break;
+        default:
+          // Whitelist of columns in main model
+          const validColumns = ['id_venta', 'fecha', 'n_cot', 'n_oc', 'n_factura', 'item', 'detalle', 'monto', 'iva', 'total', 'fecha_entrega', 'fecha_pago', 'pagado'];
+          if (validColumns.includes(sortBy)) {
+            order = [[sortBy, direction]];
+          }
+      }
+    }
+
     const { count, rows: sales } = await Sale.findAndCountAll({
       attributes: {
         include: [
-          [sequelize.literal("TO_DAYS(fecha_entrega) - TO_DAYS(CURDATE())"), 'dias'],
-          [sequelize.literal("TO_DAYS(CURDATE()) - TO_DAYS(fecha_pago)"), 'dias_pago']
+          [sequelize.literal("CASE WHEN fecha_entrega > '1000-01-01' THEN TO_DAYS(fecha_entrega) - TO_DAYS(CURDATE()) ELSE NULL END"), 'dias'],
+          [sequelize.literal("CASE WHEN fecha_pago > '1000-01-01' THEN TO_DAYS(CURDATE()) - TO_DAYS(fecha_pago) ELSE NULL END"), 'dias_pago']
         ]
       },
       where,
-      include: [
-        {
-          model: Client,
-          as: 'client',
-          attributes: ['razon', 'rut'],
-          where: clientSearch ? { razon: { [Op.like]: `%${clientSearch}%` } } : undefined
-        },
-        { model: SaleState, as: 'status' },
-        { model: Agent, as: 'agent' }
-      ],
-      order: [['id_venta', 'DESC']],
-      limit: parseInt(limit),
+      include,
+      order,
+      limit: limit,
       offset: offset
     });
+
+    console.log('Query completed. Count:', count);
 
     return successResponse(res, {
       data: sales,
       total: count,
-      page: parseInt(page),
-      totalPages: Math.ceil(count / parseInt(limit))
+      page: pageNum,
+      totalPages: Math.ceil(count / limit)
     });
   } catch (error) {
-    console.error('Error fetching sales:', error);
-    return errorResponse(res, 'Error fetching sales');
+    console.error('CRITICAL ERROR in getSales:', error);
+    return errorResponse(res, 'Error fetching sales: ' + error.message);
   }
 };
 

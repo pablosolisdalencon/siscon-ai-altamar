@@ -21,7 +21,7 @@ const sequelize = new Sequelize(
         rejectUnauthorized: false
       }
     } : {},
-    logging: false,
+    logging: console.log,
     pool: {
       max: 5,
       min: 0,
