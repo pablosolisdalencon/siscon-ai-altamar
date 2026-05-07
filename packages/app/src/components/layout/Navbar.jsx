@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, ShoppingCart, Users, Receipt, 
-  Settings, LogOut, Briefcase, Truck, User, ShoppingBag, Building2
+  Settings, LogOut, Briefcase, Truck, User, ShoppingBag, Building2, Database
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -15,6 +15,7 @@ const Navbar = () => {
     { name: 'Clientes', icon: <Users size={20} />, path: '/clientes' },
     { name: 'Proveedores', icon: <Truck size={20} />, path: '/proveedores' },
     { name: 'Empresa', icon: <Building2 size={20} />, path: '/empresa' },
+    { name: 'Importar BD', icon: <Database size={20} />, path: '/import-db' },
     { name: 'Usuarios', icon: <User size={20} />, path: '/usuarios' },
     { name: 'Config', icon: <Settings size={20} />, path: '/config' },
   ];

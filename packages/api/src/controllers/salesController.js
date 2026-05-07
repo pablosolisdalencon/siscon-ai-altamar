@@ -239,3 +239,102 @@ exports.getSalesStats = async (req, res) => {
     return errorResponse(res, 'Error fetching dashboard stats');
   }
 };
+
+exports.exportSalesExcel = async (req, res) => {
+  try {
+    const { from, to, clientId, status, nFactura, nCot, pagado, clientSearch } = req.query;
+    
+    const where = {
+      fecha: { [Op.gt]: '1000-01-01' }
+    };
+    
+    if (from && to) where.fecha = { [Op.between]: [from, to] };
+    else if (from) where.fecha = { [Op.gte]: from };
+    else if (to) where.fecha = { [Op.lte]: to };
+
+    if (clientId) where.id_cliente = clientId;
+    if (status) where.estado = status;
+    if (nFactura) where.n_factura = nFactura;
+    if (nCot) where.n_cot = nCot;
+    if (pagado && pagado !== 'TODAS') where.pagado = pagado;
+
+    const include = [
+        { model: SaleState, as: 'status' },
+        { model: Agent, as: 'agent' }
+    ];
+
+    const clientInclude = {
+        model: Client,
+        as: 'client',
+        attributes: ['razon', 'rut']
+    };
+    if (clientSearch) {
+        clientInclude.where = { razon: { [Op.like]: `%${clientSearch}%` } };
+    }
+    include.push(clientInclude);
+
+    const sales = await Sale.findAll({
+      where,
+      include,
+      order: [['id_venta', 'DESC']]
+    });
+
+    const ExcelJS = require('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Ventas');
+
+    worksheet.columns = [
+      { header: 'ID', key: 'id_venta', width: 10 },
+      { header: 'FECHA', key: 'fecha', width: 15 },
+      { header: 'CLIENTE', key: 'cliente', width: 40 },
+      { header: 'RUT', key: 'rut', width: 15 },
+      { header: 'FACTURA', key: 'n_factura', width: 12 },
+      { header: 'COTIZACION', key: 'n_cot', width: 12 },
+      { header: 'DETALLE', key: 'detalle', width: 50 },
+      { header: 'MONTO', key: 'monto', width: 15 },
+      { header: 'IVA', key: 'iva', width: 15 },
+      { header: 'TOTAL', key: 'total', width: 15 },
+      { header: 'ESTADO', key: 'estado', width: 15 },
+      { header: 'PAGADO', key: 'pagado', width: 10 }
+    ];
+
+    // Header Styling
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1E293B' }
+    };
+
+    sales.forEach(sale => {
+      worksheet.addRow({
+        id_venta: sale.id_venta,
+        fecha: sale.fecha,
+        cliente: sale.client?.razon,
+        rut: sale.client?.rut,
+        n_factura: sale.n_factura,
+        n_cot: sale.n_cot,
+        detalle: sale.detalle,
+        monto: sale.monto,
+        iva: sale.iva,
+        total: sale.total,
+        estado: sale.status?.estado,
+        pagado: sale.pagado
+      });
+    });
+
+    // Formatting
+    worksheet.getColumn('monto').numFmt = '"$"#,##0';
+    worksheet.getColumn('iva').numFmt = '"$"#,##0';
+    worksheet.getColumn('total').numFmt = '"$"#,##0';
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=ventas_export.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error('Export Error:', error);
+    res.status(500).send('Error generating Excel');
+  }
+};

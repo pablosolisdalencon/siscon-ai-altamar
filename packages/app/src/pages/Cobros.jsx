@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../lib/api';
-import { Mail, Clock, ChevronRight, Search, User as UserIcon, Settings, Download, ChevronLeft } from 'lucide-react';
+import { Mail, Clock, ChevronRight, Search, User as UserIcon, Settings, Download, ChevronLeft, ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const StatusDropdown = ({ currentStatus, states, onSelect }) => {
@@ -129,7 +129,7 @@ const Cobros = () => {
     from: '',
     to: '',
     clientSearch: '',
-    pagado: 'NO',
+    pagado: 'TODAS',
     estado: '',
     sortBy: 'razon',
     sortOrder: 'ASC'
@@ -138,6 +138,9 @@ const Cobros = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  const [itemSortBy, setItemSortBy] = useState('fecha');
+  const [itemSortOrder, setItemSortOrder] = useState('DESC');
 
   const [company, setCompany] = useState(null);
 
@@ -219,99 +222,139 @@ const Cobros = () => {
     }
   };
 
+  const handleSortItems = (key) => {
+    if (itemSortBy === key) {
+      setItemSortOrder(prev => prev === 'ASC' ? 'DESC' : 'ASC');
+    } else {
+      setItemSortBy(key);
+      setItemSortOrder('ASC');
+    }
+  };
+
+  const sortedCollections = useMemo(() => {
+    if (!collections) return [];
+    
+    return collections.map(client => {
+      const sortedItems = [...client.items].sort((a, b) => {
+        let valA = a[itemSortBy];
+        let valB = b[itemSortBy];
+
+        if (itemSortBy === 'monto' || itemSortBy === 'total' || itemSortBy === 'iva' || itemSortBy === 'n_cot' || itemSortBy === 'n_factura' || itemSortBy === 'n_oc') {
+          valA = parseFloat(valA) || 0;
+          valB = parseFloat(valB) || 0;
+        }
+
+        if (valA < valB) return itemSortOrder === 'ASC' ? -1 : 1;
+        if (valA > valB) return itemSortOrder === 'ASC' ? 1 : -1;
+        return 0;
+      });
+
+      return { ...client, items: sortedItems };
+    });
+  }, [collections, itemSortBy, itemSortOrder]);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-20">
       {/* Filter Bar */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-wrap gap-6 items-end">
-        <div className="space-y-1">
-          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N FAC</label>
-          <input
-            type="text"
-            className="input-modern w-24"
-            value={filters.nFactura}
-            onChange={(e) => setFilters({ ...filters, nFactura: e.target.value })}
-            placeholder="0000"
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N COT</label>
-          <input
-            type="text"
-            className="input-modern w-24"
-            value={filters.nCot}
-            onChange={(e) => setFilters({ ...filters, nCot: e.target.value })}
-            placeholder="0000"
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Desde</label>
-          <input
-            type="date"
-            className="input-modern"
-            value={filters.from}
-            onChange={(e) => setFilters({ ...filters, from: e.target.value })}
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Hasta</label>
-          <input
-            type="date"
-            className="input-modern"
-            value={filters.to}
-            onChange={(e) => setFilters({ ...filters, to: e.target.value })}
-          />
-        </div>
-        <div className="flex-1 space-y-1 min-w-[200px]">
-          <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Buscar Cliente</label>
-          <div className="relative">
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N FAC</label>
             <input
               type="text"
-              placeholder="RUT o Razón Social..."
-              className="input-modern w-full pr-10"
-              value={filters.clientSearch}
-              onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
+              className="input-modern w-20"
+              value={filters.nFactura}
+              onChange={(e) => setFilters({ ...filters, nFactura: e.target.value })}
             />
-            <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N COT</label>
+            <input
+              type="text"
+              className="input-modern w-20"
+              value={filters.nCot}
+              onChange={(e) => setFilters({ ...filters, nCot: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1 flex items-center gap-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase">Desde</label>
+            <input
+              type="date"
+              className="input-modern"
+              value={filters.from}
+              onChange={(e) => setFilters({ ...filters, from: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1 flex items-center gap-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase">Hasta</label>
+            <input
+              type="date"
+              className="input-modern"
+              value={filters.to}
+              onChange={(e) => setFilters({ ...filters, to: e.target.value })}
+            />
+          </div>
+          <div className="flex-1 space-y-1 min-w-[200px] flex items-center gap-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase">Cliente</label>
+            <div className="relative flex-1">
+              <input
+                type="text"
+                className="input-modern w-full pr-10"
+                value={filters.clientSearch}
+                onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
+              />
+              <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer" onClick={fetchCollections} />
+            </div>
+          </div>
+          <div className="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+            <span className="text-[10px] font-black text-slate-400 uppercase">Pagado:</span>
+            {['SI', 'NO'].map(opt => (
+              <label key={opt} className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="radio"
+                  name="pagado"
+                  className="w-4 h-4 text-primary border-slate-200 focus:ring-primary/20"
+                  checked={filters.pagado === opt}
+                  onChange={() => setFilters({ ...filters, pagado: opt })}
+                />
+                <span className={cn("text-[10px] font-black uppercase transition-colors", filters.pagado === opt ? "text-primary" : "text-slate-400 group-hover:text-slate-600")}>
+                  {opt}
+                </span>
+              </label>
+            ))}
+            <button 
+              className="text-[10px] font-black text-slate-300 uppercase hover:text-slate-500 ml-2"
+              onClick={() => setFilters({ ...filters, pagado: 'TODAS' })}
+            >
+              (Limpiar)
+            </button>
           </div>
         </div>
 
-        <div className="w-32">
-          <FormSelect
-            label="Pagados"
-            value={filters.pagado}
-            options={[
-              { value: 'SI', label: 'SÍ' },
-              { value: 'NO', label: 'NO' },
-              { value: 'TODAS', label: 'TODAS' }
-            ]}
-            onChange={(val) => setFilters({ ...filters, pagado: val })}
-            showCircle
-          />
-        </div>
-
-        <div className="w-48">
-          <FormSelect
-            label="Estado"
-            value={filters.estado}
-            options={[
-              { value: '', label: 'TODOS LOS ESTADOS' },
-              ...states.map(s => ({ value: s.id_estado, label: s.estado, color: s.color }))
-            ]}
-            onChange={(val) => setFilters({ ...filters, estado: val })}
-          />
-        </div>
-
-        <div className="w-56">
-          <FormSelect
-            label="Orden"
-            value={filters.sortBy}
-            options={[
-              { value: 'razon', label: 'RAZON SOCIAL' },
-              { value: 'rut', label: 'RUT' },
-              { value: 'mail', label: 'EMAIL' }
-            ]}
-            onChange={(val) => setFilters({ ...filters, sortBy: val })}
-          />
+        <div className="flex gap-4 items-end">
+          <div className="w-56">
+            <FormSelect
+              label="Estados"
+              value={filters.estado}
+              options={[
+                { value: '', label: 'TODAS' },
+                ...states.map(s => ({ value: s.id_estado, label: s.estado, color: s.color }))
+              ]}
+              onChange={(val) => setFilters({ ...filters, estado: val })}
+            />
+          </div>
+          <div className="w-56">
+            <FormSelect
+              label="Orden Clientes"
+              value={filters.sortBy}
+              options={[
+                { value: 'razon', label: 'RAZON SOCIAL' },
+                { value: 'rut', label: 'RUT' },
+                { value: 'mail', label: 'EMAIL' }
+              ]}
+              onChange={(val) => setFilters({ ...filters, sortBy: val })}
+            />
+          </div>
         </div>
       </div>
 
@@ -319,18 +362,21 @@ const Cobros = () => {
       <div className="space-y-8">
         {loading ? (
           <div className="flex justify-center p-20"><Clock className="animate-spin text-primary" size={48} /></div>
-        ) : collections.length === 0 ? (
+        ) : sortedCollections.length === 0 ? (
           <div className="text-center p-20 text-slate-400 font-bold uppercase tracking-widest">No se encontraron cobros pendientes</div>
-        ) : collections.map((client) => (
+        ) : sortedCollections.map((client) => (
           <div key={client.id_cliente} className="border border-slate-300">
             {/* Group Header */}
             <div className="bg-[#3a3a3a] text-white p-3 flex justify-between items-center bg-gradient-to-r from-slate-700 to-slate-800">
-              <h2 className="text-2xl font-black tracking-tight mx-auto uppercase">{client.razon} ({client.rut})</h2>
+              <h2 className="text-2xl font-black tracking-tight mx-auto uppercase">{client.razon}</h2>
               <div className="flex gap-4">
-                <button className="p-1 hover:text-yellow-400 transition-colors"><UserIcon size={20} fill="currentColor" /></button>
+                <button className="p-1 hover:text-yellow-400 transition-colors" title="Info Cliente">
+                  <UserIcon size={20} fill="currentColor" />
+                </button>
                 <button
                   onClick={() => handleOpenMailModal(client)}
                   className="p-1 hover:text-yellow-400 transition-colors"
+                  title="Enviar Cobro"
                 >
                   <Mail size={20} fill="currentColor" />
                 </button>
@@ -340,31 +386,48 @@ const Cobros = () => {
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-[10px] sm:text-xs">
-                <thead className="bg-[#666666] text-white uppercase font-black">
+                <thead className="bg-[#666666] text-white uppercase font-black select-none">
                   <tr>
                     <th className="px-2 py-1 text-left w-6"></th>
-                    <th className="px-2 py-1 text-left">fecha</th>
-                    <th className="px-2 py-1 text-center">N° Cot</th>
-                    <th className="px-2 py-1 text-center">N° OC</th>
-                    <th className="px-2 py-1 text-center">N° Fac</th>
-                    <th className="px-2 py-1 text-left">Item</th>
-                    <th className="px-2 py-1 text-left">Detalle</th>
-                    <th className="px-2 py-1 text-right">Monto $</th>
-                    <th className="px-2 py-1 text-right">IVA $</th>
-                    <th className="px-2 py-1 text-right">Total $</th>
-                    <th className="px-2 py-1 text-center">Fecha de pago</th>
-                    <th className="px-2 py-1 text-center">Dias Vencidos</th>
-                    <th className="px-2 py-1 text-center w-8"><Settings size={14} className="mx-auto" /></th>
+                    {[
+                      { label: 'fecha', key: 'fecha' },
+                      { label: 'N° Cot', key: 'n_cot', center: true },
+                      { label: 'N° OC', key: 'n_oc', center: true },
+                      { label: 'N° Fac', key: 'n_factura', center: true },
+                      { label: 'Item', key: 'item' },
+                      { label: 'Detalle', key: 'detalle' },
+                      { label: 'Monto $', key: 'monto', right: true },
+                      { label: 'IVA $', key: 'iva', right: true },
+                      { label: 'Total $', key: 'total', right: true },
+                      { label: 'Fecha de pago', key: 'fecha_pago', center: true },
+                      { label: 'Dias Vencidos', key: 'dias_pago', center: true }
+                    ].map((col) => (
+                      <th 
+                        key={col.key}
+                        onClick={() => handleSortItems(col.key)}
+                        className={cn(
+                          "px-2 py-2 cursor-pointer hover:bg-slate-500 transition-colors",
+                          col.center ? "text-center" : col.right ? "text-right" : "text-left"
+                        )}
+                      >
+                        <div className={cn("flex items-center gap-1", col.center && "justify-center", col.right && "justify-end")}>
+                          <span className={cn(col.key === 'fecha' && "lowercase")}>{col.label}</span>
+                          {itemSortBy === col.key && (
+                            itemSortOrder === 'ASC' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
+                          )}
+                        </div>
+                      </th>
+                    ))}
+                    <th className="px-2 py-1 text-center w-8"><Download size={14} className="mx-auto opacity-0" /></th>
                   </tr>
                 </thead>
                 <tbody className="border border-slate-300">
                   {client.items.map((sale) => (
                     <tr key={sale.id_venta} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-2 py-3 w-40">
-                        <StatusDropdown
-                          currentStatus={sale.status}
-                          states={states}
-                          onSelect={(id) => handleUpdateStatus(sale.id_venta, id)}
+                      <td className="px-2 py-1 w-8">
+                        <div 
+                          className="w-4 h-4 shadow-sm" 
+                          style={{ backgroundColor: sale.status?.color || '#cbd5e1' }} 
                         />
                       </td>
                       <td className="px-2 py-1 font-bold text-slate-600">{sale.fecha}</td>
@@ -406,26 +469,28 @@ const Cobros = () => {
                       <td className="px-2 py-1 text-center font-bold text-slate-500">{sale.fecha_pago}</td>
                       <td className={cn(
                         "px-2 py-1 text-center font-black",
-                        sale.daysOverdue >= 10 ? "text-red-600" :
-                        sale.daysOverdue >= 5 ? "text-orange-500" :
-                        sale.daysOverdue >= 1 ? "text-yellow-600" :
+                        sale.dias_pago >= 10 ? "text-red-600" :
+                        sale.dias_pago >= 5 ? "text-orange-500" :
+                        sale.dias_pago >= 1 ? "text-yellow-600" :
                         "text-green-600"
                       )}>
-                        {sale.daysOverdue > 0 ? sale.daysOverdue : ''}
+                        {sale.dias_pago > 0 ? sale.dias_pago : ''}
                       </td>
                       <td className="px-2 py-1 text-center">
-                        <button className="p-1 hover:bg-slate-200 rounded transition-colors"><Settings size={12} className="text-slate-400" /></button>
+                        <button className="p-1 hover:bg-slate-200 rounded transition-colors" title="Editar">
+                          <Settings size={12} className="text-slate-400 fill-slate-400" />
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot className="bg-white border-t border-slate-300 font-black text-slate-700">
                   <tr>
-                    <td colSpan={6} className="px-2 py-1 text-xs">Registros: {client.items.length}</td>
+                    <td colSpan={6} className="px-2 py-1 text-[10px] text-slate-500">Registros:{client.items.length}</td>
                     <td className="px-2 py-1 text-right uppercase">Total :</td>
                     <td className="px-2 py-1 text-right">${client.stats.totalMonto.toLocaleString()}</td>
                     <td className="px-2 py-1 text-right">${client.stats.totalIva.toLocaleString()}</td>
-                    <td className="px-2 py-1 text-right text-sm text-blue-600">${client.stats.totalTotal.toLocaleString()}</td>
+                    <td className="px-2 py-1 text-right text-sm text-slate-900">${client.stats.totalTotal.toLocaleString()}</td>
                     <td colSpan={3}></td>
                   </tr>
                 </tfoot>
@@ -617,3 +682,4 @@ const Cobros = () => {
 };
 
 export default Cobros;
+

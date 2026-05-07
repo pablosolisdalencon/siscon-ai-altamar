@@ -16,11 +16,14 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT || 3306,
     dialect: 'mysql',
-    dialectOptions: process.env.DB_SSL === 'true' ? {
-      ssl: {
-        rejectUnauthorized: false
-      }
-    } : {},
+    dialectOptions: {
+      multipleStatements: true,
+      ...(process.env.DB_SSL === 'true' ? {
+        ssl: {
+          rejectUnauthorized: false
+        }
+      } : {})
+    },
     logging: console.log,
     pool: {
       max: 5,

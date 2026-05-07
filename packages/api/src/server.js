@@ -13,6 +13,7 @@ const collectionsRoutes = require('./routes/collections');
 const purchasesRoutes = require('./routes/purchases');
 const companyRoutes = require('./routes/company');
 const uploadRoutes = require('./routes/uploadRoutes');
+const importRoutes = require('./routes/import');
 const modulesController = require('./controllers/modulesController');
 
 // Middleware
@@ -32,6 +33,7 @@ apiRouter.use('/collections', collectionsRoutes);
 apiRouter.use('/purchases', purchasesRoutes);
 apiRouter.use('/company', companyRoutes);
 apiRouter.use('/uploads', uploadRoutes);
+apiRouter.use('/import', importRoutes);
 
 // Module Routes
 // Agents

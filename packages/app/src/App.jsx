@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import { Agentes, Clientes, Proveedores, Usuarios } from './pages/Modules';
 import Config from './pages/Config';
 import Empresa from './pages/Empresa';
+import ImportDB from './pages/ImportDB';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/usuarios" element={<Usuarios />} />
             <Route path="/config" element={<Config />} />
             <Route path="/empresa" element={<Empresa />} />
+            <Route path="/import-db" element={<ImportDB />} />
           </Routes>
         </main>
       </div>

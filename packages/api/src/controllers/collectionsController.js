@@ -1,16 +1,18 @@
 const { Sale, Client, Company, SaleState } = require('../models/associations');
 const { successResponse, errorResponse } = require('../utils/response');
 const { Op } = require('sequelize');
+const { sequelize } = require('../config/database');
 
 exports.getCollectionsDashboard = async (req, res) => {
   try {
     const { nFactura, nCot, from, to, clientSearch, pagado, estado, sortBy = 'razon', sortOrder = 'ASC', page = 1, limit = 10 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    // Legacy f-cobros.php base filter: WHERE n_factura!='0'
+    // Legacy f-cobros.php base filter: WHERE n_factura!='0' AND fecha!=''
     const saleWhere = {
       [Op.and]: [
-        { n_factura: { [Op.ne]: '0' } }
+        { n_factura: { [Op.ne]: '0' } },
+        { fecha: { [Op.ne]: '' } }
       ]
     };
 
@@ -31,8 +33,6 @@ exports.getCollectionsDashboard = async (req, res) => {
 
     if (pagado && pagado !== 'TODAS') {
       saleWhere.pagado = pagado;
-    } else if (!pagado) {
-      saleWhere.pagado = 'NO';
     }
 
     // Sort mapping
@@ -47,6 +47,9 @@ exports.getCollectionsDashboard = async (req, res) => {
         { razon: { [Op.like]: `%${clientSearch}%` } },
         { rut: { [Op.like]: `%${clientSearch}%` } }
       ];
+      if (!isNaN(clientSearch)) {
+        clientWhere[Op.or].push({ id_cliente: clientSearch });
+      }
     }
 
     const { count, rows: clients } = await Client.findAndCountAll({
@@ -55,6 +58,18 @@ exports.getCollectionsDashboard = async (req, res) => {
         {
           model: Sale,
           as: 'ventas',
+          attributes: {
+            include: [
+              [
+                sequelize.literal("TO_DAYS(fecha_entrega) - TO_DAYS(CURDATE())"),
+                'dias'
+              ],
+              [
+                sequelize.literal("TO_DAYS(CURDATE()) - TO_DAYS(fecha_pago)"),
+                'dias_pago'
+              ]
+            ]
+          },
           where: saleWhere,
           required: true,
           include: [{ model: SaleState, as: 'status', constraints: false }]
@@ -62,7 +77,7 @@ exports.getCollectionsDashboard = async (req, res) => {
       ],
       order: [
         ...clientOrder,
-        [{ model: Sale, as: 'ventas' }, 'fecha_pago', 'DESC']
+        [{ model: Sale, as: 'ventas' }, 'id_venta', 'DESC']
       ],
       limit: parseInt(limit),
       offset: offset,
@@ -77,25 +92,15 @@ exports.getCollectionsDashboard = async (req, res) => {
       let totalTotal = 0;
 
       const items = client.ventas.map(sale => {
-        const today = new Date();
-        const dueDateStr = sale.fecha_pago;
-        let daysOverdue = 0;
-
-        if (dueDateStr && dueDateStr !== '0000-00-00') {
-          const dueDate = new Date(dueDateStr);
-          if (!isNaN(dueDate.getTime())) {
-            const diffTime = today - dueDate;
-            daysOverdue = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
-          }
-        }
-
         totalMonto += sale.monto || 0;
         totalIva += sale.iva || 0;
         totalTotal += sale.total || 0;
 
         return {
           ...sale.toJSON(),
-          daysOverdue
+          dias: sale.getDataValue('dias'),
+          dias_pago: sale.getDataValue('dias_pago'),
+          daysOverdue: sale.getDataValue('dias_pago')
         };
       });
 
