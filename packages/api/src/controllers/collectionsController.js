@@ -1,41 +1,37 @@
-const { Sale, Client, Company, SaleState } = require('../models/associations');
+const { Sale, Client, Company, SaleState, Agent } = require('../models/associations');
 const { successResponse, errorResponse } = require('../utils/response');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 exports.getCollectionsDashboard = async (req, res) => {
   try {
-    const { nFactura, nCot, from, to, clientSearch, pagado, estado, sortBy = 'razon', sortOrder = 'ASC', page = 1, limit = 10 } = req.query;
+    const { nFactura, nCot, nOc, from, to, clientSearch, pagado, estado, idAgente, item, detalle, sortBy = 'razon', sortOrder = 'ASC', page = 1, limit = 10 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    // Legacy f-cobros.php base filter: WHERE n_factura!='0' AND fecha!=''
+    // Base filter: Parity with Ventas
     const saleWhere = {
-      [Op.and]: [
-        { n_factura: { [Op.ne]: '0' } },
-        { fecha: { [Op.ne]: '' } }
-      ]
+      fecha: { [Op.gt]: '1000-01-01' }
     };
 
-    if (nFactura) saleWhere[Op.and].push({ n_factura: nFactura });
-    if (nCot) saleWhere[Op.and].push({ n_cot: nCot });
-    if (estado) saleWhere[Op.and].push({ estado: estado });
+    if (nFactura) saleWhere.n_factura = nFactura;
+    if (nCot) saleWhere.n_cot = nCot;
+    if (nOc) saleWhere.n_oc = nOc;
+    if (estado) saleWhere.estado = estado;
+    if (idAgente) saleWhere.id_agente = idAgente;
+    if (pagado && pagado !== 'TODAS') saleWhere.pagado = pagado;
 
-    // Dates – Full parity with legacy f-cobros.php switch(true) logic:
+    if (item) saleWhere.item = { [Op.like]: `%${item}%` };
+    if (detalle) saleWhere.detalle = { [Op.like]: `%${detalle}%` };
+
     if (from && to) {
       saleWhere.fecha = { [Op.between]: [from, to] };
     } else if (from) {
-      saleWhere.fecha = from;
+      saleWhere.fecha = { [Op.gte]: from };
     } else if (to) {
-      saleWhere.fecha = to;
-    } else {
-      saleWhere[Op.and].push({ fecha: { [Op.gt]: '1900-01-01' } });
+      saleWhere.fecha = { [Op.lte]: to };
     }
 
-    if (pagado && pagado !== 'TODAS') {
-      saleWhere.pagado = pagado;
-    }
-
-    // Sort mapping
+    // Sort mapping for Clients
     const direction = sortOrder?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
     let clientOrder = [['razon', direction]];
     if (sortBy === 'rut') clientOrder = [['rut', direction]];
@@ -47,9 +43,6 @@ exports.getCollectionsDashboard = async (req, res) => {
         { razon: { [Op.like]: `%${clientSearch}%` } },
         { rut: { [Op.like]: `%${clientSearch}%` } }
       ];
-      if (!isNaN(clientSearch)) {
-        clientWhere[Op.or].push({ id_cliente: clientSearch });
-      }
     }
 
     const { count, rows: clients } = await Client.findAndCountAll({
@@ -61,11 +54,11 @@ exports.getCollectionsDashboard = async (req, res) => {
           attributes: {
             include: [
               [
-                sequelize.literal("TO_DAYS(fecha_entrega) - TO_DAYS(CURDATE())"),
+                sequelize.literal("CASE WHEN fecha_entrega > '1000-01-01' THEN TO_DAYS(fecha_entrega) - TO_DAYS(CURDATE()) ELSE NULL END"),
                 'dias'
               ],
               [
-                sequelize.literal("TO_DAYS(CURDATE()) - TO_DAYS(fecha_pago)"),
+                sequelize.literal("CASE WHEN fecha_pago > '1000-01-01' THEN TO_DAYS(CURDATE()) - TO_DAYS(fecha_pago) ELSE NULL END"),
                 'dias_pago'
               ]
             ]

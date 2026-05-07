@@ -119,6 +119,7 @@ const Cobros = () => {
   const baseUrl = apiUrl.replace(/\/api$/, '');
   const [collections, setCollections] = useState([]);
   const [clients, setClients] = useState([]);
+  const [agents, setAgents] = useState([]);
   const [states, setStates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMailModalOpen, setIsMailModalOpen] = useState(false);
@@ -126,11 +127,15 @@ const Cobros = () => {
   const [filters, setFilters] = useState({
     nFactura: '',
     nCot: '',
+    nOc: '',
     from: '',
     to: '',
     clientSearch: '',
     pagado: 'TODAS',
     estado: '',
+    idAgente: '',
+    item: '',
+    detalle: '',
     sortBy: 'razon',
     sortOrder: 'ASC'
   });
@@ -151,6 +156,7 @@ const Cobros = () => {
   useEffect(() => {
     fetchClients();
     fetchStates();
+    fetchAgents();
     fetchCompany();
   }, []);
 
@@ -194,6 +200,15 @@ const Cobros = () => {
       setStates(data.data);
     } catch (err) {
       console.error('Error fetching states:', err);
+    }
+  };
+
+  const fetchAgents = async () => {
+    try {
+      const { data } = await api.get('/agents');
+      setAgents(data.data);
+    } catch (err) {
+      console.error('Error fetching agents:', err);
     }
   };
 
@@ -276,8 +291,17 @@ const Cobros = () => {
               onChange={(e) => setFilters({ ...filters, nCot: e.target.value })}
             />
           </div>
-          <div className="space-y-1 flex items-center gap-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase">Desde</label>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">N OC</label>
+            <input
+              type="text"
+              className="input-modern w-20"
+              value={filters.nOc}
+              onChange={(e) => setFilters({ ...filters, nOc: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Desde</label>
             <input
               type="date"
               className="input-modern"
@@ -285,8 +309,8 @@ const Cobros = () => {
               onChange={(e) => setFilters({ ...filters, from: e.target.value })}
             />
           </div>
-          <div className="space-y-1 flex items-center gap-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase">Hasta</label>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Hasta</label>
             <input
               type="date"
               className="input-modern"
@@ -299,6 +323,7 @@ const Cobros = () => {
             <div className="relative flex-1">
               <input
                 type="text"
+                placeholder="Razón o RUT..."
                 className="input-modern w-full pr-10"
                 value={filters.clientSearch}
                 onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
@@ -331,19 +356,48 @@ const Cobros = () => {
           </div>
         </div>
 
-        <div className="flex gap-4 items-end">
-          <div className="w-56">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="w-48">
+            <FormSelect
+              label="Agente"
+              value={filters.idAgente}
+              options={[
+                { value: '', label: 'TODOS LOS AGENTES' },
+                ...agents.map(a => ({ value: a.id_agente, label: a.nombre }))
+              ]}
+              onChange={(val) => setFilters({ ...filters, idAgente: val })}
+            />
+          </div>
+          <div className="w-48">
             <FormSelect
               label="Estados"
               value={filters.estado}
               options={[
-                { value: '', label: 'TODAS' },
+                { value: '', label: 'TODOS LOS ESTADOS' },
                 ...states.map(s => ({ value: s.id_estado, label: s.estado, color: s.color }))
               ]}
               onChange={(val) => setFilters({ ...filters, estado: val })}
             />
           </div>
-          <div className="w-56">
+          <div className="flex-1 min-w-[200px]">
+            <input
+              type="text"
+              placeholder="Buscar en Item..."
+              className="input-modern w-full"
+              value={filters.item}
+              onChange={(e) => setFilters({ ...filters, item: e.target.value })}
+            />
+          </div>
+          <div className="flex-1 min-w-[200px]">
+            <input
+              type="text"
+              placeholder="Buscar en Detalle..."
+              className="input-modern w-full"
+              value={filters.detalle}
+              onChange={(e) => setFilters({ ...filters, detalle: e.target.value })}
+            />
+          </div>
+          <div className="w-48">
             <FormSelect
               label="Orden Clientes"
               value={filters.sortBy}
