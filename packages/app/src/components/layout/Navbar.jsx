@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { cn } from '../../utils/cn';
 import { 
   LayoutDashboard, ShoppingCart, Users, Receipt, 
   Settings, LogOut, Briefcase, Truck, User, ShoppingBag, Building2, Database,
