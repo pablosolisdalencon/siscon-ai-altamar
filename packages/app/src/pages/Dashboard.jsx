@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { TrendingUp, Users, AlertCircle, ArrowUpRight, Calendar, ExternalLink, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
+import { TrendingUp, Users, AlertCircle, ArrowUpRight, Calendar, ExternalLink, ShieldCheck, Zap, BarChart3, Briefcase, Truck, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CountUp = ({ end, prefix = '', duration = 1000 }) => {
@@ -133,16 +133,36 @@ const Dashboard = () => {
             </div>
             <BarChart3 className="text-slate-300" size={32} />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <Link to="/ventas" className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-primary hover:bg-white hover:shadow-xl transition-all group flex flex-col items-center text-center">
               <div className="p-4 bg-primary/10 text-primary rounded-2xl mb-6 group-hover:scale-110 transition-transform"><Calendar size={32} /></div>
-              <p className="font-black text-slate-800 text-lg uppercase">Módulo de Ventas</p>
-              <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Gestión de Facturas, Cotizaciones y Ordenes de Compra con auto-homologación.</p>
+              <p className="font-black text-slate-800 text-lg uppercase">Ventas</p>
+              <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Gestión de Facturas, Cotizaciones y Ordenes de Compra.</p>
             </Link>
             <Link to="/cobros" className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-emerald-500 hover:bg-white hover:shadow-xl transition-all group flex flex-col items-center text-center">
               <div className="p-4 bg-emerald-500/10 text-emerald-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform"><ExternalLink size={32} /></div>
               <p className="font-black text-slate-800 text-lg uppercase">Audit de Cobros</p>
-              <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Control de mora legacy y envío de recordatorios masivos (f-cobros 2.0).</p>
+              <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Control de mora legacy y envío de recordatorios.</p>
+            </Link>
+            <Link to="/clientes" className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-blue-500 hover:bg-white hover:shadow-xl transition-all group flex flex-col items-center text-center">
+              <div className="p-4 bg-blue-500/10 text-blue-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform"><Briefcase size={32} /></div>
+              <p className="font-black text-slate-800 text-lg uppercase">Clientes</p>
+              <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Gestión de cartera, contactos y condiciones comerciales.</p>
+            </Link>
+            <Link to="/agentes" className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-indigo-500 hover:bg-white hover:shadow-xl transition-all group flex flex-col items-center text-center">
+              <div className="p-4 bg-indigo-500/10 text-indigo-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform"><Users size={32} /></div>
+              <p className="font-black text-slate-800 text-lg uppercase">Agentes</p>
+              <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Administración de agentes de venta y comisiones.</p>
+            </Link>
+            <Link to="/proveedores" className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-orange-500 hover:bg-white hover:shadow-xl transition-all group flex flex-col items-center text-center">
+              <div className="p-4 bg-orange-500/10 text-orange-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform"><Truck size={32} /></div>
+              <p className="font-black text-slate-800 text-lg uppercase">Proveedores</p>
+              <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Directorio de proveedores y gestión de suministros.</p>
+            </Link>
+            <Link to="/usuarios" className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-slate-800 hover:bg-white hover:shadow-xl transition-all group flex flex-col items-center text-center">
+              <div className="p-4 bg-slate-800/10 text-slate-800 rounded-2xl mb-6 group-hover:scale-110 transition-transform"><User size={32} /></div>
+              <p className="font-black text-slate-800 text-lg uppercase">Usuarios</p>
+              <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Control de accesos, roles y seguridad del sistema.</p>
             </Link>
           </div>
         </div>

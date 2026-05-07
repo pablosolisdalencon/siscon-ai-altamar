@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { User, Briefcase, Truck, Users, Plus, Mail, Phone, Hash, Search, Edit2, Trash2, X, Save, DollarSign } from 'lucide-react';
+import { User, Briefcase, Truck, Users, Plus, Mail, Phone, Hash, Search, Edit2, Trash2, X, Save, DollarSign, LayoutGrid, List } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -13,6 +13,7 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
+  const [viewMode, setViewMode] = useState('table'); // Default to table as per "listados" request
 
   useEffect(() => {
     fetchItems();
@@ -101,66 +102,120 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
         </button>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-        <input 
-          type="text" placeholder={`Buscar en ${title}...`}
-          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-2xl outline-none focus:border-primary/50 shadow-sm"
-          value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="flex justify-between items-center">
+        <div className="relative max-w-md flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+          <input 
+            type="text" placeholder={`Buscar en ${title}...`}
+            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-2xl outline-none focus:border-primary/50 shadow-sm"
+            value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex bg-white p-1 rounded-2xl border border-slate-100 shadow-sm ml-4">
+          <button 
+            onClick={() => setViewMode('table')}
+            className={cn("p-2 rounded-xl transition-all", viewMode === 'table' ? "bg-primary text-white shadow-md" : "text-slate-400 hover:text-slate-600")}
+          >
+            <List size={20} />
+          </button>
+          <button 
+            onClick={() => setViewMode('cards')}
+            className={cn("p-2 rounded-xl transition-all", viewMode === 'cards' ? "bg-primary text-white shadow-md" : "text-slate-400 hover:text-slate-600")}
+          >
+            <LayoutGrid size={20} />
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
-          [...Array(6)].map((_, i) => <div key={i} className="h-48 bg-slate-100 rounded-3xl animate-pulse" />)
-        ) : filteredItems.map((item, idx) => (
-          <div key={idx} className="glass-card p-6 group hover:translate-y-[-4px] transition-all relative">
-            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => handleOpenModal(item)} className="p-2 bg-white rounded-lg shadow-sm border border-slate-100 text-slate-400 hover:text-primary"><Edit2 size={14}/></button>
-              <button onClick={() => handleDelete(item)} className="p-2 bg-white rounded-lg shadow-sm border border-slate-100 text-slate-400 hover:text-red-500"><Trash2 size={14}/></button>
-            </div>
-
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                <Icon size={24} />
+      {viewMode === 'cards' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {loading ? (
+            [...Array(6)].map((_, i) => <div key={i} className="h-48 bg-slate-100 rounded-3xl animate-pulse" />)
+          ) : filteredItems.map((item, idx) => (
+            <div key={idx} className="glass-card p-6 group hover:translate-y-[-4px] transition-all relative">
+              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => handleOpenModal(item)} className="p-2 bg-white rounded-lg shadow-sm border border-slate-100 text-slate-400 hover:text-primary"><Edit2 size={14}/></button>
+                <button onClick={() => handleDelete(item)} className="p-2 bg-white rounded-lg shadow-sm border border-slate-100 text-slate-400 hover:text-red-500"><Trash2 size={14}/></button>
               </div>
-              <div className="flex flex-col items-end mr-12">
-                <span className="text-[10px] font-black text-slate-300 uppercase">RUT / ID</span>
-                <span className="text-xs font-bold text-slate-500 truncate max-w-[100px]">{item.rut || item.id || item.user}</span>
+
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                  <Icon size={24} />
+                </div>
+                <div className="flex flex-col items-end mr-12">
+                  <span className="text-[10px] font-black text-slate-300 uppercase">RUT / ID</span>
+                  <span className="text-xs font-bold text-slate-500 truncate max-w-[100px]">{item.rut || item.id || item.user || item.id_agente || item.id_cliente || item.id_proveedor || item.id_user}</span>
+                </div>
+              </div>
+              
+              <h3 className="text-lg font-black text-slate-800 mb-4 truncate">{item.nombre || item.razon || item.user}</h3>
+
+              <div className="space-y-3">
+                {(item.mail || item.pago_mail || item.comercial_mail) && (
+                  <div className="flex items-center gap-3 text-slate-500">
+                    <Mail size={14} className="text-slate-300" />
+                    <span className="text-xs font-medium truncate">{item.mail || item.pago_mail || item.comercial_mail}</span>
+                  </div>
+                )}
+                {(item.fono || item.pago_fono || item.comercial_fono) && (
+                  <div className="flex items-center gap-3 text-slate-500">
+                    <Phone size={14} className="text-slate-300" />
+                    <span className="text-xs font-medium">{item.fono || item.pago_fono || item.comercial_fono}</span>
+                  </div>
+                )}
+                {item.comision_default !== undefined && (
+                  <div className="flex items-center gap-3">
+                    <DollarSign size={14} className="text-green-500" />
+                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">Comisión: {item.comision_default}%</span>
+                  </div>
+                )}
+                {item.role && (
+                  <div className="flex items-center gap-3">
+                    <Briefcase size={14} className="text-slate-300" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase bg-slate-50 px-2 py-0.5 rounded">Rol: {item.role}</span>
+                  </div>
+                )}
               </div>
             </div>
-            
-            <h3 className="text-lg font-black text-slate-800 mb-4 truncate">{item.nombre || item.razon || item.user}</h3>
-
-            <div className="space-y-3">
-              {(item.mail || item.pago_mail || item.comercial_mail) && (
-                <div className="flex items-center gap-3 text-slate-500">
-                  <Mail size={14} className="text-slate-300" />
-                  <span className="text-xs font-medium truncate">{item.mail || item.pago_mail || item.comercial_mail}</span>
-                </div>
-              )}
-              {(item.fono || item.pago_fono || item.comercial_fono) && (
-                <div className="flex items-center gap-3 text-slate-500">
-                  <Phone size={14} className="text-slate-300" />
-                  <span className="text-xs font-medium">{item.fono || item.pago_fono || item.comercial_fono}</span>
-                </div>
-              )}
-              {item.comision_default !== undefined && (
-                <div className="flex items-center gap-3">
-                  <DollarSign size={14} className="text-green-500" />
-                  <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">Comisión: {item.comision_default}%</span>
-                </div>
-              )}
-              {item.role && (
-                <div className="flex items-center gap-3">
-                  <Briefcase size={14} className="text-slate-300" />
-                  <span className="text-[10px] font-black text-slate-400 uppercase bg-slate-50 px-2 py-0.5 rounded">Rol: {item.role}</span>
-                </div>
-              )}
-            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="glass-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-800 text-white">
+                  {fields.filter(f => f.type !== 'section').map(field => (
+                    <th key={field.name} className="px-6 py-4 text-[10px] font-black uppercase tracking-wider">{field.label}</th>
+                  ))}
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {loading ? (
+                  [...Array(5)].map((_, i) => <tr key={i} className="h-16 animate-pulse bg-slate-50/50" />)
+                ) : filteredItems.map((item, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50 transition-colors group">
+                    {fields.filter(f => f.type !== 'section').map(field => (
+                      <td key={field.name} className="px-6 py-4">
+                        <span className="text-xs font-bold text-slate-600">
+                          {field.name === 'pass' ? '••••••••' : (item[field.name] || '---')}
+                        </span>
+                      </td>
+                    ))}
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => handleOpenModal(item)} className="p-2 text-slate-400 hover:text-primary transition-colors"><Edit2 size={14}/></button>
+                        <button onClick={() => handleDelete(item)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       {/* Modal */}
       {isModalOpen && (
