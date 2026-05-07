@@ -28,9 +28,9 @@ const Navbar = () => {
       {/* Floating Menu Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-6 left-6 z-[100] w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all"
+        className="fixed top-6 left-6 z-[100] w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all overflow-hidden"
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {isOpen ? <X size={24} /> : <img src="/logo.png" alt="Menu" className="w-full h-full object-cover scale-110" />}
       </button>
 
       {/* Backdrop */}
@@ -49,10 +49,8 @@ const Navbar = () => {
         <div className="flex flex-col h-full gap-2">
           {/* Logo in Drawer */}
           <div className="flex items-center gap-4 mb-10 px-2">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <span className="font-bold text-xl text-slate-800">SISCON-AI</span>
+            <img src="/logo.png" alt="SISCON Logo" className="w-12 h-12 rounded-xl shadow-lg shadow-primary/20" />
+            <span className="font-black text-2xl text-slate-800 tracking-tighter">SISCON<span className="text-primary">-AI</span></span>
           </div>
 
           <div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1 pr-2">

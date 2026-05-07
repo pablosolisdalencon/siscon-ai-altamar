@@ -45,7 +45,7 @@ const generateCollectionTable = (items) => {
   `;
 };
 
-const generateCollectionEmail = ({ clientName, clientRut, message, items, companyName, companyEmail, companySignatureUrl }) => {
+const generateCollectionEmail = ({ clientName, clientRut, message, items, companyName, companyEmail, companySignatureUrl, logoUrl }) => {
     const tableHtml = generateCollectionTable(items);
 
     return `
@@ -75,10 +75,23 @@ const generateCollectionEmail = ({ clientName, clientRut, message, items, compan
           </div>
 
           <div class="footer">
-            <p>Atentamente,</p>
-            <p><strong>${companyName}</strong></p>
-            ${companySignatureUrl ? `<img src="${companySignatureUrl}" alt="Firma" style="max-width: 300px; margin-top: 10px;" />` : ''}
-            <p style="font-size: 9px; color: #777; margin-top: 20px;">
+            <table style="width: 100%;">
+              <tr>
+                <td style="width: 80px; vertical-align: middle;">
+                  ${logoUrl ? `<img src="${logoUrl}" alt="SISCON Logo" style="width: 70px; height: 70px; border-radius: 10px;" />` : ''}
+                </td>
+                <td style="padding-left: 15px; vertical-align: middle;">
+                  <p style="margin: 0; font-size: 14px; font-weight: bold; color: #333;">SISCON-AI</p>
+                  <p style="margin: 0; font-size: 9px; color: #777; text-transform: uppercase;">Ecosistema Cognitivo de Gestión</p>
+                </td>
+                <td style="text-align: right; vertical-align: middle;">
+                  <p style="margin: 0; font-size: 12px; font-weight: bold; color: #333;">${companyName}</p>
+                  <p style="margin: 0; font-size: 10px; color: #555;">${companyEmail}</p>
+                  ${companySignatureUrl ? `<img src="${companySignatureUrl}" alt="Firma" style="max-height: 80px; margin-top: 5px;" />` : ''}
+                </td>
+              </tr>
+            </table>
+            <p style="font-size: 9px; color: #777; margin-top: 25px; border-top: 1px solid #eee; padding-top: 10px;">
               Este es un correo automático generado por SISCON-AI. Por favor no responda a este mensaje directamente.
             </p>
           </div>

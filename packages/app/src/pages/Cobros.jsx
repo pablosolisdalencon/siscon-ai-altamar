@@ -738,21 +738,30 @@ SISCON-AI`;
                   </table>
                 </div>
 
-                <div className="mt-12 flex flex-col items-center border-t border-slate-200 pt-8">
-                  {company?.pago_firma ? (
-                    <img 
-                      src={`${baseUrl}/docs/FIRMAS/${company.pago_firma}`} 
-                      alt="Firma" 
-                      className="max-h-32 object-contain"
-                    />
-                  ) : (
-                    <div className="w-full max-w-[400px] h-[150px] bg-slate-100 flex items-center justify-center border border-dashed border-slate-300">
-                      <span className="text-slate-400 font-bold italic">Sin Firma Digital</span>
+                <div className="mt-12 flex items-center justify-between border-t border-slate-200 pt-8">
+                  <div className="flex items-center gap-6">
+                    <img src="/logo.png" alt="SISCON Logo" className="w-20 h-20 rounded-2xl shadow-lg shadow-slate-200" />
+                    <div className="text-left">
+                      <p className="font-black text-slate-800 text-lg uppercase tracking-tighter">SISCON<span className="text-primary">-AI</span></p>
+                      <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Ecosistema Cognitivo de Gestión</p>
                     </div>
-                  )}
-                  <div className="mt-4 text-center">
-                    <p className="font-black text-slate-800 text-lg">{company?.razon || 'Altamar MKT'}</p>
-                    <p className="text-slate-500 font-bold">{company?.pago_mail || 'czuniga@altamarmkt.cl'}</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    {company?.pago_firma ? (
+                      <img 
+                        src={`${baseUrl}/docs/FIRMAS/${company.pago_firma}`} 
+                        alt="Firma" 
+                        className="max-h-32 object-contain"
+                      />
+                    ) : (
+                      <div className="w-full max-w-[400px] h-[150px] bg-slate-100 flex items-center justify-center border border-dashed border-slate-300">
+                        <span className="text-slate-400 font-bold italic">Sin Firma Digital</span>
+                      </div>
+                    )}
+                    <div className="mt-4 text-center">
+                      <p className="font-black text-slate-800 text-base">{company?.razon || 'Altamar MKT'}</p>
+                      <p className="text-slate-500 font-bold text-xs">{company?.pago_mail || 'czuniga@altamarmkt.cl'}</p>
+                    </div>
                   </div>
                 </div>
               </div>

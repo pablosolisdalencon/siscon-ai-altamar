@@ -182,7 +182,8 @@ exports.sendCollectionEmail = async (req, res) => {
       items,
       companyName: company?.razon || 'Altamar MKT',
       companyEmail: company?.pago_mail || 'czuniga@altamarmkt.cl',
-      companySignatureUrl: company?.pago_firma ? `${req.protocol}://${req.get('host')}/docs/FIRMAS/${company.pago_firma}` : null
+      companySignatureUrl: company?.pago_firma ? `${req.protocol}://${req.get('host')}/docs/FIRMAS/${company.pago_firma}` : null,
+      logoUrl: `${req.protocol}://${req.get('host')}/docs/logo.png`
     });
 
     // 5. Send Email
