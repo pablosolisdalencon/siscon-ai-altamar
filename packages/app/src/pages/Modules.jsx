@@ -97,16 +97,13 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
 
   return (
     <div className="space-y-6 animate-in slide-in-from-right duration-500">
-      <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-primary/10 text-primary rounded-2xl">
-            <Icon size={24} />
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-4">
+        <h1 className="text-2xl md:text-3xl font-black text-slate-800 text-center max-w-[50%] leading-tight uppercase tracking-tighter">
+          {title}
+          <div className="text-[10px] font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest mt-1 inline-block">
+            {items.length} Registros activos
           </div>
-          <div>
-            <h1 className="text-3xl font-black text-slate-800">{title}</h1>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{items.length} Registros activos</p>
-          </div>
-        </div>
+        </h1>
       </div>
 
       <div className="flex justify-between items-center">

@@ -106,14 +106,11 @@ const Empresa = () => {
 
   return (
     <div className="p-8 max-w-6xl mx-auto animate-in fade-in duration-500">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <Building2 className="text-primary" size={32} />
-            Configuración de Empresa
-          </h1>
-          <p className="text-slate-500 font-medium mt-1">Gestiona la información global y firma de cobros</p>
-        </div>
+      <div className="flex flex-col items-center mb-12">
+        <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight text-center max-w-[50%] leading-tight uppercase">
+          Empresa
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2">Configuración Global</p>
+        </h1>
       </div>
 
       {message && (

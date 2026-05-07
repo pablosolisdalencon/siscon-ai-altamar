@@ -59,8 +59,8 @@ const ImportDB = () => {
         <div className="p-4 bg-primary/10 rounded-3xl">
           <Database size={48} className="text-primary" />
         </div>
-        <h1 className="text-4xl font-black tracking-tight text-slate-800 uppercase">Importar Base de Datos</h1>
-        <p className="text-slate-500 max-w-xl font-medium text-lg">
+        <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-800 uppercase max-w-[50%] leading-tight">Importar Base de Datos</h1>
+        <p className="text-slate-500 max-w-xl font-medium text-sm uppercase tracking-widest">
           Sincronización integral del ecosistema cognitivo.
         </p>
       </div>

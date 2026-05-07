@@ -81,9 +81,11 @@ const Config = () => {
 
     return (
         <div className="p-8 space-y-8 animate-in fade-in duration-500">
-            <div>
-                <h1 className="text-2xl font-bold text-blue-700 mb-1">Configuraciones</h1>
-                <p className="text-sm text-slate-500 font-medium">Aquí se configuran algunas variables y combos globales.</p>
+            <div className="flex flex-col items-center mb-8">
+                <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight text-center max-w-[50%] leading-tight uppercase">
+                    Configuración
+                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2">Variables Globales</p>
+                </h1>
             </div>
 
             <div className="flex flex-wrap gap-2">

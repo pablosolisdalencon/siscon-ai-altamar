@@ -270,6 +270,15 @@ const Cobros = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-20">
+      {/* Header */}
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-4">
+        <h1 className="text-2xl md:text-3xl font-black text-slate-800 text-center max-w-[50%] leading-tight uppercase tracking-tighter">
+          f-Cobros
+          <div className="text-[10px] font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest mt-1 inline-block">
+            Auditoría de Cobranzas
+          </div>
+        </h1>
+      </div>
       {/* Filter Bar */}
       <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
         <div className="flex flex-wrap gap-4 items-end">

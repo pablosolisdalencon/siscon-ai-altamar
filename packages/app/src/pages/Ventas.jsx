@@ -393,21 +393,24 @@ const Ventas = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-20">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-        <div>
-          <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
-            Ventas <span className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{totalItems} Registros (Pág. {currentPage}/{totalPages})</span>
-          </h1>
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-4">
+        <div className="w-full flex justify-end">
+          <div className="flex items-center gap-3">
+            <button 
+              className="btn-glass text-green-600 border-green-100 hover:bg-green-50 flex items-center gap-2 text-[10px]" 
+              onClick={handleExportExcel}
+            >
+              <Download size={16} />
+              Excel
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button 
-            className="btn-glass text-green-600 border-green-100 hover:bg-green-50 flex items-center gap-2" 
-            onClick={handleExportExcel}
-          >
-            <Download size={20} />
-            Exportar Excel
-          </button>
-        </div>
+        <h1 className="text-2xl md:text-3xl font-black text-slate-800 text-center max-w-[50%] leading-tight uppercase tracking-tighter">
+          Ventas
+          <div className="text-[10px] font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest mt-1 inline-block">
+            {totalItems} Registros (Pág. {currentPage}/{totalPages})
+          </div>
+        </h1>
       </div>
 
       {/* Legacy Filter Bar */}
