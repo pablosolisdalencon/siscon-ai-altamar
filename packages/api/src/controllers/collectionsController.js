@@ -135,7 +135,7 @@ const { generateCollectionEmail } = require('../utils/mailTemplate');
 
 exports.sendCollectionEmail = async (req, res) => {
   try {
-    const { clientId } = req.body;
+    const { clientId, customMessage } = req.body;
 
     // 1. Get Client and Sales data
     const client = await Client.findByPk(clientId, {
@@ -178,11 +178,11 @@ exports.sendCollectionEmail = async (req, res) => {
     const html = generateCollectionEmail({
       clientName: client.razon,
       clientRut: client.rut,
-      message: client.mensaje_cobro,
+      message: customMessage || client.mensaje_cobro,
       items,
       companyName: company?.razon || 'Altamar MKT',
       companyEmail: company?.pago_mail || 'czuniga@altamarmkt.cl',
-      companySignatureUrl: company?.pago_firma ? `${req.protocol}://${req.get('host')}/img/${company.pago_firma}` : null
+      companySignatureUrl: company?.pago_firma ? `${req.protocol}://${req.get('host')}/docs/FIRMAS/${company.pago_firma}` : null
     });
 
     // 5. Send Email

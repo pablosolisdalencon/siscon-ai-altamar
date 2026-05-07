@@ -139,6 +139,7 @@ const Cobros = () => {
     sortBy: 'razon',
     sortOrder: 'ASC'
   });
+  const [mailMessage, setMailMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -224,12 +225,37 @@ const Cobros = () => {
 
   const handleOpenMailModal = (client) => {
     setSelectedClient(client);
+    
+    // Generate default message
+    const contactName = client.pago_nombre || client.comercial_nombre || '';
+    const clientName = client.razon || 'Estimado Cliente';
+    
+    const defaultMsg = `Hola ${contactName ? contactName : clientName},
+
+Espero que estés muy bien.
+
+Te escribo de parte del equipo de finanzas para invitarte a ponerte al día con los pagos pendientes que tenemos registrados en nuestro sistema SISCON-AI. 
+
+A continuación, adjuntamos el detalle de las ventas que presentan saldos pendientes de pago. Agradeceríamos mucho si pudieras revisar esta información y coordinar el pago a la brevedad posible.
+
+Si ya realizaste el pago, por favor ignora este mensaje o envíanos el comprobante para regularizar tu estado.
+
+Quedamos atentos a cualquier duda o comentario.
+
+Saludos cordiales,
+Equipo de Cobranzas
+SISCON-AI`;
+
+    setMailMessage(defaultMsg);
     setIsMailModalOpen(true);
   };
 
   const handleSendCollection = async () => {
     try {
-      await api.post('/collections/send-email', { clientId: selectedClient.id_cliente });
+      await api.post('/collections/send-email', { 
+        clientId: selectedClient.id_cliente,
+        customMessage: mailMessage
+      });
       alert(`Cobro enviado con éxito a ${selectedClient.razon}`);
       setIsMailModalOpen(false);
     } catch (error) {
@@ -649,6 +675,16 @@ const Cobros = () => {
 
               {/* Email Content Area */}
               <div className="bg-white border border-slate-300 p-8 shadow-sm">
+                <div className="mb-8">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Mensaje Personalizado</label>
+                  <textarea 
+                    className="w-full min-h-[250px] p-6 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-medium focus:border-primary/50 outline-none transition-all shadow-inner"
+                    value={mailMessage}
+                    onChange={(e) => setMailMessage(e.target.value)}
+                    placeholder="Escribe el mensaje de cobro..."
+                  />
+                </div>
+
                 <div className="border border-slate-300 mb-8">
                   <div className="bg-[#3a3a3a] text-white p-3 text-center">
                     <h2 className="text-2xl font-black uppercase">{selectedClient.razon || "Cliente Generico"} ({selectedClient.rut || "---"})</h2>
