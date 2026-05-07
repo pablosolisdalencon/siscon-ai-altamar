@@ -384,8 +384,8 @@ const Cobros = () => {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-[10px] sm:text-xs">
+            <div className="table-container">
+              <table className="w-full border-collapse text-[10px] sm:text-xs min-w-[1000px]">
                 <thead className="bg-[#666666] text-white uppercase font-black select-none">
                   <tr>
                     <th className="px-2 py-1 text-left w-6"></th>

@@ -365,8 +365,8 @@ const Compras = () => {
       </div>
 
       {/* Data Table */}
-      <div className="glass-card overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[1400px]">
+      <div className="table-container">
+        <table className="w-full text-left border-collapse min-w-[1200px]">
           <thead className="bg-slate-800 text-white select-none">
             <tr>
               <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider"></th>

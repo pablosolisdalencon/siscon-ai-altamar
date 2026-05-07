@@ -56,10 +56,10 @@ const Dashboard = () => {
             <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-6 border border-blue-500/30">
               <Zap size={14} className="fill-current" /> Sistema Operativo: Modo Épico
             </div>
-            <h1 className="text-5xl font-black tracking-tight leading-tight">
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
               Control Maestro <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">SISCON-AI</span>
             </h1>
-            <p className="text-slate-400 mt-4 text-xl max-w-xl font-medium">
+            <p className="text-slate-400 mt-4 text-base md:text-xl max-w-xl font-medium">
               Gestión comercial con paridad total legacy y análisis predictivo en tiempo real.
             </p>
             <div className="mt-10 flex flex-wrap gap-4 justify-center md:justify-start">
@@ -111,7 +111,7 @@ const Dashboard = () => {
                 {stat.icon}
               </div>
               <p className="text-slate-400 font-black uppercase text-[10px] tracking-[0.2em]">{stat.label}</p>
-              <h3 className="text-4xl font-black text-slate-800 mt-3 tabular-nums">
+              <h3 className="text-2xl md:text-4xl font-black text-slate-800 mt-3 tabular-nums">
                 {stat.isCurrency ? <CountUp end={stat.value} prefix="$ " /> : <CountUp end={stat.value} />}
               </h3>
               <div className="mt-6 flex items-center gap-2 text-xs font-bold text-slate-400">

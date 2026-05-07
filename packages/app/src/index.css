@@ -92,5 +92,14 @@
 }
 
 .table-container {
-  @apply overflow-x-auto custom-scrollbar rounded-2xl border border-slate-100;
+  @apply overflow-x-auto custom-scrollbar rounded-2xl border border-slate-100 w-full;
+  -webkit-overflow-scrolling: touch;
+}
+
+html, body {
+  @apply overflow-x-hidden max-w-full;
+}
+
+#root {
+  @apply overflow-x-hidden max-w-full min-h-screen flex flex-col;
 }

@@ -13,7 +13,18 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
-  const [viewMode, setViewMode] = useState('table'); // Default to table as per "listados" request
+  const [viewMode, setViewMode] = useState('table');
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setViewMode('cards');
+      }
+    };
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchItems();
@@ -180,9 +191,8 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
           ))}
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+        <div className="table-container">
+          <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-slate-800 text-white">
                   {fields.filter(f => f.type !== 'section').map(field => (
@@ -213,7 +223,6 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
                 ))}
               </tbody>
             </table>
-          </div>
         </div>
       )}
 

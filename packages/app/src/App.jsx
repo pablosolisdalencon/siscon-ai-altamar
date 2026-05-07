@@ -13,9 +13,9 @@ import ImportDB from './pages/ImportDB';
 function App() {
   return (
     <Router>
-      <div className="flex min-h-screen">
+      <div className="flex flex-col md:flex-row min-h-screen max-w-full overflow-x-hidden">
         <Navbar />
-        <main className="flex-1 ml-32 p-8 transition-all duration-500">
+        <main className="flex-1 w-full md:ml-24 lg:ml-28 p-4 md:p-8 transition-all duration-500 overflow-x-hidden pb-24 md:pb-8">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/ventas" element={<Ventas />} />
