@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const StatusDropdown = ({ currentStatus, states, onSelect }) => {

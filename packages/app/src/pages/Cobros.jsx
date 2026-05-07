@@ -660,11 +660,11 @@ SISCON-AI`;
 
       {/* Email Preview Modal (Matches Screenshot 2) */}
       {isMailModalOpen && selectedClient && (
-        <div className="fixed inset-0 z-[200] flex flex-col bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full bg-[#f0f0f0] flex flex-col flex-1 p-8 overflow-y-auto">
-            <div className="max-w-6xl mx-auto w-full space-y-6">
+        <div className="fixed inset-0 z-[200] flex flex-col bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-300 overflow-y-auto">
+          <div className="w-full bg-[#f0f0f0] flex flex-col flex-1 p-4 md:p-8">
+            <div className="max-w-6xl mx-auto w-full space-y-4 md:space-y-6">
               {/* Email Technical Headers */}
-              <div className="bg-white p-4 border border-slate-200 text-xs font-mono space-y-1 text-slate-500">
+              <div className="bg-white p-4 border border-slate-200 text-[10px] md:text-xs font-mono space-y-1 text-slate-500 overflow-x-auto whitespace-nowrap">
                 <p>MIME-Version: 1.0</p>
                 <p>Content-type: text/html; charset=iso-8859-1</p>
                 <p>From: ALTAMAR MKT czuniga@altamarmkt.cl</p>
@@ -674,22 +674,22 @@ SISCON-AI`;
               </div>
 
               {/* Email Content Area */}
-              <div className="bg-white border border-slate-300 p-8 shadow-sm">
-                <div className="mb-8">
+              <div className="bg-white border border-slate-300 p-4 md:p-8 shadow-sm">
+                <div className="mb-6 md:mb-8">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Mensaje Personalizado</label>
                   <textarea 
-                    className="w-full min-h-[250px] p-6 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-medium focus:border-primary/50 outline-none transition-all shadow-inner"
+                    className="w-full min-h-[200px] md:min-h-[250px] p-4 md:p-6 bg-slate-50 border border-slate-200 rounded-2xl md:rounded-3xl text-sm font-medium focus:border-primary/50 outline-none transition-all shadow-inner"
                     value={mailMessage}
                     onChange={(e) => setMailMessage(e.target.value)}
                     placeholder="Escribe el mensaje de cobro..."
                   />
                 </div>
 
-                <div className="border border-slate-300 mb-8">
-                  <div className="bg-[#3a3a3a] text-white p-3 text-center">
-                    <h2 className="text-2xl font-black uppercase">{selectedClient.razon || "Cliente Generico"} ({selectedClient.rut || "---"})</h2>
+                <div className="border border-slate-300 mb-8 overflow-x-auto">
+                  <div className="bg-[#3a3a3a] text-white p-3 text-center sticky left-0">
+                    <h2 className="text-xl md:text-2xl font-black uppercase">{selectedClient.razon || "Cliente Generico"} ({selectedClient.rut || "---"})</h2>
                   </div>
-                  <table className="w-full text-[10px] border-collapse">
+                  <table className="w-full text-[10px] border-collapse min-w-[800px]">
                     <thead className="bg-[#666666] text-white font-black uppercase">
                       <tr>
                         <th className="px-2 py-1 text-left w-6"></th>
@@ -738,45 +738,45 @@ SISCON-AI`;
                   </table>
                 </div>
 
-                <div className="mt-12 flex items-center justify-between border-t border-slate-200 pt-8">
-                  <div className="flex items-center gap-6">
-                    <img src="/logo.png" alt="SISCON Logo" className="w-20 h-20 rounded-2xl shadow-lg shadow-slate-200" />
+                <div className="mt-8 md:mt-12 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 pt-8 gap-8">
+                  <div className="flex items-center gap-4 md:gap-6 order-2 md:order-1">
+                    <img src="/logo.png" alt="SISCON Logo" className="w-16 h-16 md:w-20 md:h-20 rounded-2xl shadow-lg shadow-slate-200" />
                     <div className="text-left">
-                      <p className="font-black text-slate-800 text-lg uppercase tracking-tighter">SISCON<span className="text-primary">-AI</span></p>
-                      <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Ecosistema Cognitivo de Gestión</p>
+                      <p className="font-black text-slate-800 text-base md:text-lg uppercase tracking-tighter">SISCON<span className="text-primary">-AI</span></p>
+                      <p className="text-slate-400 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">Ecosistema Cognitivo de Gestión</p>
                     </div>
                   </div>
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center order-1 md:order-2">
                     {company?.pago_firma ? (
                       <img 
                         src={`${baseUrl}/docs/FIRMAS/${company.pago_firma}`} 
                         alt="Firma" 
-                        className="max-h-32 object-contain"
+                        className="max-h-24 md:max-h-32 object-contain"
                       />
                     ) : (
-                      <div className="w-full max-w-[400px] h-[150px] bg-slate-100 flex items-center justify-center border border-dashed border-slate-300">
-                        <span className="text-slate-400 font-bold italic">Sin Firma Digital</span>
+                      <div className="w-full max-w-[300px] h-[100px] md:h-[150px] bg-slate-100 flex items-center justify-center border border-dashed border-slate-300 rounded-xl">
+                        <span className="text-slate-400 text-xs font-bold italic">Sin Firma Digital</span>
                       </div>
                     )}
                     <div className="mt-4 text-center">
-                      <p className="font-black text-slate-800 text-base">{company?.razon || 'Altamar MKT'}</p>
-                      <p className="text-slate-500 font-bold text-xs">{company?.pago_mail || 'czuniga@altamarmkt.cl'}</p>
+                      <p className="font-black text-slate-800 text-sm md:text-base">{company?.razon || 'Altamar MKT'}</p>
+                      <p className="text-slate-500 font-bold text-[10px] md:text-xs">{company?.pago_mail || 'czuniga@altamarmkt.cl'}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Modal Actions */}
-              <div className="flex justify-center gap-8 py-10">
+              <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-8 py-6 md:py-10">
                 <button
                   onClick={() => setIsMailModalOpen(false)}
-                  className="px-12 py-3 bg-red-600 text-white font-black text-xl uppercase tracking-widest shadow-lg hover:bg-red-700 transition-all rounded"
+                  className="w-full sm:w-auto px-12 py-3 bg-red-600 text-white font-black text-lg md:text-xl uppercase tracking-widest shadow-lg hover:bg-red-700 transition-all rounded-xl"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSendCollection}
-                  className="px-12 py-3 bg-green-700 text-white font-black text-xl uppercase tracking-widest shadow-lg hover:bg-green-800 transition-all rounded"
+                  className="w-full sm:w-auto px-12 py-3 bg-green-700 text-white font-black text-lg md:text-xl uppercase tracking-widest shadow-lg hover:bg-green-800 transition-all rounded-xl"
                 >
                   Enviar Cobro
                 </button>
