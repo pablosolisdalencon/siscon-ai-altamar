@@ -107,10 +107,6 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{items.length} Registros activos</p>
           </div>
         </div>
-        <button className="btn-primary flex items-center gap-2" onClick={() => handleOpenModal()}>
-          <Plus size={20} />
-          Nuevo Registro
-        </button>
       </div>
 
       <div className="flex justify-between items-center">
@@ -282,6 +278,14 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
           </div>
         </div>
       )}
+      {/* Floating Action Button (FAB) */}
+      <button 
+        onClick={() => handleOpenModal()}
+        className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-[100] group"
+        title={`Nuevo ${title}`}
+      >
+        <Plus size={32} className="group-hover:rotate-90 transition-transform" />
+      </button>
     </div>
   );
 };

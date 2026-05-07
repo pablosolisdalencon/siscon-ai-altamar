@@ -308,10 +308,6 @@ const Compras = () => {
             Compras <span className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{totalItems} Registros (Pág. {currentPage}/{totalPages})</span>
           </h1>
         </div>
-        <button className="btn-primary flex items-center gap-2 group" onClick={() => handleOpenModal()}>
-          <Plus size={20} className="group-hover:rotate-90 transition-transform" />
-          Nueva Compra
-        </button>
       </div>
 
       {/* Filter Bar */}
@@ -688,6 +684,14 @@ const Compras = () => {
           </div>
         </div>
       )}
+      {/* Floating Action Button (FAB) */}
+      <button 
+        onClick={() => handleOpenModal()}
+        className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-[100] group"
+        title="Nueva Compra"
+      >
+        <Plus size={32} className="group-hover:rotate-90 transition-transform" />
+      </button>
     </div>
   );
 };
