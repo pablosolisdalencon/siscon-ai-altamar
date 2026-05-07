@@ -2,10 +2,12 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, ShoppingCart, Users, Receipt, 
-  Settings, LogOut, Briefcase, Truck, User, ShoppingBag, Building2, Database
+  Settings, LogOut, Briefcase, Truck, User, ShoppingBag, Building2, Database,
+  Menu, X
 } from 'lucide-react';
 
 const Navbar = () => {
+  const [isOpen, setIsOpen] = React.useState(false);
   const navItems = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
     { name: 'Ventas', icon: <Receipt size={20} />, path: '/ventas' },
@@ -21,45 +23,66 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed md:left-6 bottom-0 md:top-1/2 md:-translate-y-1/2 w-full md:w-20 hover:md:w-64 glass md:rounded-3xl p-2 md:p-4 transition-all duration-500 overflow-hidden group z-50 h-16 md:h-[90vh]">
-      <div className="flex flex-row md:flex-col gap-2 md:gap-8 h-full items-center md:items-stretch">
-        {/* Logo Section - Hidden on Mobile to save space */}
-        <div className="hidden md:flex items-center gap-4 px-2 shrink-0">
-          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-            <span className="text-white font-bold text-xl">S</span>
+    <>
+      {/* Floating Menu Button */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-6 left-6 z-[100] w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] animate-in fade-in duration-300"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Drawer Menu */}
+      <nav className={cn(
+        "fixed top-0 left-0 h-full w-72 bg-white/90 backdrop-blur-xl z-[90] shadow-2xl transition-transform duration-500 ease-out p-8 pt-24",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="flex flex-col h-full gap-2">
+          {/* Logo in Drawer */}
+          <div className="flex items-center gap-4 mb-10 px-2">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+              <span className="text-white font-bold text-lg">S</span>
+            </div>
+            <span className="font-bold text-xl text-slate-800">SISCON-AI</span>
           </div>
-          <span className="font-bold text-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">SISCON-AI</span>
-        </div>
 
-        {/* Links */}
-        <div className="flex flex-row md:flex-col gap-1 md:gap-2 flex-1 overflow-x-auto md:overflow-x-hidden no-scrollbar justify-around md:justify-start">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) => 
-                `flex flex-col md:flex-row items-center gap-1 md:gap-4 p-2 md:p-3 rounded-xl md:rounded-2xl transition-all shrink-0 ${
-                  isActive 
-                    ? 'bg-primary/10 md:bg-primary text-primary md:text-white shadow-none md:shadow-lg md:shadow-primary/20' 
-                    : 'hover:bg-slate-100 text-slate-400 md:text-slate-500 hover:text-primary'
-                }`
-              }
-            >
-              <div className="shrink-0">{item.icon}</div>
-              <span className="text-[10px] md:text-sm font-medium md:font-medium opacity-100 md:opacity-0 group-hover:md:opacity-100 transition-opacity whitespace-nowrap">{item.name}</span>
-            </NavLink>
-          ))}
-        </div>
+          <div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1 pr-2">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) => 
+                  `flex items-center gap-4 p-3 rounded-2xl transition-all ${
+                    isActive 
+                      ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                      : 'hover:bg-slate-50 text-slate-500 hover:text-primary'
+                  }`
+                }
+              >
+                <div className="shrink-0">{item.icon}</div>
+                <span className="font-bold text-sm">{item.name}</span>
+              </NavLink>
+            ))}
+          </div>
 
-        {/* Footer - Only on Desktop */}
-        <div className="hidden md:block mt-auto shrink-0">
-          <button className="flex items-center gap-4 p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50/50 transition-all w-full">
-            <LogOut size={20} className="shrink-0" />
-            <span className="font-medium opacity-0 group-hover:opacity-100 transition-opacity">Salir</span>
-          </button>
+          <div className="mt-auto pt-6 border-t border-slate-100">
+            <button className="flex items-center gap-4 p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50/50 transition-all w-full">
+              <LogOut size={20} className="shrink-0" />
+              <span className="font-bold text-sm">Cerrar Sesión</span>
+            </button>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };
 

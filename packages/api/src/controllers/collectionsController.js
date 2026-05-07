@@ -47,77 +47,84 @@ exports.getCollectionsDashboard = async (req, res) => {
 
     const { count, rows: clients } = await Client.findAndCountAll({
       where: clientWhere,
+    const { count: salesCount, rows: sales } = await Sale.findAndCountAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal("CASE WHEN fecha_entrega > '1000-01-01' THEN TO_DAYS(fecha_entrega) - TO_DAYS(CURDATE()) ELSE NULL END"),
+            'dias'
+          ],
+          [
+            sequelize.literal("CASE WHEN fecha_pago > '1000-01-01' THEN TO_DAYS(CURDATE()) - TO_DAYS(fecha_pago) ELSE NULL END"),
+            'dias_pago'
+          ]
+        ]
+      },
+      where: saleWhere,
       include: [
-        {
-          model: Sale,
-          as: 'ventas',
-          attributes: {
-            include: [
-              [
-                sequelize.literal("CASE WHEN fecha_entrega > '1000-01-01' THEN TO_DAYS(fecha_entrega) - TO_DAYS(CURDATE()) ELSE NULL END"),
-                'dias'
-              ],
-              [
-                sequelize.literal("CASE WHEN fecha_pago > '1000-01-01' THEN TO_DAYS(CURDATE()) - TO_DAYS(fecha_pago) ELSE NULL END"),
-                'dias_pago'
-              ]
-            ]
-          },
-          where: saleWhere,
-          required: true,
-          include: [{ model: SaleState, as: 'status', constraints: false }]
-        }
-      ],
-      order: [
-        ...clientOrder,
-        [{ model: Sale, as: 'ventas' }, 'id_venta', 'DESC']
-      ],
-      limit: parseInt(limit),
-      offset: offset,
-      distinct: true // Required for correct count with includes
-    });
-
-
-    // Process collections logic (Parity with f-cobros.php)
-    const dashboard = clients.map(client => {
-      let totalMonto = 0;
-      let totalIva = 0;
-      let totalTotal = 0;
-
-      const items = client.ventas.map(sale => {
-        totalMonto += sale.monto || 0;
-        totalIva += sale.iva || 0;
-        totalTotal += sale.total || 0;
-
-        return {
-          ...sale.toJSON(),
-          dias: sale.getDataValue('dias'),
-          dias_pago: sale.getDataValue('dias_pago'),
-          daysOverdue: sale.getDataValue('dias_pago')
-        };
-      });
-
-      return {
-        id_cliente: client.id_cliente,
-        razon: client.razon,
-        rut: client.rut,
-        mail: client.pago_mail,
-        mensaje: client.mensaje_cobro,
-        stats: {
-          pendingItems: items.length,
-          totalMonto,
-          totalIva,
-          totalTotal
+        { 
+          model: Client, 
+          as: 'client', 
+          where: clientWhere,
+          required: clientSearch ? true : false // If searching client, must have one. Otherwise, LEFT JOIN.
         },
-        items
-      };
+        { model: SaleState, as: 'status', constraints: false }
+      ],
+      order: [['id_venta', 'DESC']]
     });
+
+    // Manual Grouping by Client in JS
+    const groups = {};
+    sales.forEach(sale => {
+      const clientId = sale.id_cliente || 0;
+      if (!groups[clientId]) {
+        groups[clientId] = {
+          id_cliente: clientId,
+          razon: sale.client?.razon || "Cliente Generico",
+          rut: sale.client?.rut || "---",
+          mail: sale.client?.pago_mail || "",
+          mensaje: sale.client?.mensaje_cobro || "",
+          stats: { pendingItems: 0, totalMonto: 0, totalIva: 0, totalTotal: 0 },
+          items: []
+        };
+      }
+      
+      const g = groups[clientId];
+      g.stats.pendingItems++;
+      g.stats.totalMonto += sale.monto || 0;
+      g.stats.totalIva += sale.iva || 0;
+      g.stats.totalTotal += sale.total || 0;
+      
+      g.items.push({
+        ...sale.toJSON(),
+        dias: sale.getDataValue('dias'),
+        dias_pago: sale.getDataValue('dias_pago'),
+        daysOverdue: sale.getDataValue('dias_pago')
+      });
+    });
+
+    const allGroups = Object.values(groups);
+    
+    // Sort groups
+    allGroups.sort((a, b) => {
+      let valA = a[sortBy] || '';
+      let valB = b[sortBy] || '';
+      if (sortBy === 'razon') {
+        valA = a.razon;
+        valB = b.razon;
+      }
+      if (direction === 'ASC') return valA > valB ? 1 : -1;
+      return valA < valB ? 1 : -1;
+    });
+
+    // Pagination
+    const paginatedGroups = allGroups.slice(offset, offset + parseInt(limit));
 
     return successResponse(res, {
-      data: dashboard,
-      total: count,
+      data: paginatedGroups,
+      total: allGroups.length,
       page: parseInt(page),
-      totalPages: Math.ceil(count / parseInt(limit))
+      totalPages: Math.ceil(allGroups.length / parseInt(limit))
     });
   } catch (error) {
     console.error('Error fetching collections:', error);

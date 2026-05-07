@@ -422,7 +422,7 @@ const Cobros = () => {
           <div key={client.id_cliente} className="border border-slate-300">
             {/* Group Header */}
             <div className="bg-[#3a3a3a] text-white p-3 flex justify-between items-center bg-gradient-to-r from-slate-700 to-slate-800">
-              <h2 className="text-2xl font-black tracking-tight mx-auto uppercase">{client.razon}</h2>
+              <h2 className="text-2xl font-black tracking-tight mx-auto uppercase">{client.razon || "Cliente Generico"}</h2>
               <div className="flex gap-4">
                 <button className="p-1 hover:text-yellow-400 transition-colors" title="Info Cliente">
                   <UserIcon size={20} fill="currentColor" />
@@ -642,7 +642,7 @@ const Cobros = () => {
               <div className="bg-white border border-slate-300 p-8 shadow-sm">
                 <div className="border border-slate-300 mb-8">
                   <div className="bg-[#3a3a3a] text-white p-3 text-center">
-                    <h2 className="text-2xl font-black uppercase">{selectedClient.razon} ({selectedClient.rut})</h2>
+                    <h2 className="text-2xl font-black uppercase">{selectedClient.razon || "Cliente Generico"} ({selectedClient.rut || "---"})</h2>
                   </div>
                   <table className="w-full text-[10px] border-collapse">
                     <thead className="bg-[#666666] text-white font-black uppercase">

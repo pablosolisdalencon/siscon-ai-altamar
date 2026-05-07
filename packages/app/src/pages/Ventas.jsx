@@ -568,11 +568,11 @@ const Ventas = () => {
                     </td>
 
                     <td className="px-2 py-3">
-                      <p className="text-[11px] font-bold text-slate-800 uppercase max-w-[120px] truncate" title={sale.client?.razon}>{sale.client?.razon}</p>
+                      <p className="text-[11px] font-bold text-slate-800 uppercase max-w-[120px] truncate" title={sale.client?.razon || "Cliente Generico"}>{sale.client?.razon || "Cliente Generico"}</p>
                     </td>
                     
                     <td className="px-2 py-3">
-                      <p className="text-[11px] text-slate-500 whitespace-nowrap">{sale.client?.rut}</p>
+                      <p className="text-[11px] text-slate-500 whitespace-nowrap">{sale.client?.rut || "---"}</p>
                     </td>
 
                     <td className="px-2 py-3">

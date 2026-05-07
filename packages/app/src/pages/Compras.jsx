@@ -446,11 +446,11 @@ const Compras = () => {
                   </td>
 
                   <td className="px-2 py-3">
-                    <p className="text-[11px] font-bold text-slate-800 uppercase max-w-[120px] truncate" title={purchase.client?.razon}>{purchase.client?.razon}</p>
+                    <p className="text-[11px] font-bold text-slate-800 uppercase max-w-[120px] truncate" title={purchase.client?.razon || "Cliente Generico"}>{purchase.client?.razon || "Cliente Generico"}</p>
                   </td>
                   
                   <td className="px-2 py-3">
-                    <p className="text-[11px] text-slate-500 whitespace-nowrap">{purchase.client?.rut}</p>
+                    <p className="text-[11px] text-slate-500 whitespace-nowrap">{purchase.client?.rut || "---"}</p>
                   </td>
 
                   <td className="px-2 py-3">
