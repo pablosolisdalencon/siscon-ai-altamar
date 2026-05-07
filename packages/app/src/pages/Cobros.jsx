@@ -164,7 +164,7 @@ const Cobros = () => {
   const fetchCompany = async () => {
     try {
       const { data } = await api.get('/company');
-      setCompany(data.data);
+      setCompany(data);
     } catch (err) {
       console.error('Error fetching company:', err);
     }

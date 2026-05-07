@@ -29,10 +29,23 @@ const Dashboard = () => {
     activeClients: 0
   });
   const [loading, setLoading] = useState(true);
+  const [company, setCompany] = useState(null);
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const baseUrl = apiUrl.replace(/\/api$/, '');
 
   useEffect(() => {
     fetchStats();
+    fetchCompany();
   }, []);
+
+  const fetchCompany = async () => {
+    try {
+      const { data } = await api.get('/company');
+      setCompany(data);
+    } catch (err) {
+      console.error('Error fetching company:', err);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -70,6 +83,23 @@ const Dashboard = () => {
                 AUDIT DE COBROS <BarChart3 size={20} />
               </Link>
             </div>
+          </div>
+
+          {/* Logo & Company Image Area */}
+          <div className="hidden lg:flex flex-col items-center gap-6 z-10 animate-in zoom-in duration-700 delay-300">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/40 transition-all duration-700"></div>
+              <img src="/logo.png" alt="SISCON Logo" className="relative w-48 h-48 object-contain hover:scale-110 transition-transform duration-700 drop-shadow-2xl" />
+            </div>
+            {company?.pago_firma && (
+              <div className="bg-white/5 backdrop-blur-md p-6 rounded-[2rem] border border-white/10 shadow-2xl hover:bg-white/10 transition-all duration-500">
+                <img 
+                  src={`${baseUrl}/docs/FIRMAS/${company.pago_firma}`} 
+                  alt="Empresa Logo" 
+                  className="max-h-20 object-contain filter brightness-0 invert opacity-80"
+                />
+              </div>
+            )}
           </div>
 
           <div className="relative mt-12 md:mt-0">
