@@ -580,7 +580,9 @@ const Ventas = () => {
                     </td>
                     
                     <td className="px-2 py-3">
-                      <p className="text-[10px] text-slate-500 max-w-[150px] truncate" title={sale.detalle}>{sale.detalle}</p>
+                      <p className="text-[10px] text-slate-500 max-w-[150px] whitespace-pre-wrap" title={sale.detalle?.replace(/\\r\\n|\\n|\\r/g, '\n')}>
+                        {sale.detalle?.replace(/\\r\\n|\\n|\\r/g, '\n')}
+                      </p>
                     </td>
 
                     <td className="px-2 py-3 text-right">

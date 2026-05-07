@@ -516,7 +516,7 @@ const Cobros = () => {
                         </div>
                       </td>
                       <td className="px-2 py-1 font-bold text-slate-700">{sale.item}</td>
-                      <td className="px-2 py-1 text-slate-500 italic max-w-xs">{sale.detalle}</td>
+                      <td className="px-2 py-1 text-slate-500 italic max-w-xs whitespace-pre-wrap">{sale.detalle?.replace(/\\r\\n|\\n|\\r/g, '\n')}</td>
                       <td className="px-2 py-1 text-right font-medium">${sale.monto?.toLocaleString()}</td>
                       <td className="px-2 py-1 text-right font-medium">${sale.iva?.toLocaleString()}</td>
                       <td className="px-2 py-1 text-right font-black text-slate-900">${sale.total?.toLocaleString()}</td>
@@ -670,7 +670,7 @@ const Cobros = () => {
                           <td className="px-2 py-2 text-center">{item.n_oc}</td>
                           <td className="px-2 py-2 text-center text-blue-600">{item.n_factura}</td>
                           <td className="px-2 py-2 font-bold">{item.item}</td>
-                          <td className="px-2 py-2 italic text-slate-500">{item.detalle}</td>
+                          <td className="px-2 py-2 italic text-slate-500 whitespace-pre-wrap">{item.detalle?.replace(/\\r\\n|\\n|\\r/g, '\n')}</td>
                           <td className="px-2 py-2 text-right">${item.monto?.toLocaleString()}</td>
                           <td className="px-2 py-2 text-right">${item.iva?.toLocaleString()}</td>
                           <td className="px-2 py-2 text-right font-bold">${item.total?.toLocaleString()}</td>

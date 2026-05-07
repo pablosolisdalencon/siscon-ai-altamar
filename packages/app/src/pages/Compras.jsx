@@ -458,7 +458,9 @@ const Compras = () => {
                   </td>
                   
                   <td className="px-2 py-3">
-                    <p className="text-[10px] text-slate-500 max-w-[150px] truncate" title={purchase.detalle}>{purchase.detalle}</p>
+                    <p className="text-[10px] text-slate-500 max-w-[150px] whitespace-pre-wrap" title={purchase.detalle?.replace(/\\r\\n|\\n|\\r/g, '\n')}>
+                      {purchase.detalle?.replace(/\\r\\n|\\n|\\r/g, '\n')}
+                    </p>
                   </td>
 
                   <td className="px-2 py-3 text-right">

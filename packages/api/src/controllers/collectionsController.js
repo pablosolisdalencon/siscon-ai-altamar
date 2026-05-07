@@ -45,8 +45,6 @@ exports.getCollectionsDashboard = async (req, res) => {
       ];
     }
 
-    const { count, rows: clients } = await Client.findAndCountAll({
-      where: clientWhere,
     const { count: salesCount, rows: sales } = await Sale.findAndCountAll({
       attributes: {
         include: [
