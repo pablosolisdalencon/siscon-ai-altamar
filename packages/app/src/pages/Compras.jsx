@@ -363,10 +363,10 @@ const Compras = () => {
 
       {/* Data Table */}
       <div className="table-container">
-        <table className="w-full text-left border-collapse min-w-[1200px]">
-          <thead className="bg-slate-800 text-white select-none">
+        <table className="w-full text-left border-collapse min-w-[1200px] md:min-w-[1400px]">
+          <thead className="text-white select-none">
             <tr>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider"></th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider sticky top-0 z-10 bg-slate-800"></th>
               {[
                 { label: 'fecha', key: 'fecha' },
                 { label: 'N° OC', key: 'n_oc', center: true },
@@ -387,7 +387,7 @@ const Compras = () => {
                   key={col.key}
                   onClick={() => col.key !== 'accion' && handleSort(col.key)}
                   className={cn(
-                    "px-2 py-3 text-[10px] font-black uppercase tracking-wider transition-colors group",
+                    "px-2 py-3 text-[10px] font-black uppercase tracking-wider transition-colors group sticky top-0 z-10 bg-slate-800",
                     col.key !== 'accion' && "cursor-pointer hover:bg-slate-700",
                     col.center && "text-center",
                     col.right && "text-right"
@@ -612,8 +612,8 @@ const Compras = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-4xl rounded-[40px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-black text-slate-800">{isEditMode ? 'Editar Compra' : 'Nueva Compra'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><Trash2 size={24} /></button>
+              <h2 className="text-3xl font-black text-slate-800">{isEditMode ? 'Editar Compra' : 'Crear Nueva Compra'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

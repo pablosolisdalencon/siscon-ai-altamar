@@ -186,12 +186,12 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
       ) : (
         <div className="table-container">
           <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-slate-800 text-white">
+              <thead className="text-white">
+                <tr>
                   {fields.filter(f => f.type !== 'section').map(field => (
-                    <th key={field.name} className="px-6 py-4 text-[10px] font-black uppercase tracking-wider">{field.label}</th>
+                    <th key={field.name} className="px-6 py-4 text-[10px] font-black uppercase tracking-wider sticky top-0 z-10 bg-slate-800">{field.label}</th>
                   ))}
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-right">Acciones</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-right sticky top-0 z-10 bg-slate-800">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
@@ -224,7 +224,7 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-2xl rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-black text-slate-800">{editingItem ? 'Editar' : 'Nuevo'} {title}</h2>
+              <h2 className="text-2xl font-black text-slate-800">{editingItem ? 'Editar' : 'Crear Nuevo'} {title}</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><X size={24}/></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">

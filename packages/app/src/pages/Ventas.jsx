@@ -470,9 +470,9 @@ const Ventas = () => {
       {/* Advanced Data Table */}
       <div className="table-container">
         <table className="w-full text-left border-collapse min-w-[1200px] md:min-w-[1600px]">
-          <thead className="bg-slate-800 text-white select-none">
+          <thead className="text-white select-none">
             <tr>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider"></th>
+              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider sticky top-0 z-10 bg-slate-800"></th>
               {[
                 { label: 'fecha', key: 'fecha' },
                 { label: 'N° Cot', key: 'n_cot', center: true },
@@ -496,7 +496,7 @@ const Ventas = () => {
                   key={col.key}
                   onClick={() => handleSort(col.key)}
                   className={cn(
-                    "px-2 py-3 text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-slate-700 transition-colors group",
+                    "px-2 py-3 text-[10px] font-black uppercase tracking-wider cursor-pointer group sticky top-0 z-10 bg-slate-800",
                     col.center && "text-center",
                     col.right && "text-right"
                   )}
@@ -741,12 +741,12 @@ const Ventas = () => {
           <div className="bg-white w-full max-w-4xl rounded-[40px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-3xl font-black text-slate-800">{isEditMode ? 'Editar Venta' : 'Nueva Venta'}</h2>
+                <h2 className="text-3xl font-black text-slate-800">{isEditMode ? 'Editar Venta' : 'Crear Nueva Venta'}</h2>
                 <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">
                   {isEditMode ? `Editando registro N° ${selectedSaleId}` : 'Registro de transacción comercial'}
                 </p>
               </div>
-              <button onClick={handleCloseModal} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><Trash2 size={24} /></button>
+              <button onClick={handleCloseModal} className="p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><X size={24} /></button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">

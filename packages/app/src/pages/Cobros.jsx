@@ -475,9 +475,9 @@ SISCON-AI`;
             {/* Table */}
             <div className="table-container">
               <table className="w-full border-collapse text-[10px] sm:text-xs min-w-[1000px]">
-                <thead className="bg-[#666666] text-white uppercase font-black select-none">
+                <thead className="text-white uppercase font-black select-none">
                   <tr>
-                    <th className="px-2 py-1 text-left w-6"></th>
+                    <th className="px-2 py-1 text-left w-6 sticky top-0 z-10 bg-[#666666]"></th>
                     {[
                       { label: 'fecha', key: 'fecha' },
                       { label: 'N° Cot', key: 'n_cot', center: true },
@@ -495,7 +495,7 @@ SISCON-AI`;
                         key={col.key}
                         onClick={() => handleSortItems(col.key)}
                         className={cn(
-                          "px-2 py-2 cursor-pointer hover:bg-slate-500 transition-colors",
+                          "px-2 py-1 font-black uppercase tracking-wider cursor-pointer group sticky top-0 z-10 bg-[#666666]",
                           col.center ? "text-center" : col.right ? "text-right" : "text-left"
                         )}
                       >
