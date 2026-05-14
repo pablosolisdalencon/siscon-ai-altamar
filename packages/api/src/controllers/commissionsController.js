@@ -4,19 +4,21 @@ const { sendEmail } = require('../utils/mailSender');
 
 exports.getCommissions = async (req, res) => {
   try {
-    const { from, to, clientSearch, nFactura, idAgente } = req.query;
+    const { from, to, clientSearch, nFactura, idAgente, page = 1, limit = 10 } = req.query;
     const { role, id_agente: tokenAgentId } = req.user;
 
     const where = {};
 
-    // 1. Role based restriction
     if (role === 'agente') {
       where.id_agente = tokenAgentId;
-    } else if (role === 'admin' && idAgente) {
-      where.id_agente = idAgente;
+    } else if (role === 'admin') {
+      if (idAgente) {
+        where.id_agente = idAgente;
+      } else {
+        where.id_agente = { [Op.ne]: null };
+      }
     }
 
-    // 2. Filters
     if (nFactura) {
       where.n_factura = nFactura;
     }
@@ -37,6 +39,23 @@ exports.getCommissions = async (req, res) => {
       ];
     }
 
+    const allSales = await Sale.findAll({
+      where,
+      include: [
+        { 
+          model: Client, 
+          as: 'client',
+          where: clientSearch ? clientWhere : undefined,
+          required: clientSearch ? true : false
+        }
+      ]
+    });
+
+    const totalCommissions = allSales.reduce((acc, sale) => acc + (sale.comicion || 0), 0);
+    const totalSales = allSales.reduce((acc, sale) => acc + (sale.total || 0), 0);
+    const totalItems = allSales.length;
+
+    const offset = (page - 1) * limit;
     const sales = await Sale.findAll({
       where,
       include: [
@@ -48,12 +67,10 @@ exports.getCommissions = async (req, res) => {
         },
         { model: User, as: 'agent' }
       ],
-      order: [['fecha', 'DESC']]
+      order: [['fecha', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
     });
-
-    // Calculate totals
-    const totalCommissions = sales.reduce((acc, sale) => acc + (sale.comicion || 0), 0);
-    const totalSales = sales.reduce((acc, sale) => acc + (sale.total || 0), 0);
 
     res.json({
       success: true,
@@ -62,7 +79,13 @@ exports.getCommissions = async (req, res) => {
         summary: {
           totalSales,
           totalCommissions,
-          count: sales.length
+          count: totalItems
+        },
+        pagination: {
+          total: totalItems,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(totalItems / limit)
         }
       }
     });

@@ -13,6 +13,10 @@ function AgentDashboard() {
   const [loading, setLoading] = useState(false);
   const userRole = localStorage.getItem('role');
   const [agents, setAgents] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     if (userRole === 'admin') {
@@ -36,7 +40,7 @@ function AgentDashboard() {
   const fetchCommissions = async () => {
     setLoading(true);
     try {
-      const queryParams = new URLSearchParams(filters).toString();
+      const queryParams = new URLSearchParams({ ...filters, page: currentPage, limit: itemsPerPage }).toString();
       const res = await fetch(`${import.meta.env.VITE_API_URL}/commissions?${queryParams}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -46,6 +50,8 @@ function AgentDashboard() {
       if (json.success) {
         setSales(json.data.sales);
         setSummary(json.data.summary);
+        setTotalItems(json.data.pagination.total);
+        setTotalPages(json.data.pagination.totalPages);
       }
     } catch (err) {
       console.error('Error fetching commissions:', err);
@@ -55,8 +61,12 @@ function AgentDashboard() {
   };
 
   useEffect(() => {
-    fetchCommissions();
+    setCurrentPage(1);
   }, [filters]);
+
+  useEffect(() => {
+    fetchCommissions();
+  }, [filters, currentPage, itemsPerPage]);
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -98,8 +108,8 @@ function AgentDashboard() {
   return (
     <div className="space-y-6 max-w-full">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
-        <div>
+      <div className="flex flex-col items-center gap-4 print:hidden">
+        <div className="text-center">
           <h1 className="text-3xl font-bold text-slate-800">Dashboard de Comisiones</h1>
           <p className="text-sm text-slate-500">Resumen de comisiones obtenidas en tus ventas.</p>
         </div>
@@ -196,6 +206,31 @@ function AgentDashboard() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {!loading && totalItems > itemsPerPage && (
+          <div className="glass-card p-4 flex justify-between items-center mt-6">
+            <span className="text-xs font-bold text-slate-400">
+              Mostrando {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} de {totalItems}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 h-10 rounded-xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+              >
+                Anterior
+              </button>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 h-10 rounded-xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-slate-500"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
