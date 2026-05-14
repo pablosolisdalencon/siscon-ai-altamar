@@ -10,6 +10,25 @@ const ImportDB = () => {
   const [message, setMessage] = useState('');
   const [errorDetail, setErrorDetail] = useState(null);
 
+  const handleExport = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/import/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'database_backup.sql');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Error al exportar la base de datos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile && (selectedFile.name.endsWith('.sql') || selectedFile.name.endsWith('.sql.txt'))) {
@@ -59,7 +78,7 @@ const ImportDB = () => {
         <div className="p-4 bg-primary/10 rounded-3xl">
           <Database size={48} className="text-primary" />
         </div>
-        <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-800 uppercase max-w-[50%] leading-tight">Importar Base de Datos</h1>
+        <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-800 uppercase max-w-[50%] leading-tight">Sincronizar Base de Datos</h1>
         <p className="text-slate-500 max-w-xl font-medium text-sm uppercase tracking-widest">
           Sincronización integral del ecosistema cognitivo.
         </p>
@@ -154,6 +173,25 @@ const ImportDB = () => {
             ) : (
               'Iniciar Importación'
             )}
+          </button>
+        </div>
+      </div>
+
+      {/* Export Card */}
+      <div className="bg-white p-12 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 space-y-8 relative overflow-hidden group">
+        <div className="flex flex-col items-center text-center space-y-4">
+          <Database size={32} className="text-primary" />
+          <h2 className="text-xl font-black text-slate-800 uppercase">Exportar Base de Datos</h2>
+          <p className="text-sm text-slate-500">Descarga un respaldo completo en formato SQL.</p>
+          <button 
+            onClick={handleExport} 
+            disabled={loading}
+            className={cn(
+              "btn-primary py-4 px-10 text-sm font-black uppercase tracking-widest transition-all",
+              loading ? "opacity-50 cursor-not-allowed" : "hover:scale-105 active:scale-95 shadow-xl shadow-primary/20"
+            )}
+          >
+            {loading ? 'Procesando...' : 'Exportar BD Completa a un SQL'}
           </button>
         </div>
       </div>

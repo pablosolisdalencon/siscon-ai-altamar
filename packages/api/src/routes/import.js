@@ -7,4 +7,7 @@ const upload = multer({ dest: 'uploads/' });
 // Endpoint to receive a .sql file and overwrite relevant tables
 router.post('/database', upload.single('file'), importController.importSql);
 
+// Endpoint to export database to SQL
+router.get('/export', importController.exportSql);
+
 module.exports = router;

@@ -7,10 +7,31 @@ function AgentDashboard() {
     from: '',
     to: '',
     clientSearch: '',
-    nFactura: ''
+    nFactura: '',
+    agentId: ''
   });
   const [loading, setLoading] = useState(false);
   const userRole = localStorage.getItem('role');
+  const [agents, setAgents] = useState([]);
+
+  useEffect(() => {
+    if (userRole === 'admin') {
+      const fetchAgents = async () => {
+        try {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          });
+          const json = await res.json();
+          // Adjust based on response structure. If crudFactory returns data directly or in an array:
+          const users = Array.isArray(json) ? json : (json.data || []);
+          setAgents(users.filter(u => u.role === 'agente'));
+        } catch (err) {
+          console.error('Error fetching agents:', err);
+        }
+      };
+      fetchAgents();
+    }
+  }, [userRole]);
 
   const fetchCommissions = async () => {
     setLoading(true);
@@ -110,7 +131,7 @@ function AgentDashboard() {
 
       {/* Filters */}
       <div className="glass-card p-6 print:hidden">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className={`grid grid-cols-1 ${userRole === 'admin' ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-4`}>
           <div>
             <label className="text-xs font-bold text-slate-600 uppercase mb-1 block">Desde</label>
             <input type="date" name="from" value={filters.from} onChange={handleFilterChange} className="input-modern" />
@@ -127,6 +148,17 @@ function AgentDashboard() {
             <label className="text-xs font-bold text-slate-600 uppercase mb-1 block">N° Factura</label>
             <input type="text" name="nFactura" value={filters.nFactura} onChange={handleFilterChange} placeholder="Buscar..." className="input-modern" />
           </div>
+          {userRole === 'admin' && (
+            <div>
+              <label className="text-xs font-bold text-slate-600 uppercase mb-1 block">Agente</label>
+              <select name="agentId" value={filters.agentId} onChange={handleFilterChange} className="input-modern">
+                <option value="">Todos</option>
+                {agents.map(agent => (
+                  <option key={agent.id} value={agent.id}>{agent.user}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 

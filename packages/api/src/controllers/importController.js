@@ -67,3 +67,45 @@ exports.importSql = async (req, res) => {
     });
   }
 };
+
+exports.exportSql = async (req, res) => {
+  try {
+    const [tables] = await sequelize.query('SHOW TABLES');
+    const dbName = sequelize.config.database;
+    const tableNames = tables.map(t => t[`Tables_in_${dbName}`]);
+
+    let sqlDump = `-- SISCON-AI Database Dump\n-- Generated on ${new Date().toISOString()}\n\nSET FOREIGN_KEY_CHECKS = 0;\n\n`;
+
+    for (const tableName of tableNames) {
+      const [[createTableResult]] = await sequelize.query(`SHOW CREATE TABLE \`${tableName}\``);
+      const createTableSql = createTableResult['Create Table'];
+      sqlDump += `DROP TABLE IF EXISTS \`${tableName}\`;\n`;
+      sqlDump += `${createTableSql};\n\n`;
+
+      const [rows] = await sequelize.query(`SELECT * FROM \`${tableName}\``);
+      if (rows.length > 0) {
+        sqlDump += `INSERT INTO \`${tableName}\` VALUES `;
+        const values = rows.map(row => {
+          const rowValues = Object.values(row).map(val => {
+            if (val === null) return 'NULL';
+            if (typeof val === 'string') return `'${val.replace(/'/g, "''")}'`;
+            if (val instanceof Date) return `'${val.toISOString()}'`;
+            return val;
+          });
+          return `(${rowValues.join(',')})`;
+        });
+        sqlDump += `${values.join(',\\n')};\n\n`;
+      }
+    }
+
+    sqlDump += `SET FOREIGN_KEY_CHECKS = 1;\n`;
+
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', 'attachment; filename="database_backup.sql"');
+    res.send(sqlDump);
+
+  } catch (error) {
+    console.error('Error exporting SQL:', error);
+    res.status(500).json({ success: false, message: 'Error al exportar la base de datos: ' + error.message });
+  }
+};

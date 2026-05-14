@@ -92,6 +92,14 @@ app.use('/docs', express.static(path.join(__dirname, '../docs')));
 // Start Server
 const startServer = async () => {
   await connectDB();
+  
+  // Sync User model to add comicion column if missing
+  try {
+    await User.sync({ alter: true });
+    console.log('✅ User table synced successfully.');
+  } catch (err) {
+    console.error('❌ Error syncing User table:', err);
+  }
 
   // Test Model Load
   console.log('📦 Models loaded successfully.');

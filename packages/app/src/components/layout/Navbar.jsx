@@ -11,13 +11,14 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const navItems = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
+    { name: 'Dashboard Agente', icon: <Users size={20} />, path: '/agent-dashboard' },
     { name: 'Ventas', icon: <Receipt size={20} />, path: '/ventas' },
     { name: 'f-Cobros', icon: <ShoppingCart size={20} />, path: '/cobros' },
     { name: 'Compras', icon: <ShoppingBag size={20} />, path: '/compras' },
     { name: 'Clientes', icon: <Briefcase size={20} />, path: '/clientes' },
     { name: 'Proveedores', icon: <Truck size={20} />, path: '/proveedores' },
     { name: 'Empresa', icon: <Building2 size={20} />, path: '/empresa' },
-    { name: 'Importar BD', icon: <Database size={20} />, path: '/import-db' },
+    { name: 'Sincronizar BD', icon: <Database size={20} />, path: '/import-db' },
     { name: 'Usuarios', icon: <User size={20} />, path: '/usuarios' },
     { name: 'Config', icon: <Settings size={20} />, path: '/config' },
   ];
