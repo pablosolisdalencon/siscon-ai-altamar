@@ -903,7 +903,7 @@ const Ventas = () => {
                 <button type="button" onClick={handleCloseModal} className="px-8 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">Cancelar</button>
                 <button type="submit" className="btn-primary flex items-center gap-3 px-12 py-4 text-lg">
                   <Save size={24} />
-                  {isEditMode ? 'Actualizar Venta' : 'Confirmar y Crear Venta'}
+                  {isEditMode ? 'Actualizar Venta' : 'Agregar Nueva Venta'}
                 </button>
               </div>
             </form>
@@ -912,7 +912,7 @@ const Ventas = () => {
       )}
       {/* Floating Action Button (FAB) */}
       <button 
-        onClick={handleOpenModal}
+        onClick={() => handleOpenModal(null)}
         className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-[100] group"
         title="Nueva Venta"
       >

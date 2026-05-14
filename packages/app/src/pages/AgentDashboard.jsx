@@ -112,6 +112,11 @@ function AgentDashboard() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-slate-800">Dashboard de Comisiones</h1>
           <p className="text-sm text-slate-500">Resumen de comisiones obtenidas en tus ventas.</p>
+          {(filters.from || filters.to) && (
+            <p className="text-xs font-bold text-slate-600 mt-2">
+              Período: {filters.from || 'Inicio'} hasta {filters.to || 'Presente'}
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           <button onClick={handlePrint} className="btn-glass flex items-center gap-2">

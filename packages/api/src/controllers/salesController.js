@@ -1,4 +1,4 @@
-const { Sale, Client, SaleState, Agent, SaleRecord } = require('../models/associations');
+const { Sale, Client, SaleState, User, SaleRecord } = require('../models/associations');
 const { successResponse, errorResponse } = require('../utils/response');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
@@ -46,7 +46,7 @@ exports.getSales = async (req, res) => {
 
     const include = [
         { model: SaleState, as: 'status' },
-        { model: Agent, as: 'agent' }
+        { model: User, as: 'agent' }
     ];
 
     const clientInclude = {
@@ -260,7 +260,7 @@ exports.exportSalesExcel = async (req, res) => {
 
     const include = [
         { model: SaleState, as: 'status' },
-        { model: Agent, as: 'agent' }
+        { model: User, as: 'agent' }
     ];
 
     const clientInclude = {
