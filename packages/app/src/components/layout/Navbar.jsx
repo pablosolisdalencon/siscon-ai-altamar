@@ -14,7 +14,6 @@ const Navbar = () => {
     { name: 'Ventas', icon: <Receipt size={20} />, path: '/ventas' },
     { name: 'f-Cobros', icon: <ShoppingCart size={20} />, path: '/cobros' },
     { name: 'Compras', icon: <ShoppingBag size={20} />, path: '/compras' },
-    { name: 'Agentes', icon: <Users size={20} />, path: '/agentes' },
     { name: 'Clientes', icon: <Briefcase size={20} />, path: '/clientes' },
     { name: 'Proveedores', icon: <Truck size={20} />, path: '/proveedores' },
     { name: 'Empresa', icon: <Building2 size={20} />, path: '/empresa' },

@@ -22,6 +22,10 @@ const User = sequelize.define('usuarios', {
   role: {
     type: DataTypes.STRING,
     defaultValue: 'user'
+  },
+  comicion: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0
   }
 }, {
   tableName: 'usuarios',

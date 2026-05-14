@@ -5,7 +5,7 @@ import Ventas from './pages/Ventas';
 import Cobros from './pages/Cobros';
 import Compras from './pages/Compras';
 import Dashboard from './pages/Dashboard';
-import { Agentes, Clientes, Proveedores, Usuarios } from './pages/Modules';
+import { Clientes, Proveedores, Usuarios } from './pages/Modules';
 import Config from './pages/Config';
 import Empresa from './pages/Empresa';
 import ImportDB from './pages/ImportDB';
@@ -68,11 +68,7 @@ function App() {
                 <Compras />
               </ProtectedRoute>
             } />
-            <Route path="/agentes" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <Agentes />
-              </ProtectedRoute>
-            } />
+
             <Route path="/clientes" element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <Clientes />

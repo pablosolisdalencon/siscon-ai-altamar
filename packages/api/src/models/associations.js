@@ -1,7 +1,6 @@
 const Sale = require('./Sale');
 const Client = require('./Client');
 const SaleState = require('./SaleState');
-const Agent = require('./Agent');
 const Provider = require('./Provider');
 const Purchase = require('./Purchase');
 const Company = require('./Company');
@@ -17,8 +16,8 @@ Client.hasMany(Sale, { foreignKey: 'id_cliente', as: 'ventas', constraints: fals
 Sale.belongsTo(SaleState, { foreignKey: 'estado', as: 'status', constraints: false });
 SaleState.hasMany(Sale, { foreignKey: 'estado', constraints: false });
 
-Sale.belongsTo(Agent, { foreignKey: 'id_agente', as: 'agent', constraints: false });
-Agent.hasMany(Sale, { foreignKey: 'id_agente', constraints: false });
+Sale.belongsTo(User, { foreignKey: 'id_agente', as: 'agent', constraints: false });
+User.hasMany(Sale, { foreignKey: 'id_agente', constraints: false });
 
 // Purchase Associations
 Purchase.belongsTo(Client, { foreignKey: 'id_cliente', as: 'client', constraints: false });
@@ -35,7 +34,6 @@ module.exports = {
   Sale,
   Client,
   SaleState,
-  Agent,
   Provider,
   Purchase,
   Company,

@@ -237,6 +237,7 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
                       </div>
                     );
                   }
+                  if (field.showIf && !field.showIf(formData)) return null;
                   return (
                     <div key={field.name} className={cn("space-y-1", field.fullWidth && "col-span-full")}>
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">{field.label}</label>
@@ -287,15 +288,6 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
   );
 };
 
-const AGENT_FIELDS = [
-  { type: 'section', label: 'Información Básica' },
-  { name: 'nombre', label: 'Nombre Completo', required: true, fullWidth: true },
-  { name: 'rut', label: 'RUT' },
-  { name: 'mail', label: 'Email' },
-  { name: 'fono', label: 'Teléfono' },
-  { name: 'comision_default', label: 'Comisión Base (%)', type: 'number', defaultValue: 0 }
-];
-
 const CLIENT_FIELDS = [
   { type: 'section', label: 'Datos de la Empresa' },
   { name: 'razon', label: 'Razón Social', required: true, fullWidth: true },
@@ -336,12 +328,11 @@ const USER_FIELDS = [
   { name: 'pass', label: 'Contraseña', type: 'password', required: true },
   { name: 'role', label: 'Rol del Sistema', type: 'select', defaultValue: 'user', options: [
     { label: 'Administrador', value: 'admin' },
-    { label: 'Usuario', value: 'user' },
-    { label: 'Visualizador', value: 'viewer' }
-  ]}
+    { label: 'Agente', value: 'agente' }
+  ]},
+  { name: 'comicion', label: 'Comisión (%)', type: 'number', defaultValue: 0, showIf: (data) => data.role === 'agente' }
 ];
 
-export const Agentes = () => <ModuleManager title="Gestión de Agentes" endpoint="/agents" icon={Users} fields={AGENT_FIELDS} />;
 export const Clientes = () => <ModuleManager title="Clientes" endpoint="/clients" icon={Briefcase} fields={CLIENT_FIELDS} />;
 export const Proveedores = () => <ModuleManager title="Proveedores" endpoint="/providers" icon={Truck} fields={PROVIDER_FIELDS} />;
 export const Usuarios = () => <ModuleManager title="Usuarios" endpoint="/users" icon={User} fields={USER_FIELDS} />;

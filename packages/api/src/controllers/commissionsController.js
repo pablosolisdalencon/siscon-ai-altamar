@@ -1,4 +1,4 @@
-const { Sale, Client, Agent, User } = require('../models/associations');
+const { Sale, Client, User } = require('../models/associations');
 const { Op } = require('sequelize');
 const { sendEmail } = require('../utils/mailSender');
 
@@ -46,7 +46,7 @@ exports.getCommissions = async (req, res) => {
           where: clientSearch ? clientWhere : undefined,
           required: clientSearch ? true : false
         },
-        { model: Agent, as: 'agent' }
+        { model: User, as: 'agent' }
       ],
       order: [['fecha', 'DESC']]
     });
@@ -88,12 +88,12 @@ exports.sendReport = async (req, res) => {
       if (!targetAgentId) {
         return res.status(400).json({ success: false, message: 'Se requiere id de agente' });
       }
-      const agent = await Agent.findByPk(targetAgentId);
+      const agent = await User.findByPk(targetAgentId);
       if (!agent || !agent.mail) {
         return res.status(400).json({ success: false, message: 'Agente no encontrado o sin correo' });
       }
       targetEmail = agent.mail;
-      subject = `[ADMIN] Reporte de Comisiones para ${agent.nombre}`;
+      subject = `[ADMIN] Reporte de Comisiones para ${agent.user}`;
     } else if (role === 'agente') {
       // Agent sends to Admin
       // Find an admin user or use a default

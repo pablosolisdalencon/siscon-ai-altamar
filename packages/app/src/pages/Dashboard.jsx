@@ -96,7 +96,7 @@ const Dashboard = () => {
                 <img 
                   src={`${baseUrl}/docs/FIRMAS/${company.pago_firma}`} 
                   alt="Empresa Logo" 
-                  className="max-h-24 object-contain filter brightness-0 invert opacity-80"
+                  className="max-h-24 object-contain filter opacity-80"
                 />
               </div>
             )}
