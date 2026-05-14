@@ -139,8 +139,13 @@ exports.createSale = async (req, res) => {
     const iva = neto * 0.19;
     const total = neto + iva;
 
+    // Handle empty strings for integer fields
+    const dataToSave = { ...rest };
+    if (dataToSave.id_agente === '') dataToSave.id_agente = null;
+    if (dataToSave.id_cliente === '') dataToSave.id_cliente = null;
+
     const sale = await Sale.create({
-      ...rest,
+      ...dataToSave,
       monto: neto,
       iva,
       total
@@ -149,7 +154,7 @@ exports.createSale = async (req, res) => {
     return successResponse(res, sale, 'Sale created successfully', 211);
   } catch (error) {
     console.error('Error creating sale:', error);
-    return errorResponse(res, 'Error creating sale');
+    return errorResponse(res, 'Error creating sale: ' + error.message);
   }
 };
 

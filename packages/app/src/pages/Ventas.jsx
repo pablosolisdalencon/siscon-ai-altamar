@@ -814,11 +814,11 @@ const Ventas = () => {
                       value={formData.id_agente}
                       options={[
                         { value: '', label: 'Sin Agente' },
-                        ...auxData.agents.map(a => ({ value: a.id_agente, label: a.nombre, comision: a.comision_default }))
+                        ...auxData.agents.map(a => ({ value: a.id_user, label: a.user, comision: a.comicion }))
                       ]}
                       onChange={(val) => {
-                        const agent = auxData.agents.find(a => a.id_agente == val);
-                        setFormData({ ...formData, id_agente: val, comicion: agent?.comision_default || 0 });
+                        const agent = auxData.agents.find(a => a.id_user == val);
+                        setFormData({ ...formData, id_agente: val, comicion: agent?.comicion || 0 });
                       }}
                     />
                   </div>
