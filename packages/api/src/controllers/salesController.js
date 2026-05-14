@@ -3,6 +3,28 @@ const { successResponse, errorResponse } = require('../utils/response');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 
+const cleanSaleData = (data) => {
+  const cleanInt = (val) => (val === '' || val === undefined) ? null : parseInt(val);
+  const cleanFloat = (val) => (val === '' || val === undefined) ? null : parseFloat(val);
+  const cleanDate = (val) => (val === '' || val === undefined) ? null : val;
+
+  const result = { ...data };
+  
+  if ('id_agente' in result) result.id_agente = cleanInt(result.id_agente);
+  if ('id_cliente' in result) result.id_cliente = cleanInt(result.id_cliente);
+  if ('n_factura' in result) result.n_factura = cleanInt(result.n_factura) || 0;
+  if ('n_cot' in result) result.n_cot = cleanInt(result.n_cot) || 0;
+  if ('n_oc' in result) result.n_oc = cleanInt(result.n_oc) || 0;
+  if ('estado' in result) result.estado = cleanInt(result.estado) || 1;
+  if ('comicion' in result) result.comicion = cleanFloat(result.comicion) || 0;
+  
+  if ('fecha_entrega' in result) result.fecha_entrega = cleanDate(result.fecha_entrega);
+  if ('fecha_pago' in result) result.fecha_pago = cleanDate(result.fecha_pago);
+  if ('fecha' in result) result.fecha = cleanDate(result.fecha);
+
+  return result;
+};
+
 exports.getSales = async (req, res) => {
   try {
     const { from, to, clientId, status, nFactura, nCot, pagado, clientSearch, page = 1, limit: queryLimit, sortBy = 'id_venta', sortOrder = 'DESC' } = req.query;
@@ -139,10 +161,8 @@ exports.createSale = async (req, res) => {
     const iva = neto * 0.19;
     const total = neto + iva;
 
-    // Handle empty strings for integer fields
-    const dataToSave = { ...rest };
-    if (dataToSave.id_agente === '') dataToSave.id_agente = null;
-    if (dataToSave.id_cliente === '') dataToSave.id_cliente = null;
+    // Handle empty strings and types for robust insertion
+    const dataToSave = cleanSaleData(rest);
 
     const sale = await Sale.create({
       ...dataToSave,
@@ -164,7 +184,7 @@ exports.updateSale = async (req, res) => {
     const sale = await Sale.findByPk(req.params.id);
     if (!sale) return errorResponse(res, 'Sale not found', 404);
 
-    const updateData = { ...req.body };
+    const updateData = cleanSaleData(req.body);
     if (monto) {
       const neto = parseFloat(monto) || 0;
       updateData.iva = neto * 0.19;
