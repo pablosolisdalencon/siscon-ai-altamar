@@ -164,7 +164,7 @@ function AgentDashboard() {
               <select name="agentId" value={filters.agentId} onChange={handleFilterChange} className="input-modern">
                 <option value="">Todos</option>
                 {agents.map(agent => (
-                  <option key={agent.id} value={agent.id}>{agent.user}</option>
+                  <option key={agent.id_user} value={agent.id_user}>{agent.user}</option>
                 ))}
               </select>
             </div>
