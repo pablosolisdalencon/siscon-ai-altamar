@@ -77,7 +77,7 @@ function AgentDashboard() {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ 
-          agentId: localStorage.getItem('id_agente'),
+          agentId: userRole === 'admin' ? filters.agentId : localStorage.getItem('id_agente'),
           // We could pass base64 PDF data here if we generated it on frontend.
           // Since we use window.print(), we can't easily get the PDF data in JS.
           // So the backend will just send a notification or a summary in the email body.
