@@ -16,7 +16,7 @@ function AgentDashboard() {
     setLoading(true);
     try {
       const queryParams = new URLSearchParams(filters).toString();
-      const res = await fetch(`http://localhost:4000/api/commissions?${queryParams}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/commissions?${queryParams}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -49,7 +49,7 @@ function AgentDashboard() {
     try {
       // For simplicity, we send the current filters so the backend can fetch the same data
       // or we could send the HTML. Let's send the filters and agentId.
-      const res = await fetch('http://localhost:4000/api/commissions/send-report', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/commissions/send-report`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

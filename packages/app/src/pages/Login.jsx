@@ -12,7 +12,7 @@ function Login() {
 
   const fetchCaptcha = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/auth/captcha');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/captcha`);
       const json = await res.json();
       if (json.success) {
         setCaptchaQuestion(json.data.question);
@@ -32,7 +32,7 @@ function Login() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:4000/api/auth/login', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, captchaAnswer, captchaToken })
