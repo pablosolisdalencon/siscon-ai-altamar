@@ -223,15 +223,15 @@ const Ventas = () => {
 
   const fetchAuxData = async () => {
     try {
-      const [c, a, s, r] = await Promise.all([
+      const [c, u, s, r] = await Promise.all([
         api.get('/clients'),
-        api.get('/agents'),
+        api.get('/users'),
         api.get('/sale-states'),
         api.get('/sale-records')
       ]);
       setAuxData({
         clients: c.data.data,
-        agents: a.data.data,
+        agents: Array.isArray(u.data.data) ? u.data.data.filter(user => user.role === 'agente') : [],
         states: s.data.data
       });
       // Set pagination limit from config
