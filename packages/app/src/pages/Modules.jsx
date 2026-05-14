@@ -326,6 +326,7 @@ const USER_FIELDS = [
   { type: 'section', label: 'Credenciales de Acceso' },
   { name: 'user', label: 'Nombre de Usuario', required: true },
   { name: 'pass', label: 'Contraseña', type: 'password', required: true },
+  { name: 'mail', label: 'Correo Electrónico', type: 'email', required: true },
   { name: 'role', label: 'Rol del Sistema', type: 'select', defaultValue: 'user', options: [
     { label: 'Administrador', value: 'admin' },
     { label: 'Agente', value: 'agente' }
