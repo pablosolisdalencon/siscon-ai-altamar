@@ -171,21 +171,23 @@ function AgentDashboard() {
                 <th className="p-3 text-xs font-bold text-slate-500 uppercase">Fecha</th>
                 <th className="p-3 text-xs font-bold text-slate-500 uppercase">N° Factura</th>
                 <th className="p-3 text-xs font-bold text-slate-500 uppercase">Cliente</th>
+                <th className="p-3 text-xs font-bold text-slate-500 uppercase">Agente</th>
                 <th className="p-3 text-xs font-bold text-slate-500 uppercase text-right">Total Venta</th>
                 <th className="p-3 text-xs font-bold text-slate-500 uppercase text-right">Comisión</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="5" className="p-4 text-center text-slate-500">Cargando...</td></tr>
+                <tr><td colSpan="6" className="p-4 text-center text-slate-500">Cargando...</td></tr>
               ) : sales.length === 0 ? (
-                <tr><td colSpan="5" className="p-4 text-center text-slate-500">No se encontraron registros.</td></tr>
+                <tr><td colSpan="6" className="p-4 text-center text-slate-500">No se encontraron registros.</td></tr>
               ) : (
                 sales.map(sale => (
                   <tr key={sale.id_venta} className="border-bottom border-slate-50 hover:bg-slate-50/50 transition-all">
                     <td className="p-3 text-sm font-medium text-slate-700">{sale.fecha}</td>
                     <td className="p-3 text-sm font-bold text-primary">{sale.n_factura}</td>
                     <td className="p-3 text-sm font-medium text-slate-700">{sale.client?.razon || '---'}</td>
+                    <td className="p-3 text-sm font-medium text-slate-700">{sale.agent?.user || '---'}</td>
                     <td className="p-3 text-sm font-bold text-slate-700 text-right">$ {(sale.total || 0).toLocaleString()}</td>
                     <td className="p-3 text-sm font-bold text-green-600 text-right">$ {(sale.comicion || 0).toLocaleString()}</td>
                   </tr>

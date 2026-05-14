@@ -18,6 +18,40 @@ async function run() {
       console.log('ℹ️ La columna "comicion" ya existe en la tabla "usuarios".');
     }
 
+    // 1. Crear usuario psolis si no existe
+    const [[userExists]] = await sequelize.query("SELECT * FROM usuarios WHERE user = 'psolis'");
+    let userId;
+    if (!userExists) {
+      const [insertUser] = await sequelize.query("INSERT INTO usuarios (user, pass, mail, role, comicion) VALUES ('psolis', 'CometaHalley.,2026', 'pablo.solis.dalencon@gmail.com', 'agente', 25)");
+      userId = insertUser;
+      console.log('✅ Usuario "psolis" creado.');
+    } else {
+      userId = userExists.id_user;
+      console.log('ℹ️ El usuario "psolis" ya existe.');
+    }
+
+    // 2. Crear cliente genérico si no existe (ya que ventas requiere id_cliente)
+    const [[clientExists]] = await sequelize.query("SELECT * FROM clientes WHERE razon = 'Cliente Generico'");
+    let clientId;
+    if (!clientExists) {
+      const [insertClient] = await sequelize.query("INSERT INTO clientes (rut, razon) VALUES ('1-9', 'Cliente Generico')");
+      clientId = insertClient;
+      console.log('✅ Cliente "Cliente Generico" creado.');
+    } else {
+      clientId = clientExists.id_cliente;
+      console.log('ℹ️ El cliente "Cliente Generico" ya existe.');
+    }
+
+    // 3. Crear venta de muestra si no existe
+    const [[saleExists]] = await sequelize.query(`SELECT * FROM ventas WHERE id_agente = ${userId} AND total = 1000000`);
+    if (!saleExists) {
+      const sqlSale = `INSERT INTO ventas (fecha, n_factura, n_cot, n_oc, id_cliente, id_agente, item, detalle, monto, iva, total, estado, pagado, comicion) VALUES ('${new Date().toISOString().split('T')[0]}', 9999, 0, 0, ${clientId}, ${userId}, 'Servicio de Prueba', 'Venta de muestra para dashboard', 840336, 159664, 1000000, 1, 'NO', 250000)`;
+      await sequelize.query(sqlSale);
+      console.log('✅ Venta de muestra creada.');
+    } else {
+      console.log('ℹ️ La venta de muestra ya existe.');
+    }
+
     process.exit(0);
   } catch (error) {
     console.error('❌ Error al ejecutar el comando SQL:', error);

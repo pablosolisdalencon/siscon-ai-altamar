@@ -156,7 +156,7 @@ const Dashboard = () => {
               <p className="font-black text-slate-800 text-lg uppercase">Clientes</p>
               <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Gestión de cartera, contactos y condiciones comerciales.</p>
             </Link>
-            <Link to="/agentes" className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-indigo-500 hover:bg-white hover:shadow-xl transition-all group flex flex-col items-center text-center">
+            <Link to="/agent-dashboard" className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-indigo-500 hover:bg-white hover:shadow-xl transition-all group flex flex-col items-center text-center">
               <div className="p-4 bg-indigo-500/10 text-indigo-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform"><Users size={32} /></div>
               <p className="font-black text-slate-800 text-lg uppercase">Agentes</p>
               <p className="text-xs text-slate-400 mt-2 font-bold px-4 leading-relaxed">Administración de agentes de venta y comisiones.</p>

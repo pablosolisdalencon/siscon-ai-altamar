@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import { 
   LayoutDashboard, ShoppingCart, Users, Receipt, 
@@ -9,6 +9,7 @@ import {
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const navigate = useNavigate();
   const navItems = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
     { name: 'Dashboard Agente', icon: <Users size={20} />, path: '/agent-dashboard' },
@@ -74,7 +75,15 @@ const Navbar = () => {
           </div>
 
           <div className="mt-auto pt-6 border-t border-slate-100">
-            <button className="flex items-center gap-4 p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50/50 transition-all w-full">
+            <button 
+              onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('role');
+                localStorage.removeItem('id_agente');
+                navigate('/login');
+              }}
+              className="flex items-center gap-4 p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50/50 transition-all w-full"
+            >
               <LogOut size={20} className="shrink-0" />
               <span className="font-bold text-sm">Cerrar Sesión</span>
             </button>
