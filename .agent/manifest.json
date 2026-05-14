@@ -176,18 +176,5 @@
       "enabled": true,
       "description": "Al finalizar cada tarea, sintetizar Genotipo Superior más preciso que el Genotipo Base"
     }
-  },
-  "telemetry": {
-    "enabled": true,
-    "format": "[⚙️ INVOCANDO SKILL: {skill_name}]",
-    "mandatory": true,
-    "log_to_memory": true
-  },
-  "constraints": {
-    "max_concurrent_skills": 4,
-    "zero_trust_architecture": true,
-    "auto_validation_mandatory": true,
-    "never_hardcode_paths": true,
-    "all_paths_relative_to_root": true
   }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Ventas from './pages/Ventas';
 import Cobros from './pages/Cobros';
@@ -9,25 +9,110 @@ import { Agentes, Clientes, Proveedores, Usuarios } from './pages/Modules';
 import Config from './pages/Config';
 import Empresa from './pages/Empresa';
 import ImportDB from './pages/ImportDB';
+import Login from './pages/Login';
+import AgentDashboard from './pages/AgentDashboard';
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    // If agent tries to access admin pages, redirect to agent dashboard
+    if (role === 'agente') {
+      return <Navigate to="/agent-dashboard" replace />;
+    }
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
 
 function App() {
+  const isLoginPage = window.location.pathname === '/login';
+
   return (
     <Router>
       <div className="flex flex-col md:flex-row min-h-screen max-w-full overflow-x-hidden">
-        <Navbar />
-        <main className="flex-1 w-full p-4 md:p-8 transition-all duration-500 overflow-x-hidden pt-24 md:pt-8">
+        {/* Only show Navbar if not on login page */}
+        <Routes>
+          <Route path="/login" element={null} />
+          <Route path="*" element={<Navbar />} />
+        </Routes>
+        
+        <main className={`flex-1 w-full p-4 md:p-8 transition-all duration-500 overflow-x-hidden ${isLoginPage ? '' : 'pt-24 md:pt-8'}`}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/ventas" element={<Ventas />} />
-            <Route path="/cobros" element={<Cobros />} />
-            <Route path="/compras" element={<Compras />} />
-            <Route path="/agentes" element={<Agentes />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/proveedores" element={<Proveedores />} />
-            <Route path="/usuarios" element={<Usuarios />} />
-            <Route path="/config" element={<Config />} />
-            <Route path="/empresa" element={<Empresa />} />
-            <Route path="/import-db" element={<ImportDB />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Admin Only Routes */}
+            <Route path="/" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Ventas />
+              </ProtectedRoute>
+            } />
+            <Route path="/cobros" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Cobros />
+              </ProtectedRoute>
+            } />
+            <Route path="/compras" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Compras />
+              </ProtectedRoute>
+            } />
+            <Route path="/agentes" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Agentes />
+              </ProtectedRoute>
+            } />
+            <Route path="/clientes" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Clientes />
+              </ProtectedRoute>
+            } />
+            <Route path="/proveedores" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Proveedores />
+              </ProtectedRoute>
+            } />
+            <Route path="/usuarios" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Usuarios />
+              </ProtectedRoute>
+            } />
+            <Route path="/config" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Config />
+              </ProtectedRoute>
+            } />
+            <Route path="/empresa" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Empresa />
+              </ProtectedRoute>
+            } />
+            <Route path="/import-db" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <ImportDB />
+              </ProtectedRoute>
+            } />
+
+            {/* Agent & Admin Routes */}
+            <Route path="/agent-dashboard" element={
+              <ProtectedRoute allowedRoles={['admin', 'agente']}>
+                <AgentDashboard />
+              </ProtectedRoute>
+            } />
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </div>

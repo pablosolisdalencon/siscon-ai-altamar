@@ -14,7 +14,11 @@ const purchasesRoutes = require('./routes/purchases');
 const companyRoutes = require('./routes/company');
 const uploadRoutes = require('./routes/uploadRoutes');
 const importRoutes = require('./routes/import');
+const authRoutes = require('./routes/auth');
+const commissionsRoutes = require('./routes/commissions');
 const modulesController = require('./controllers/modulesController');
+
+const { authenticateToken, authorizeRole } = require('./utils/authMiddleware');
 
 // Middleware
 app.use(cors());
@@ -28,6 +32,20 @@ app.get('/', (req, res) => {
 const apiRouter = express.Router();
 
 // Routes Registration
+// Public routes
+apiRouter.use('/auth', authRoutes);
+
+// Protect all subsequent routes
+apiRouter.use(authenticateToken);
+
+// Allow access to commissions for both admin and agent
+apiRouter.use('/commissions', authorizeRole(['admin', 'agente']), commissionsRoutes);
+
+// Restrict all other routes to admin only
+apiRouter.use((req, res, next) => {
+  authorizeRole(['admin'])(req, res, next);
+});
+
 apiRouter.use('/sales', salesRoutes);
 apiRouter.use('/collections', collectionsRoutes);
 apiRouter.use('/purchases', purchasesRoutes);

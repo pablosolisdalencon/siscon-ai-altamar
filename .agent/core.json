@@ -8,16 +8,6 @@
     "updated_at": "2026-04-30T03:29:00Z",
     "workspace_root": "./"
   },
-  "identity": {
-    "personality_level": 7,
-    "primary_skill": "master_orchestrator",
-    "core_engine": "brain",
-    "designation": "Motor de Optimización y Ejecución Agnóstica (MOEA)",
-    "autonomy_level": "full",
-    "courtesy_mode": false,
-    "technical_density": "maximized",
-    "reasoning_mode": "system_2_tree_of_thought"
-  },
   "architecture": {
     "skill_directory": ".agent/skills",
     "workflow_directory": ".agent/workflows",
@@ -58,28 +48,10 @@
     "moea_agent",
     "requirements_factory"
   ],
-  "execution_pipeline": {
-    "pre_processing": [
-      "master_orchestrator:purpose_processing",
-      "master_orchestrator:nerve_activation",
-      "hyper_specialist:deep_domain_identification"
-    ],
-    "processing": [
-      "brain:chain_of_thought",
-      "adaptive_learning:macro_micro_learning"
-    ],
-    "materialization": [
-      "architect_node:scaffolding",
-      "master_orchestrator:end_to_end_autonomy"
-    ],
-    "post_processing": [
-      "master_orchestrator:mavm_closure",
-      "brain:auto_overwrite"
-    ]
-  },
   "telemetry": {
     "enabled": true,
     "format": "[⚙️ INVOCANDO SKILL: {skill_name}]",
+    "mandatory": true,
     "log_to_memory": true
   },
   "constraints": {
@@ -88,7 +60,9 @@
     "objectivity_target": 100,
     "zero_trust_architecture": true,
     "auto_validation_mandatory": true,
-    "anti_hallucination_gate": true
+    "anti_hallucination_gate": true,
+    "never_hardcode_paths": true,
+    "all_paths_relative_to_root": true
   },
   "tech_policy": {
     "default_stack": {

@@ -6,7 +6,7 @@ if (process.env.SENDGRID_API_KEY) {
     console.warn('SENDGRID_API_KEY is not defined in environment variables');
 }
 
-const sendEmail = async ({ to, subject, html, fromName, fromEmail }) => {
+const sendEmail = async ({ to, subject, html, fromName, fromEmail, attachments }) => {
     const msg = {
         to,
         from: {
@@ -15,6 +15,7 @@ const sendEmail = async ({ to, subject, html, fromName, fromEmail }) => {
         },
         subject,
         html,
+        ...(attachments && { attachments })
     };
 
     try {

@@ -28,7 +28,7 @@ const Navbar = () => {
       {/* Floating Menu Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-6 left-6 z-[100] w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all overflow-hidden"
+        className="fixed top-6 left-6 z-[100] w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all overflow-hidden print:hidden"
       >
         {isOpen ? <X size={24} /> : <img src="/logo.png" alt="Menu" className="w-full h-full object-cover scale-110" />}
       </button>
@@ -43,7 +43,7 @@ const Navbar = () => {
 
       {/* Drawer Menu */}
       <nav className={cn(
-        "fixed top-0 left-0 h-full w-72 bg-white/90 backdrop-blur-xl z-[90] shadow-2xl transition-transform duration-500 ease-out p-8 pt-24",
+        "fixed top-0 left-0 h-full w-72 bg-white/90 backdrop-blur-xl z-[90] shadow-2xl transition-transform duration-500 ease-out p-8 pt-24 print:hidden",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full gap-2">

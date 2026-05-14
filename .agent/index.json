@@ -2,9 +2,9 @@
   "$schema": "index_v1",
   "metadata": {
     "generated_at": "2026-04-30T03:29:00Z",
-    "updated_at": "2026-04-30T03:38:00Z",
+    "updated_at": "2026-05-13T20:40:00Z",
     "description": "Tabla de Particiones del ecosistema agéntico ERIC. Índice maestro de todas las rutas disponibles.",
-    "entry_count": 23,
+    "entry_count": 24,
     "workspace_root": "./"
   },
   "skills": [
@@ -114,6 +114,11 @@
     }
   ],
   "config_files": [
+    {
+      "name": "manifest",
+      "description": "Manifiesto de arranque y definición del motor cognitivo",
+      "path": ".agent/manifest.json"
+    },
     {
       "name": "core",
       "description": "Configuración global del sistema agéntico ERIC",
