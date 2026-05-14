@@ -40,17 +40,18 @@ exports.login = async (req, res) => {
     }
 
     // 2. Verify Credentials
-    let role = null;
-    let id_agente = null; // To link with Agent if needed
+    const user = await User.findOne({ where: { user: username } });
 
-    if (username === 'admin' && password === 'TiburonBlanco.,2026') {
-      role = 'admin';
-    } else if (username === 'agente' && password === 'CometaHalley.,2026') {
-      role = 'agente';
-      id_agente = 1; // Fallback or search in DB. Let's assume agent 1 for now or search by username if we can.
-    } else {
-      return res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Usuario no encontrado' });
     }
+
+    if (user.pass !== password) {
+      return res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
+    }
+
+    const role = user.role;
+    const id_agente = role === 'agente' ? user.id_user : null;
 
     // 3. Generate Auth Token
     const token = jwt.sign({ username, role, id_agente }, JWT_SECRET, { expiresIn: '24h' });

@@ -4,7 +4,7 @@ const { sendEmail } = require('../utils/mailSender');
 
 exports.getCommissions = async (req, res) => {
   try {
-    const { from, to, clientSearch, nFactura, idAgente, page = 1, limit = 10 } = req.query;
+    const { from, to, clientSearch, nFactura, agentId, page = 1, limit = 10 } = req.query;
     const { role, id_agente: tokenAgentId } = req.user;
 
     const where = {};
@@ -12,8 +12,8 @@ exports.getCommissions = async (req, res) => {
     if (role === 'agente') {
       where.id_agente = tokenAgentId;
     } else if (role === 'admin') {
-      if (idAgente) {
-        where.id_agente = idAgente;
+      if (agentId) {
+        where.id_agente = agentId;
       } else {
         where.id_agente = { [Op.ne]: null };
       }
