@@ -54,11 +54,6 @@ apiRouter.use('/uploads', uploadRoutes);
 apiRouter.use('/import', importRoutes);
 
 // Module Routes
-// Agents
-apiRouter.get('/agents', modulesController.getAgents);
-apiRouter.post('/agents', modulesController.createAgent);
-apiRouter.put('/agents/:id', modulesController.updateAgent);
-apiRouter.delete('/agents/:id', modulesController.deleteAgent);
 
 // Clients
 apiRouter.get('/clients', modulesController.getClients);
