@@ -18,6 +18,15 @@ async function run() {
       console.log('ℹ️ La columna "comicion" ya existe en la tabla "usuarios".');
     }
 
+    // 0. Crear usuario admin por defecto si no existe
+    const [[adminExists]] = await sequelize.query("SELECT * FROM usuarios WHERE user = 'admin'");
+    if (!adminExists) {
+      await sequelize.query("INSERT INTO usuarios (user, pass, mail, role, comicion) VALUES ('admin', 'TiburonBlanco.,2026', 'admin@test.com', 'admin', 0)");
+      console.log('✅ Usuario "admin" creado.');
+    } else {
+      console.log('ℹ️ El usuario "admin" ya existe.');
+    }
+
     // 1. Crear usuario psolis si no existe
     const [[userExists]] = await sequelize.query("SELECT * FROM usuarios WHERE user = 'psolis'");
     let userId;
