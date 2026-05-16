@@ -15,11 +15,11 @@ axios.interceptors.request.use(
 );
 
 export const getBaseURL = () => {
-  // En producción, forzamos la ruta absoluta para saltarnos interferencias de WordPress
+  // En producción, usamos la URL absoluta configurada para evitar interferencias
   if (window.location.hostname !== 'localhost') {
     return 'https://altamarmkt.cl/siscon-ai/api';
   }
-  return '/api';
+  return import.meta.env.VITE_API_URL || '/api';
 };
 
 const api = axios.create({

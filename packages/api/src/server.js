@@ -88,6 +88,16 @@ apiRouter.get('/configurations', modulesController.getConfigurations);
 apiRouter.post('/configurations', modulesController.createConfiguration);
 apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 
+// Middleware de "blindaje" para limpiar cualquier prefijo (cPanel, subcarpetas, etc.)
+app.use((req, res, next) => {
+  // Buscamos el inicio de nuestras rutas conocidas
+  const match = req.url.match(/(\/auth|\/sales|\/collections|\/purchases|\/company|\/uploads|\/import|\/clients|\/providers|\/users|\/sale-states|\/sale-records|\/configurations|\/commissions).*$/);
+  if (match) {
+    req.url = match[0];
+  }
+  next();
+});
+
 // Soporta múltiples prefijos para máxima compatibilidad con el proxy de cPanel
 app.use(['/siscon-ai/api', '/api', '/'], apiRouter);
 
