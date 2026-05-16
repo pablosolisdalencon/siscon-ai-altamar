@@ -88,7 +88,8 @@ apiRouter.get('/configurations', modulesController.getConfigurations);
 apiRouter.post('/configurations', modulesController.createConfiguration);
 apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 
-app.use('/api', apiRouter);
+// Soporta tanto /api como la raíz para flexibilidad en entornos como cPanel
+app.use(['/api', '/'], apiRouter);
 
 // Static Files (Legacy Parity for Documents)
 const path = require('path');

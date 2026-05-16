@@ -17,12 +17,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const role = localStorage.getItem('role');
 
   if (!token) {
-    return <Navigate to="login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {
     if (role === 'agente') {
-      return <Navigate to="agent-dashboard" replace />;
+      return <Navigate to="/agent-dashboard" replace />;
     }
     return <Navigate to="/" replace />;
   }

@@ -1,6 +1,10 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /siscon-ai/
+
+  # Forzar trailing slash para asegurar que la base sea correcta
+  RewriteCond %{REQUEST_URI} /siscon-ai$ [NC]
+  RewriteRule ^(.*)$ /siscon-ai/ [R=301,L]
   
   # Si la petición empieza por /api, dejar que Node.js la maneje
   RewriteCond %{REQUEST_URI} ^/siscon-ai/api [NC]
