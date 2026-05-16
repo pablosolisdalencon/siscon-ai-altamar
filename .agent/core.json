@@ -1,78 +1,43 @@
 {
-  "$schema": "core_v1",
+  "core_version": "2.1.0",
   "metadata": {
     "system_name": "ERIC",
-    "version": "2.0.0",
     "codename": "Meta-Ingeniero Autónomo Evolutivo",
-    "created_at": "2026-04-30T03:29:00Z",
-    "updated_at": "2026-04-30T03:29:00Z",
+    "updated_at": "2026-05-16T13:30:00Z",
     "workspace_root": "./"
   },
   "architecture": {
     "skill_directory": ".agent/skills",
     "workflow_directory": ".agent/workflows",
     "memory_directory": ".agent/memory",
-    "index_file": ".agent/index.json",
-    "core_file": ".agent/core.json"
+    "index_file": ".agent/index.json"
   },
   "skill_registry": {
-    "core_skills": [
-      "master_orchestrator",
-      "brain",
-      "hyper_specialist",
-      "adaptive_learning"
-    ],
-    "infrastructure_skills": [
-      "architect_node",
-      "maf_architect"
-    ],
-    "product_skills": [
-      "maf_scout",
-      "maf_product",
-      "maf_brain",
-      "maf_agile"
-    ],
-    "design_skills": [
-      "maf_ux",
-      "ux_reconstructor_2.0"
-    ],
-    "growth_skills": [
-      "growth_node"
-    ],
-    "utility_skills": [
-      "make_json"
-    ]
-  },
-  "workflow_registry": [
-    "app_factory",
-    "moea_agent",
-    "requirements_factory"
-  ],
-  "telemetry": {
-    "enabled": true,
-    "format": "[⚙️ INVOCANDO SKILL: {skill_name}]",
-    "mandatory": true,
-    "log_to_memory": true
+    "core": ["master_orchestrator", "brain", "hyper_specialist", "adaptive_learning"],
+    "infrastructure": ["architect_node", "maf_architect"],
+    "product": ["maf_scout", "maf_product", "maf_brain", "maf_agile"],
+    "design": ["maf_ux", "ux_reconstructor_2.0"],
+    "growth": ["growth_node"],
+    "utility": ["make_json"]
   },
   "constraints": {
-    "max_concurrent_skills": 4,
     "precision_threshold": 99.9,
     "objectivity_target": 100,
     "zero_trust_architecture": true,
     "auto_validation_mandatory": true,
     "anti_hallucination_gate": true,
-    "never_hardcode_paths": true,
-    "all_paths_relative_to_root": true
+    "never_hardcode_paths": true
   },
   "tech_policy": {
     "default_stack": {
       "architecture": "monorepo",
       "frontend": "react",
-      "css": "tailwindcss",
+      "css": "vanilla-css",
       "backend": "node.js",
-      "api_style": "rest"
+      "api_style": "rest",
+      "database": "mysql/sequelize"
     },
     "enforced_by": "maf_architect",
-    "override_allowed": false
+    "override_allowed": true
   }
 }

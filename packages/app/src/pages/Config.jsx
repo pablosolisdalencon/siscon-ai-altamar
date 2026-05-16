@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Save, Trash2, Plus, Check } from 'lucide-react';
+import { Save, Trash2, Plus, Check, Mail, Server, Shield } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -10,11 +10,14 @@ const Config = () => {
     const [activeTab, setActiveTab] = useState('estados_ventas');
     const [states, setStates] = useState([]);
     const [records, setRecords] = useState([]);
+    const [mailingConfig, setMailingConfig] = useState(null);
+    const [mailingMode, setMailingMode] = useState('off');
     const [loading, setLoading] = useState(true);
 
     const tabs = [
         { id: 'estados_ventas', label: 'Estados Ventas', active: true },
         { id: 'registros_ventas', label: 'Registros Ventas', active: true },
+        { id: 'mailing', label: 'Mailing', active: true },
         { id: 'estados_compras', label: 'Estados Compras', active: false },
         { id: 'estados_empresas', label: 'Estados Empresas', active: false },
         { id: 'alarmas_ventas', label: 'Alarmas Ventas', active: false },
@@ -28,12 +31,20 @@ const Config = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [s, r] = await Promise.all([
+            const [s, r, c, configs] = await Promise.all([
                 api.get('/sale-states'),
-                api.get('/sale-records')
+                api.get('/sale-records'),
+                api.get('/company'),
+                api.get('/configurations')
             ]);
             setStates(s.data.data);
             setRecords(r.data.data);
+            
+            const mMode = configs.data.data.find(conf => conf.clave === 'mailing_mode');
+            if (mMode) {
+                setMailingConfig(mMode);
+                setMailingMode(mMode.valor);
+            }
         } catch (error) {
             console.error('Error fetching config data:', error);
         } finally {
@@ -76,6 +87,22 @@ const Config = () => {
             fetchData();
         } catch (error) {
             alert('Error al guardar configuración');
+        }
+    };
+
+    const handleUpdateMailing = async (mode) => {
+        try {
+            if (mailingConfig) {
+                await api.put(`/configurations/${mailingConfig.id}`, { valor: mode });
+            } else {
+                const res = await api.post('/configurations', { clave: 'mailing_mode', valor: mode });
+                setMailingConfig(res.data.data);
+            }
+            setMailingMode(mode);
+            alert('Modo de mailing actualizado con éxito');
+        } catch (error) {
+            console.error('Error updating mailing mode:', error);
+            alert('Error al actualizar el modo de mailing');
         }
     };
 
@@ -236,6 +263,76 @@ const Config = () => {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'mailing' && (
+                    <div className="space-y-8 animate-in slide-in-from-left-4 duration-300">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl">
+                                <Mail size={24} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Motor de Envío</h2>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Configuración de Mensajería</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
+                            {[
+                                { id: 'off', label: 'Desactivado', icon: Shield, desc: 'Ningún correo será enviado por el sistema.', color: 'slate' },
+                                { id: 'sendgrid', label: 'SendGrid', icon: Check, desc: 'Envío profesional vía API. Requiere configuración DNS.', color: 'blue' },
+                                { id: 'hosting', label: 'Hosting', icon: Server, desc: 'Envío nativo desde el servidor SMTP del hosting.', color: 'emerald' }
+                            ].map((opt) => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => handleUpdateMailing(opt.id)}
+                                    className={cn(
+                                        "relative flex flex-col items-start p-6 rounded-3xl border-2 transition-all duration-300 text-left group",
+                                        mailingMode === opt.id
+                                            ? `border-${opt.color}-500 bg-${opt.color}-50/50 shadow-lg shadow-${opt.color}-500/10`
+                                            : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-md"
+                                    )}
+                                >
+                                    <div className={cn(
+                                        "p-3 rounded-2xl mb-4 transition-colors",
+                                        mailingMode === opt.id 
+                                            ? `bg-${opt.color}-500 text-white` 
+                                            : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                                    )}>
+                                        <opt.icon size={20} />
+                                    </div>
+                                    
+                                    <h3 className={cn(
+                                        "font-black uppercase tracking-wider text-sm mb-2",
+                                        mailingMode === opt.id ? `text-${opt.color}-700` : "text-slate-700"
+                                    )}>
+                                        {opt.label}
+                                    </h3>
+                                    
+                                    <p className="text-xs text-slate-500 leading-relaxed">
+                                        {opt.desc}
+                                    </p>
+
+                                    {mailingMode === opt.id && (
+                                        <div className={cn(
+                                            "absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center",
+                                            `bg-${opt.color}-500 text-white animate-in zoom-in duration-300`
+                                        )}>
+                                            <Check size={14} strokeWidth={3} />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 max-w-4xl">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nota Técnica</p>
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                El cambio de modo es instantáneo y afecta a todos los módulos (Cobranzas, Comisiones, etc.). 
+                                Asegúrese de que las credenciales en el archivo .env coincidan con el modo seleccionado.
+                            </p>
                         </div>
                     </div>
                 )}

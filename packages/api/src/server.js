@@ -83,6 +83,11 @@ apiRouter.delete('/sale-states/:id', modulesController.deleteSaleState);
 apiRouter.get('/sale-records', modulesController.getSaleRecords);
 apiRouter.put('/sale-records/:id', modulesController.updateSaleRecord);
 
+// Global Configurations
+apiRouter.get('/configurations', modulesController.getConfigurations);
+apiRouter.post('/configurations', modulesController.createConfiguration);
+apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
+
 app.use('/api', apiRouter);
 
 // Static Files (Legacy Parity for Documents)

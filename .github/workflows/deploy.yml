@@ -1,0 +1,54 @@
+name: Deploy to Production (cPanel)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install root dependencies
+        run: npm install
+
+      - name: 🏗️ Build Frontend
+        run: |
+          cd packages/app
+          npm install
+          npm run build
+
+      - name: 🚀 Deploy Frontend to public_html/siscon-ai
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          port: 21
+          local-dir: ./packages/app/dist/
+          server-dir: public_html/siscon-ai/
+          state-name: .ftp-deploy-frontend-state.json
+
+      - name: 🚀 Deploy Backend to public_html/siscon-ai/api
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          port: 21
+          local-dir: ./packages/api/
+          server-dir: public_html/siscon-ai/api/
+          exclude: |
+            **/node_modules/**
+            **/.env*
+            **/scripts/**
+          state-name: .ftp-deploy-api-state.json

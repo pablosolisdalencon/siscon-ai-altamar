@@ -7,6 +7,7 @@ const Company = require('./Company');
 const User = require('./User');
 const Cobrobot = require('./Cobrobot');
 const SaleRecord = require('./SaleRecord');
+const Configuration = require('./Configuration');
 
 // Sales Associations
 // Disabling physical constraints to match the exact SQL schema (no FKs)
@@ -39,5 +40,6 @@ module.exports = {
   Company,
   User,
   Cobrobot,
-  SaleRecord
+  SaleRecord,
+  Configuration
 };
