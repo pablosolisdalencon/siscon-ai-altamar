@@ -24,9 +24,13 @@ const { authenticateToken, authorizeRole } = require('./utils/authMiddleware');
 app.use(cors());
 app.use(express.json());
 
-// Basic Route
-app.get('/', (req, res) => {
-  res.json({ message: 'SISCON-AI API is running', version: '1.0.0' });
+// Diagnostic endpoint - verifica qué versión está corriendo y qué URL recibe Node
+app.get('/_health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    version: '2.1.0-blindaje',
+    node_sees: { url: req.url, originalUrl: req.originalUrl, path: req.path, baseUrl: req.baseUrl }
+  });
 });
 
 const apiRouter = express.Router();
@@ -88,30 +92,14 @@ apiRouter.get('/configurations', modulesController.getConfigurations);
 apiRouter.post('/configurations', modulesController.createConfiguration);
 apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 
-// El middleware de limpieza se mantiene como capa extra
-app.use((req, res, next) => {
-  const originalUrl = req.url;
-  const knownBases = ['/auth', '/sales', '/collections', '/purchases', '/company', '/uploads', '/import', '/clients', '/providers', '/users', '/sale-states', '/sale-records', '/configurations', '/commissions', '/agents'];
-  
-  // Normalizamos la URL eliminando prefijos de subcarpeta/proxy
-  for (const base of knownBases) {
-    if (req.url.includes(base)) {
-      const index = req.url.indexOf(base);
-      req.url = req.url.substring(index);
-      break;
-    }
-  }
-
-  // Aseguramos compatibilidad con/sin slash final para Passenger/cPanel
-  if (req.url.length > 1 && req.url.endsWith('/')) {
-    req.url = req.url.slice(0, -1);
-  }
-  
-  next();
-});
-
-// Montamos el router en múltiples posibles prefijos para máxima resiliencia
-app.use(['/siscon-ai/api', '/api', '/'], apiRouter);
+// ═══════════════════════════════════════════════════════════════
+// MONTAJE MULTI-PREFIJO: Express maneja el prefix-stripping nativamente.
+// Montamos el router en cada prefijo posible que Passenger/cPanel pueda enviar.
+// Express prueba cada mount en orden y stripea el prefijo automáticamente.
+// ═══════════════════════════════════════════════════════════════
+app.use('/siscon-ai/api', apiRouter);  // Si Passenger pasa el path completo
+app.use('/api', apiRouter);            // Si Passenger stripea /siscon-ai
+app.use('/', apiRouter);               // Si Passenger stripea todo
 
 // Static Files (Legacy Parity for Documents)
 const path = require('path');
