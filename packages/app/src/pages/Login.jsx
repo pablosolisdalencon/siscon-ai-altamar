@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 
 function Login() {
@@ -45,7 +47,7 @@ function Login() {
           localStorage.setItem('id_agente', json.data.user.id_agente);
         }
 
-        // Redirect based on role
+        // Redirección relativa para seguridad en subcarpetas
         if (json.data.user.role === 'agente') {
           navigate('/agent-dashboard');
         } else {
@@ -53,7 +55,7 @@ function Login() {
         }
       } else {
         setError(json.message || 'Error en el login');
-        fetchCaptcha(); // Refresh captcha on failure
+        fetchCaptcha();
         setCaptchaAnswer('');
       }
     } catch (err) {

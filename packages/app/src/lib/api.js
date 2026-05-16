@@ -15,13 +15,24 @@ axios.interceptors.request.use(
 );
 
 export const getBaseURL = () => {
-  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'undefined') {
+  // 1. Prioridad: Variable de entorno explícita
+  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'undefined' && import.meta.env.VITE_API_URL !== '') {
     return import.meta.env.VITE_API_URL;
   }
-  // Fallback para despliegue en subcarpeta cPanel
-  if (window.location.pathname.includes('/siscon-ai')) {
+
+  // 2. Detección por ubicación del script o URL
+  const isSisconFolder = window.location.pathname.includes('/siscon-ai') || 
+                         window.location.href.includes('/siscon-ai/');
+
+  if (isSisconFolder) {
     return '/siscon-ai/api';
   }
+
+  // 3. Fallback final (Asumimos producción si no estamos en localhost)
+  if (window.location.hostname !== 'localhost') {
+    return '/siscon-ai/api';
+  }
+
   return '/api';
 };
 

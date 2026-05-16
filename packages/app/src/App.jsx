@@ -17,12 +17,13 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const role = localStorage.getItem('role');
 
   if (!token) {
-    return <Navigate to="/login" replace />;
+    // Redirección relativa sin slash inicial para evitar saltar a la raíz del dominio
+    return <Navigate to="login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {
     if (role === 'agente') {
-      return <Navigate to="/agent-dashboard" replace />;
+      return <Navigate to="agent-dashboard" replace />;
     }
     return <Navigate to="/" replace />;
   }
@@ -31,12 +32,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 function App() {
+  // Detección de login compatible con HashRouter
   const isLoginPage = window.location.hash.includes('/login');
 
   return (
     <Router>
       <div className="flex flex-col md:flex-row min-h-screen max-w-full overflow-x-hidden">
-        {/* Only show Navbar if not on login page */}
         <Routes>
           <Route path="/login" element={null} />
           <Route path="*" element={<Navbar />} />
@@ -46,7 +47,6 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             
-            {/* Admin Only Routes */}
             <Route path="/" element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <Dashboard />
@@ -67,7 +67,6 @@ function App() {
                 <Compras />
               </ProtectedRoute>
             } />
-
             <Route path="/clientes" element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <Clientes />
@@ -98,15 +97,13 @@ function App() {
                 <ImportDB />
               </ProtectedRoute>
             } />
-
-            {/* Agent & Admin Routes */}
             <Route path="/agent-dashboard" element={
               <ProtectedRoute allowedRoles={['admin', 'agente']}>
                 <AgentDashboard />
               </ProtectedRoute>
             } />
 
-            {/* Fallback */}
+            {/* Fallback a la raíz del Hash */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
