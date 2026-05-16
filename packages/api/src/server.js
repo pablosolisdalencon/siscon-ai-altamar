@@ -91,7 +91,7 @@ apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 // El middleware de limpieza se mantiene como capa extra
 app.use((req, res, next) => {
   const originalUrl = req.url;
-  const knownBases = ['/auth', '/sales', '/collections', '/purchases', '/company', '/uploads', '/import', '/clients', '/providers', '/users', '/sale-states', '/sale-records', '/configurations', '/commissions'];
+  const knownBases = ['/auth', '/sales', '/collections', '/purchases', '/company', '/uploads', '/import', '/clients', '/providers', '/users', '/sale-states', '/sale-records', '/configurations', '/commissions', '/agents'];
   
   // Normalizamos la URL eliminando prefijos de subcarpeta/proxy
   for (const base of knownBases) {

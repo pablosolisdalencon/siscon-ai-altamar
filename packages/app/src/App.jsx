@@ -34,7 +34,7 @@ function App() {
   const isLoginPage = window.location.hash.includes('/login');
 
   return (
-    <Router basename="/siscon-ai">
+    <Router>
       <div className="flex flex-col md:flex-row min-h-screen max-w-full overflow-x-hidden">
         <Routes>
           <Route path="login" element={null} />
