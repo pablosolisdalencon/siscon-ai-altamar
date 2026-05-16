@@ -203,7 +203,7 @@ const Ventas = () => {
   const fetchSales = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/sales', { 
+      const { data } = await api.get('sales', { 
         params: { ...filters, page: currentPage, limit: itemsPerPage } 
       });
       setSales(data.data.data);
@@ -224,10 +224,10 @@ const Ventas = () => {
   const fetchAuxData = async () => {
     try {
       const [c, u, s, r] = await Promise.all([
-        api.get('/clients'),
-        api.get('/users'),
-        api.get('/sale-states'),
-        api.get('/sale-records')
+        api.get('clients'),
+        api.get('users'),
+        api.get('sale-states'),
+        api.get('sale-records')
       ]);
       setAuxData({
         clients: c.data.data,
@@ -311,7 +311,7 @@ const Ventas = () => {
     if (metadata.fecha) formData.append('fecha', metadata.fecha);
     if (metadata.numero) formData.append('numero', metadata.numero);
     try {
-      const { data } = await api.post('/uploads/sale-document', formData, {
+      const { data } = await api.post('uploads/sale-document', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return data.data.filename;
@@ -348,10 +348,10 @@ const Ventas = () => {
       };
 
       if (isEditMode) {
-        await api.put(`/sales/${selectedSaleId}`, dataToSave);
+        await api.put(`sales/${selectedSaleId}`, dataToSave);
         alert('Venta actualizada con éxito');
       } else {
-        await api.post('/sales', dataToSave);
+        await api.post('sales', dataToSave);
         alert('Venta creada con éxito');
       }
 
@@ -367,7 +367,7 @@ const Ventas = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await api.put(`/sales/${id}`, { estado: newStatus });
+      await api.put(`sales/${id}`, { estado: newStatus });
       setSales(prevSales => prevSales.map(sale => 
         sale.id_venta === id ? { ...sale, estado: newStatus, status: auxData.states.find(s => s.id_estado == newStatus) } : sale
       ));
@@ -640,7 +640,7 @@ const Ventas = () => {
                         <button className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all" title="Documento">
                           <FileText size={12} />
                         </button>
-                        <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta venta?')) { await api.delete(`/sales/${sale.id_venta}`); fetchSales(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
+                        <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta venta?')) { await api.delete(`sales/${sale.id_venta}`); fetchSales(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
                           <Trash2 size={12} />
                         </button>
                       </div>

@@ -40,7 +40,7 @@ const Dashboard = () => {
 
   const fetchCompany = async () => {
     try {
-      const { data } = await api.get('/company');
+      const { data } = await api.get('company');
       setCompany(data);
     } catch (err) {
       console.error('Error fetching company:', err);
@@ -50,7 +50,7 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/sales/stats');
+      const { data } = await api.get('sales/stats');
       setStats(data.data);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);

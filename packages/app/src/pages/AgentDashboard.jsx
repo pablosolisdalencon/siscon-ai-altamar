@@ -23,7 +23,7 @@ function AgentDashboard() {
     if (userRole === 'admin') {
       const fetchAgents = async () => {
         try {
-          const res = await api.get('/users');
+          const res = await api.get('users');
           const json = res.data;
           // Adjust based on response structure. If crudFactory returns data directly or in an array:
           const users = Array.isArray(json) ? json : (json.data || []);
@@ -39,7 +39,7 @@ function AgentDashboard() {
   const fetchCommissions = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/commissions', {
+      const res = await api.get('commissions', {
         params: { ...filters, page: currentPage, limit: itemsPerPage }
       });
       const json = res.data;
@@ -76,7 +76,7 @@ function AgentDashboard() {
     try {
       // For simplicity, we send the current filters so the backend can fetch the same data
       // or we could send the HTML. Let's send the filters and agentId.
-      const res = await api.post('/commissions/send-report', {
+      const res = await api.post('commissions/send-report', {
           agentId: userRole === 'admin' ? filters.agentId : localStorage.getItem('id_agente'),
       });
       const json = res.data;

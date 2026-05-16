@@ -13,7 +13,7 @@ const ImportDB = () => {
   const handleExport = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/import/export', { responseType: 'blob' });
+      const res = await api.get('import/export', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -54,7 +54,7 @@ const ImportDB = () => {
     formData.append('file', file);
 
     try {
-      const { data } = await api.post('/import/database', formData, {
+      const { data } = await api.post('import/database', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setStatus('success');

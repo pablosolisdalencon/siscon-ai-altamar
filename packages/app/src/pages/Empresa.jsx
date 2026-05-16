@@ -37,7 +37,7 @@ const Empresa = () => {
 
   const fetchCompany = async () => {
     try {
-      const response = await api.get('/company');
+      const response = await api.get('company');
       if (response.data) {
         setFormData(response.data);
         if (response.data.pago_firma) {
@@ -82,7 +82,7 @@ const Empresa = () => {
     }
 
     try {
-      await api.put('/company', data, {
+      await api.put('company', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setMessage({ type: 'success', text: 'Información actualizada correctamente' });

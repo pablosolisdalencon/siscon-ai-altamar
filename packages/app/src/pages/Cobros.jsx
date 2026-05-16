@@ -163,7 +163,7 @@ const Cobros = () => {
 
   const fetchCompany = async () => {
     try {
-      const { data } = await api.get('/company');
+      const { data } = await api.get('company');
       setCompany(data);
     } catch (err) {
       console.error('Error fetching company:', err);
@@ -173,7 +173,7 @@ const Cobros = () => {
   const fetchCollections = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/collections/dashboard', { 
+      const { data } = await api.get('collections/dashboard', { 
         params: { ...filters, page: currentPage, limit: ITEMS_PER_PAGE } 
       });
       setCollections(data.data.data);
@@ -188,7 +188,7 @@ const Cobros = () => {
 
   const fetchClients = async () => {
     try {
-      const { data } = await api.get('/clients');
+      const { data } = await api.get('clients');
       setClients(data.data);
     } catch (err) {
       console.error('Error fetching clients:', err);
@@ -197,7 +197,7 @@ const Cobros = () => {
 
   const fetchStates = async () => {
     try {
-      const { data } = await api.get('/sale-states');
+      const { data } = await api.get('sale-states');
       setStates(data.data);
     } catch (err) {
       console.error('Error fetching states:', err);
@@ -206,7 +206,7 @@ const Cobros = () => {
 
   const fetchAgents = async () => {
     try {
-      const { data } = await api.get('/agents');
+      const { data } = await api.get('agents');
       setAgents(data.data);
     } catch (err) {
       console.error('Error fetching agents:', err);
@@ -215,7 +215,7 @@ const Cobros = () => {
 
   const handleUpdateStatus = async (id_venta, id_estado) => {
     try {
-      await api.put(`/sale-records/${id_venta}`, { estado: id_estado });
+      await api.put(`sale-records/${id_venta}`, { estado: id_estado });
       fetchCollections(); // Refresh
     } catch (error) {
       console.error('Error updating status:', error);
@@ -252,7 +252,7 @@ SISCON-AI`;
 
   const handleSendCollection = async () => {
     try {
-      await api.post('/collections/send-email', { 
+      await api.post('collections/send-email', { 
         clientId: selectedClient.id_cliente,
         customMessage: mailMessage
       });

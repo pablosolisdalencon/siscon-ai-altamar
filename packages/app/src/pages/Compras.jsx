@@ -190,7 +190,7 @@ const Compras = () => {
   const fetchPurchases = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/purchases', { 
+      const { data } = await api.get('purchases', { 
         params: { ...filters, page: currentPage, limit: ITEMS_PER_PAGE } 
       });
       setPurchases(data.data.data);
@@ -206,8 +206,8 @@ const Compras = () => {
   const fetchAuxData = async () => {
     try {
       const [c, s] = await Promise.all([
-        api.get('/clients'),
-        api.get('/sale-states')
+        api.get('clients'),
+        api.get('sale-states')
       ]);
       setAuxData({ clients: c.data.data, states: s.data.data });
     } catch (err) {
@@ -217,7 +217,7 @@ const Compras = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await api.put(`/purchases/${id}`, { estado: newStatus });
+      await api.put(`purchases/${id}`, { estado: newStatus });
       setPurchases(prevPurchases => prevPurchases.map(purchase => 
         purchase.id_compra === id ? { ...purchase, estado: newStatus, status: auxData.states.find(s => s.id_estado == newStatus) } : purchase
       ));
@@ -271,10 +271,10 @@ const Compras = () => {
     try {
       setLoading(true);
       if (isEditMode) {
-        await api.put(`/purchases/${selectedPurchaseId}`, formData);
+        await api.put(`purchases/${selectedPurchaseId}`, formData);
         alert('Compra actualizada con éxito');
       } else {
-        await api.post('/purchases', formData);
+        await api.post('purchases', formData);
         alert('Compra creada con éxito');
       }
       setIsModalOpen(false);
@@ -513,7 +513,7 @@ const Compras = () => {
                       <button onClick={() => handleOpenModal(purchase)} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all" title="Editar">
                         <Save size={12} />
                       </button>
-                      <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta compra?')) { await api.delete(`/purchases/${purchase.id_compra}`); fetchPurchases(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
+                      <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta compra?')) { await api.delete(`purchases/${purchase.id_compra}`); fetchPurchases(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
                         <Trash2 size={12} />
                       </button>
                     </div>

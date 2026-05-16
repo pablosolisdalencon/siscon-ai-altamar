@@ -66,7 +66,7 @@ const ModuleManager = ({ title, endpoint, icon: Icon, fields }) => {
 
       if (editingItem) {
         const idKey = Object.keys(editingItem).find(k => k.startsWith('id_') || k === 'id');
-        await api.put(`${endpoint}/${editingItem[idKey]}`, cleanData);
+        await api.put(`${endpoint.startsWith('/') ? endpoint.substring(1) : endpoint}/${editingItem[idKey]}`, cleanData);
       } else {
         await api.post(endpoint, cleanData);
       }
@@ -334,6 +334,6 @@ const USER_FIELDS = [
   { name: 'comicion', label: 'Comisión (%)', type: 'number', defaultValue: 0, showIf: (data) => data.role === 'agente' }
 ];
 
-export const Clientes = () => <ModuleManager title="Clientes" endpoint="/clients" icon={Briefcase} fields={CLIENT_FIELDS} />;
-export const Proveedores = () => <ModuleManager title="Proveedores" endpoint="/providers" icon={Truck} fields={PROVIDER_FIELDS} />;
-export const Usuarios = () => <ModuleManager title="Usuarios" endpoint="/users" icon={User} fields={USER_FIELDS} />;
+export const Clientes = () => <ModuleManager title="Clientes" endpoint="clients" icon={Briefcase} fields={CLIENT_FIELDS} />;
+export const Proveedores = () => <ModuleManager title="Proveedores" endpoint="providers" icon={Truck} fields={PROVIDER_FIELDS} />;
+export const Usuarios = () => <ModuleManager title="Usuarios" endpoint="users" icon={User} fields={USER_FIELDS} />;

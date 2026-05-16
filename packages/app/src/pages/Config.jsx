@@ -32,10 +32,10 @@ const Config = () => {
         setLoading(true);
         try {
             const [s, r, c, configs] = await Promise.all([
-                api.get('/sale-states'),
-                api.get('/sale-records'),
-                api.get('/company'),
-                api.get('/configurations')
+                api.get('sale-states'),
+                api.get('sale-records'),
+                api.get('company'),
+                api.get('configurations')
             ]);
             setStates(s.data.data);
             setRecords(r.data.data);
@@ -55,9 +55,9 @@ const Config = () => {
     const handleSaveState = async (state) => {
         try {
             if (state.id_estado) {
-                await api.put(`/sale-states/${state.id_estado}`, state);
+                await api.put(`sale-states/${state.id_estado}`, state);
             } else {
-                await api.post('/sale-states', state);
+                await api.post('sale-states', state);
             }
             alert('Estado guardado');
             fetchData();
@@ -69,7 +69,7 @@ const Config = () => {
     const handleDeleteState = async (id) => {
         if (!confirm('¿Eliminar este estado?')) return;
         try {
-            await api.delete(`/sale-states/${id}`);
+            await api.delete(`sale-states/${id}`);
             fetchData();
         } catch (error) {
             alert('Error al eliminar');
@@ -82,7 +82,7 @@ const Config = () => {
 
     const handleUpdateRecord = async (record) => {
         try {
-            await api.put(`/sale-records/${record.id}`, record);
+            await api.put(`sale-records/${record.id}`, record);
             alert('Configuración guardada');
             fetchData();
         } catch (error) {
@@ -93,9 +93,9 @@ const Config = () => {
     const handleUpdateMailing = async (mode) => {
         try {
             if (mailingConfig) {
-                await api.put(`/configurations/${mailingConfig.id}`, { valor: mode });
+                await api.put(`configurations/${mailingConfig.id}`, { valor: mode });
             } else {
-                const res = await api.post('/configurations', { clave: 'mailing_mode', valor: mode });
+                const res = await api.post('configurations', { clave: 'mailing_mode', valor: mode });
                 setMailingConfig(res.data.data);
             }
             setMailingMode(mode);

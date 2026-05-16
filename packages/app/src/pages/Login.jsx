@@ -13,7 +13,7 @@ function Login() {
 
   const fetchCaptcha = async () => {
     try {
-      const res = await api.get('/auth/captcha');
+      const res = await api.get('auth/captcha');
       const json = res.data;
       if (json.success) {
         setCaptchaQuestion(json.data.question);
@@ -33,7 +33,7 @@ function Login() {
     setError('');
 
     try {
-      const res = await api.post('/auth/login', {
+      const res = await api.post('auth/login', {
         username, password, captchaAnswer, captchaToken
       });
 
