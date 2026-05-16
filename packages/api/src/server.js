@@ -122,13 +122,21 @@ apiRouter.post('/configurations', modulesController.createConfiguration);
 apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 
 // ═══════════════════════════════════════════════════════════════
-// MONTAJE MULTI-PREFIJO: Express maneja el prefix-stripping nativamente.
-// Montamos el router en cada prefijo posible que Passenger/cPanel pueda enviar.
-// Express prueba cada mount en orden y stripea el prefijo automáticamente.
+// STRIP PREFIJO: Sabemos que Passenger pasa la URL COMPLETA
+// (ej: /siscon-ai/api/auth/captcha). Stripeamos el prefijo
+// conocido para que el router reciba solo /auth/captcha.
 // ═══════════════════════════════════════════════════════════════
-app.use('/siscon-ai/api', apiRouter);  // Si Passenger pasa el path completo
-app.use('/api', apiRouter);            // Si Passenger stripea /siscon-ai
-app.use('/', apiRouter);               // Si Passenger stripea todo
+app.use((req, res, next) => {
+  if (req.url.startsWith('/siscon-ai/api')) {
+    req.url = req.url.slice('/siscon-ai/api'.length) || '/';
+  } else if (req.url.startsWith('/api')) {
+    req.url = req.url.slice('/api'.length) || '/';
+  }
+  next();
+});
+
+// Montamos el router en raíz — el middleware ya limpió la URL
+app.use(apiRouter);
 
 // Static Files (Legacy Parity for Documents)
 const path = require('path');
