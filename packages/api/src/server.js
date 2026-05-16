@@ -30,7 +30,7 @@ app.use((req, res, next) => {
   
   if (req.url.includes('_diag') || req.originalUrl.includes('_diag')) {
     return res.json({
-      version: '2.2.0-diag',
+      version: '2.3.0',
       url: req.url,
       originalUrl: req.originalUrl,
       path: req.path,
@@ -121,6 +121,11 @@ apiRouter.get('/configurations', modulesController.getConfigurations);
 apiRouter.post('/configurations', modulesController.createConfiguration);
 apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 
+// TEST DIRECTO: ruta sin Router, path completo, para verificar que Express matchea
+app.get('/siscon-ai/api/ping', (req, res) => {
+  res.json({ pong: true, version: '2.3.0' });
+});
+
 // ═══════════════════════════════════════════════════════════════
 // STRIP PREFIJO: Sabemos que Passenger pasa la URL COMPLETA
 // (ej: /siscon-ai/api/auth/captcha). Stripeamos el prefijo
@@ -141,6 +146,17 @@ app.use(apiRouter);
 // Static Files (Legacy Parity for Documents)
 const path = require('path');
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
+
+// CATCH-ALL 404: Reemplaza el 'Cannot GET' con info diagnóstica
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'No route matched after strip',
+    version: '2.3.0',
+    url_after_strip: req.url,
+    originalUrl: req.originalUrl,
+    path: req.path
+  });
+});
 
 // Start Server
 const startServer = async () => {
