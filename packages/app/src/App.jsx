@@ -17,12 +17,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const role = localStorage.getItem('role');
 
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {
     if (role === 'agente') {
-      return <Navigate to="/agent-dashboard" replace />;
+      return <Navigate to="agent-dashboard" replace />;
     }
     return <Navigate to="/" replace />;
   }
@@ -34,7 +34,7 @@ function App() {
   const isLoginPage = window.location.hash.includes('/login');
 
   return (
-    <Router basename="/siscon-ai">
+    <Router>
       <div className="flex flex-col md:flex-row min-h-screen max-w-full overflow-x-hidden">
         <Routes>
           <Route path="login" element={null} />
