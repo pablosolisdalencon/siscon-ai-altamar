@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 const path = require('path');
 const envMap = {
-  'production': '.env.production',
+  'production': '.env.prod',
   'preprod': '.env.preprod',
   'development': '.env.development'
 };
