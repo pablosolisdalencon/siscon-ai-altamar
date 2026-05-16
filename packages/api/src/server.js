@@ -90,7 +90,7 @@ apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 
 // Middleware de "blindaje" para limpiar cualquier prefijo (cPanel, subcarpetas, etc.)
 app.use((req, res, next) => {
-  // Buscamos el inicio de nuestras rutas conocidas
+  // Buscamos el inicio de nuestras rutas conocidas para normalizar la petición
   const match = req.url.match(/(\/auth|\/sales|\/collections|\/purchases|\/company|\/uploads|\/import|\/clients|\/providers|\/users|\/sale-states|\/sale-records|\/configurations|\/commissions).*$/);
   if (match) {
     req.url = match[0];
@@ -98,8 +98,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Soporta múltiples prefijos para máxima compatibilidad con el proxy de cPanel
-app.use(['/siscon-ai/api', '/api', '/'], apiRouter);
+// Montamos el router en la raíz de la app Node.js ya que el middleware anterior
+// se encarga de normalizar las rutas independientemente de la subcarpeta de cPanel.
+app.use('/', apiRouter);
 
 // Static Files (Legacy Parity for Documents)
 const path = require('path');
