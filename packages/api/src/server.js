@@ -36,7 +36,14 @@ app.get('/_health', (req, res) => {
 const apiRouter = express.Router();
 
 // Routes Registration
-// Public routes
+// Public routes (no token required)
+apiRouter.get('/_health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    version: '2.1.0-blindaje',
+    node_sees: { url: req.url, originalUrl: req.originalUrl, path: req.path, baseUrl: req.baseUrl }
+  });
+});
 apiRouter.use('/auth', authRoutes);
 
 // Protect all subsequent routes
