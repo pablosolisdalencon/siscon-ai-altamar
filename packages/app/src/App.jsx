@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Ventas from './pages/Ventas';
 import Cobros from './pages/Cobros';
@@ -21,7 +21,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {
-    // If agent tries to access admin pages, redirect to agent dashboard
     if (role === 'agente') {
       return <Navigate to="/agent-dashboard" replace />;
     }
@@ -32,11 +31,10 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 function App() {
-  const basename = '/siscon-ai';
-  const isLoginPage = window.location.pathname === `${basename}/login` || window.location.pathname === '/login';
+  const isLoginPage = window.location.hash.includes('/login');
 
   return (
-    <Router basename={basename}>
+    <Router>
       <div className="flex flex-col md:flex-row min-h-screen max-w-full overflow-x-hidden">
         {/* Only show Navbar if not on login page */}
         <Routes>

@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /siscon-ai/
+  
+  # Si la petición empieza por /api, dejar que Node.js la maneje
+  RewriteCond %{REQUEST_URI} ^/siscon-ai/api [NC]
+  RewriteRule .* - [L]
+
+  # Con HashRouter, no necesitamos redirigir todo a index.html, 
+  # pero lo mantenemos por seguridad para que el acceso directo funcione.
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /siscon-ai/index.html [L]
+</IfModule>
