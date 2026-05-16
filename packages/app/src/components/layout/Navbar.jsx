@@ -31,7 +31,7 @@ const Navbar = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="fixed top-6 left-6 z-[100] w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all overflow-hidden print:hidden"
       >
-        {isOpen ? <X size={24} /> : <img src="/logo.png" alt="Menu" className="w-full h-full object-cover scale-110" />}
+        {isOpen ? <X size={24} /> : <img src="logo.png" alt="Menu" className="w-full h-full object-cover scale-110" />}
       </button>
 
       {/* Backdrop */}
@@ -50,7 +50,7 @@ const Navbar = () => {
         <div className="flex flex-col h-full gap-2">
           {/* Logo in Drawer */}
           <div className="flex items-center gap-4 mb-10 px-2">
-            <img src="/logo.png" alt="SISCON Logo" className="w-12 h-12 rounded-xl shadow-lg shadow-primary/20" />
+            <img src="logo.png" alt="SISCON Logo" className="w-12 h-12 rounded-xl shadow-lg shadow-primary/20" />
             <span className="font-black text-2xl text-slate-800 tracking-tighter">SISCON<span className="text-primary">-AI</span></span>
           </div>
 

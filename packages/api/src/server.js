@@ -88,21 +88,30 @@ apiRouter.get('/configurations', modulesController.getConfigurations);
 apiRouter.post('/configurations', modulesController.createConfiguration);
 apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 
-// Middleware de "blindaje" para limpiar cualquier prefijo (cPanel, subcarpetas, etc.)
+// El middleware de limpieza se mantiene como capa extra
 app.use((req, res, next) => {
   const originalUrl = req.url;
-  // Buscamos el inicio de nuestras rutas conocidas para normalizar la petición
-  const match = req.url.match(/(\/auth|\/sales|\/collections|\/purchases|\/company|\/uploads|\/import|\/clients|\/providers|\/users|\/sale-states|\/sale-records|\/configurations|\/commissions).*$/);
+  const knownBases = ['/auth', '/sales', '/collections', '/purchases', '/company', '/uploads', '/import', '/clients', '/providers', '/users', '/sale-states', '/sale-records', '/configurations', '/commissions'];
   
-  if (match) {
-    req.url = match[0];
-    console.log(`[ROUTING] Normalized: ${originalUrl} -> ${req.url}`);
+  // Normalizamos la URL eliminando prefijos de subcarpeta/proxy
+  for (const base of knownBases) {
+    if (req.url.includes(base)) {
+      const index = req.url.indexOf(base);
+      req.url = req.url.substring(index);
+      break;
+    }
   }
+
+  // Aseguramos compatibilidad con/sin slash final para Passenger/cPanel
+  if (req.url.length > 1 && req.url.endsWith('/')) {
+    req.url = req.url.slice(0, -1);
+  }
+  
   next();
 });
 
-// Montamos el router en la raíz de la app Node.js
-app.use('/', apiRouter);
+// Montamos el router en múltiples posibles prefijos para máxima resiliencia
+app.use(['/siscon-ai/api', '/api', '/'], apiRouter);
 
 // Static Files (Legacy Parity for Documents)
 const path = require('path');

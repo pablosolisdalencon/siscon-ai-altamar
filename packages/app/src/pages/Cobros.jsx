@@ -740,7 +740,7 @@ SISCON-AI`;
 
                 <div className="mt-8 md:mt-12 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 pt-8 gap-8">
                   <div className="flex items-center gap-4 md:gap-6 order-2 md:order-1">
-                    <img src="/logo.png" alt="SISCON Logo" className="w-16 h-16 md:w-20 md:h-20 rounded-2xl shadow-lg shadow-slate-200" />
+                    <img src="logo.png" alt="SISCON Logo" className="w-16 h-16 md:w-20 md:h-20 rounded-2xl shadow-lg shadow-slate-200" />
                     <div className="text-left">
                       <p className="font-black text-slate-800 text-base md:text-lg uppercase tracking-tighter">SISCON<span className="text-primary">-AI</span></p>
                       <p className="text-slate-400 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">Ecosistema Cognitivo de Gestión</p>
