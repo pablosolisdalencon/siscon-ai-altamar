@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api, { getBaseURL } from '../lib/api';
 import { 
   Building2, Phone, Mail, User, Save, Upload, 
   FileText, Briefcase, CreditCard, CheckCircle2, AlertCircle
@@ -7,7 +6,7 @@ import {
 import { cn } from '../utils/cn';
 
 const Empresa = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const apiUrl = getBaseURL();
   const baseUrl = apiUrl.replace(/\/api$/, '');
   
   const [loading, setLoading] = useState(true);
@@ -38,7 +37,7 @@ const Empresa = () => {
 
   const fetchCompany = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/company`);
+      const response = await api.get('/company');
       if (response.data) {
         setFormData(response.data);
         if (response.data.pago_firma) {
@@ -83,7 +82,7 @@ const Empresa = () => {
     }
 
     try {
-      await axios.put(`${apiUrl}/company`, data, {
+      await api.put('/company', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setMessage({ type: 'success', text: 'Información actualizada correctamente' });

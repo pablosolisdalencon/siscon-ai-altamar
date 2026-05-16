@@ -32,10 +32,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 function App() {
-  const isLoginPage = window.location.pathname === '/login';
+  const basename = '/siscon-ai';
+  const isLoginPage = window.location.pathname === `${basename}/login` || window.location.pathname === '/login';
 
   return (
-    <Router>
+    <Router basename={basename}>
       <div className="flex flex-col md:flex-row min-h-screen max-w-full overflow-x-hidden">
         {/* Only show Navbar if not on login page */}
         <Routes>

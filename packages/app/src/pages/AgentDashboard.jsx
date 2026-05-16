@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../lib/api';
 
 function AgentDashboard() {
   const [sales, setSales] = useState([]);
@@ -22,10 +23,8 @@ function AgentDashboard() {
     if (userRole === 'admin') {
       const fetchAgents = async () => {
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-          });
-          const json = await res.json();
+          const res = await api.get('/users');
+          const json = res.data;
           // Adjust based on response structure. If crudFactory returns data directly or in an array:
           const users = Array.isArray(json) ? json : (json.data || []);
           setAgents(users.filter(u => u.role === 'agente'));
@@ -40,13 +39,10 @@ function AgentDashboard() {
   const fetchCommissions = async () => {
     setLoading(true);
     try {
-      const queryParams = new URLSearchParams({ ...filters, page: currentPage, limit: itemsPerPage }).toString();
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/commissions?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const res = await api.get('/commissions', {
+        params: { ...filters, page: currentPage, limit: itemsPerPage }
       });
-      const json = await res.json();
+      const json = res.data;
       if (json.success) {
         setSales(json.data.sales);
         setSummary(json.data.summary);
@@ -80,20 +76,10 @@ function AgentDashboard() {
     try {
       // For simplicity, we send the current filters so the backend can fetch the same data
       // or we could send the HTML. Let's send the filters and agentId.
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/commissions/send-report`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ 
+      const res = await api.post('/commissions/send-report', {
           agentId: userRole === 'admin' ? filters.agentId : localStorage.getItem('id_agente'),
-          // We could pass base64 PDF data here if we generated it on frontend.
-          // Since we use window.print(), we can't easily get the PDF data in JS.
-          // So the backend will just send a notification or a summary in the email body.
-        })
       });
-      const json = await res.json();
+      const json = res.data;
       if (json.success) {
         alert('Reporte enviado con éxito');
       } else {

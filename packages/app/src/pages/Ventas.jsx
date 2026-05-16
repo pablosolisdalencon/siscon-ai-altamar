@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../lib/api';
+import api, { getBaseURL } from '../lib/api';
 import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -133,7 +133,7 @@ const FormSelect = ({ label, value, options, onChange, required = false, showCir
 };
 
 const Ventas = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const apiUrl = getBaseURL();
   const baseUrl = apiUrl.replace(/\/api$/, '');
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);

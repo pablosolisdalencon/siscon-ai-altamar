@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import api from '../lib/api';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -12,8 +11,8 @@ function Login() {
 
   const fetchCaptcha = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/captcha`);
-      const json = await res.json();
+      const res = await api.get('/auth/captcha');
+      const json = res.data;
       if (json.success) {
         setCaptchaQuestion(json.data.question);
         setCaptchaToken(json.data.token);
@@ -32,13 +31,11 @@ function Login() {
     setError('');
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, captchaAnswer, captchaToken })
+      const res = await api.post('/auth/login', {
+        username, password, captchaAnswer, captchaToken
       });
 
-      const json = await res.json();
+      const json = res.data;
 
       if (json.success) {
         localStorage.setItem('token', json.data.token);
@@ -60,8 +57,9 @@ function Login() {
         setCaptchaAnswer('');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      setError(err.response?.data?.message || 'Error de conexión con el servidor');
       console.error('Login error:', err);
+      fetchCaptcha();
     }
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../lib/api';
+import api, { getBaseURL } from '../lib/api';
 import { TrendingUp, Users, AlertCircle, ArrowUpRight, Calendar, ExternalLink, ShieldCheck, Zap, BarChart3, Briefcase, Truck, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -30,7 +30,7 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState(null);
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const apiUrl = getBaseURL();
   const baseUrl = apiUrl.replace(/\/api$/, '');
 
   useEffect(() => {
