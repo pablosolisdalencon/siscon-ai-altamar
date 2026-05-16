@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import api from '../lib/api';
+import api, { getBaseURL } from '../lib/api';
 import { Mail, Clock, ChevronRight, Search, User as UserIcon, Settings, Download, ChevronLeft, ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -115,7 +115,7 @@ const FormSelect = ({ label, value, options, onChange, showCircle = false, curre
 };
 
 const Cobros = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const apiUrl = getBaseURL();
   const baseUrl = apiUrl.replace(/\/api$/, '');
   const [collections, setCollections] = useState([]);
   const [clients, setClients] = useState([]);
