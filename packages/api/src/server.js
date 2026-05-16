@@ -20,6 +20,28 @@ const modulesController = require('./controllers/modulesController');
 
 const { authenticateToken, authorizeRole } = require('./utils/authMiddleware');
 
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║ DIAGNOSTIC: Primera linea de defensa - captura _diag en     ║
+// ║ CUALQUIER posición de la URL, antes de todo middleware.      ║
+// ╚═══════════════════════════════════════════════════════════════╝
+app.use((req, res, next) => {
+  // Log EVERY request for cPanel logs
+  console.log(`[SISCON] ${req.method} url="${req.url}" orig="${req.originalUrl}" path="${req.path}"`);
+  
+  if (req.url.includes('_diag') || req.originalUrl.includes('_diag')) {
+    return res.json({
+      version: '2.2.0-diag',
+      url: req.url,
+      originalUrl: req.originalUrl,
+      path: req.path,
+      baseUrl: req.baseUrl,
+      method: req.method,
+      host: req.headers.host
+    });
+  }
+  next();
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
