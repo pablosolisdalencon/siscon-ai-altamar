@@ -14,8 +14,19 @@ axios.interceptors.request.use(
   }
 );
 
+const getBaseURL = () => {
+  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'undefined') {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Fallback para despliegue en subcarpeta cPanel
+  if (window.location.pathname.includes('/siscon-ai')) {
+    return '/siscon-ai/api';
+  }
+  return '/api';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json'
   }
