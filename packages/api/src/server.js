@@ -88,8 +88,8 @@ apiRouter.get('/configurations', modulesController.getConfigurations);
 apiRouter.post('/configurations', modulesController.createConfiguration);
 apiRouter.put('/configurations/:id', modulesController.updateConfiguration);
 
-// Soporta tanto /api como la raíz para flexibilidad en entornos como cPanel
-app.use(['/api', '/'], apiRouter);
+// Soporta múltiples prefijos para máxima compatibilidad con el proxy de cPanel
+app.use(['/siscon-ai/api', '/api', '/'], apiRouter);
 
 // Static Files (Legacy Parity for Documents)
 const path = require('path');

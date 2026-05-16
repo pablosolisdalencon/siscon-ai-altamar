@@ -46,9 +46,11 @@ function App() {
             <Route path="login" element={<Login />} />
             
             <Route path="/" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <Dashboard />
-              </ProtectedRoute>
+              localStorage.getItem('token') ? (
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Dashboard />
+                </ProtectedRoute>
+              ) : <Login />
             } />
             <Route path="ventas" element={
               <ProtectedRoute allowedRoles={['admin']}>
