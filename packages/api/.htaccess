@@ -1,0 +1,15 @@
+# Desactivar el listado de directorios para seguridad
+Options -Indexes
+
+# Si el servidor tiene mod_rewrite, proteger archivos sensibles
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # No permitir acceso directo a archivos .js (deben ser ejecutados por Node.js)
+    # Pero esto podría romper si el servidor no tiene Node.js configurado correctamente.
+    # Por ahora solo bloqueamos el acceso a .env y archivos ocultos
+    RewriteRule ^\.env - [F,L]
+</IfModule>
+
+# Asegurar que el servidor sepa que esto es una aplicación Node.js 
+# (Depende de la configuración de cPanel, pero ayuda)
+DirectoryIndex app.js index.js server.js

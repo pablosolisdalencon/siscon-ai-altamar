@@ -11,17 +11,17 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const navigate = useNavigate();
   const navItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
-    { name: 'Dashboard Agente', icon: <Users size={20} />, path: '/agent-dashboard' },
-    { name: 'Ventas', icon: <Receipt size={20} />, path: '/ventas' },
-    { name: 'f-Cobros', icon: <ShoppingCart size={20} />, path: '/cobros' },
-    { name: 'Compras', icon: <ShoppingBag size={20} />, path: '/compras' },
-    { name: 'Clientes', icon: <Briefcase size={20} />, path: '/clientes' },
-    { name: 'Proveedores', icon: <Truck size={20} />, path: '/proveedores' },
-    { name: 'Empresa', icon: <Building2 size={20} />, path: '/empresa' },
-    { name: 'Sincronizar BD', icon: <Database size={20} />, path: '/import-db' },
-    { name: 'Usuarios', icon: <User size={20} />, path: '/usuarios' },
-    { name: 'Config', icon: <Settings size={20} />, path: '/config' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '' },
+    { name: 'Dashboard Agente', icon: <Users size={20} />, path: 'agent-dashboard' },
+    { name: 'Ventas', icon: <Receipt size={20} />, path: 'ventas' },
+    { name: 'f-Cobros', icon: <ShoppingCart size={20} />, path: 'cobros' },
+    { name: 'Compras', icon: <ShoppingBag size={20} />, path: 'compras' },
+    { name: 'Clientes', icon: <Briefcase size={20} />, path: 'clientes' },
+    { name: 'Proveedores', icon: <Truck size={20} />, path: 'proveedores' },
+    { name: 'Empresa', icon: <Building2 size={20} />, path: 'empresa' },
+    { name: 'Sincronizar BD', icon: <Database size={20} />, path: 'import-db' },
+    { name: 'Usuarios', icon: <User size={20} />, path: 'usuarios' },
+    { name: 'Config', icon: <Settings size={20} />, path: 'config' },
   ];
 
   return (
@@ -80,7 +80,7 @@ const Navbar = () => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('role');
                 localStorage.removeItem('id_agente');
-                navigate('/login');
+                navigate('login');
               }}
               className="flex items-center gap-4 p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50/50 transition-all w-full"
             >
