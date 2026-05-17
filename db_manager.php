@@ -109,9 +109,19 @@ if (isset($_POST['action']) && $_POST['action'] == 'import' && isset($_FILES['sq
             
             $query = $query . $line;
             if ($endWith == ';') {
-                if ($use_mysql) mysql_query($query, $conn) or ($error = true);
-                else mysqli_query($conn, $query) or ($error = true);
-                if ($error) $message = "Error en query: " . ($use_mysql ? mysql_error() : mysqli_error($conn));
+                if ($use_mysql) {
+                    if (!mysql_query($query, $conn)) {
+                        $error = true;
+                        $message = "Error: " . mysql_error() . "<br><br><b>En la query:</b><br><pre style='color:#f87171'>" . htmlspecialchars($query) . "</pre>";
+                        break;
+                    }
+                } else {
+                    if (!mysqli_query($conn, $query)) {
+                        $error = true;
+                        $message = "Error: " . mysqli_error($conn) . "<br><br><b>En la query:</b><br><pre style='color:#f87171'>" . htmlspecialchars($query) . "</pre>";
+                        break;
+                    }
+                }
                 $query = "";
             }
         }

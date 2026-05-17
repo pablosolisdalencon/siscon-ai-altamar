@@ -7,21 +7,23 @@ import {
   Menu, X
 } from 'lucide-react';
 
+import logoImg from '../../assets/logo.png';
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const navigate = useNavigate();
   const navItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '' },
-    { name: 'Dashboard Agente', icon: <Users size={20} />, path: 'agent-dashboard' },
-    { name: 'Ventas', icon: <Receipt size={20} />, path: 'ventas' },
-    { name: 'f-Cobros', icon: <ShoppingCart size={20} />, path: 'cobros' },
-    { name: 'Compras', icon: <ShoppingBag size={20} />, path: 'compras' },
-    { name: 'Clientes', icon: <Briefcase size={20} />, path: 'clientes' },
-    { name: 'Proveedores', icon: <Truck size={20} />, path: 'proveedores' },
-    { name: 'Empresa', icon: <Building2 size={20} />, path: 'empresa' },
-    { name: 'Sincronizar BD', icon: <Database size={20} />, path: 'import-db' },
-    { name: 'Usuarios', icon: <User size={20} />, path: 'usuarios' },
-    { name: 'Config', icon: <Settings size={20} />, path: 'config' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
+    { name: 'Dashboard Agente', icon: <Users size={20} />, path: '/agent-dashboard' },
+    { name: 'Ventas', icon: <Receipt size={20} />, path: '/ventas' },
+    { name: 'f-Cobros', icon: <ShoppingCart size={20} />, path: '/cobros' },
+    { name: 'Compras', icon: <ShoppingBag size={20} />, path: '/compras' },
+    { name: 'Clientes', icon: <Briefcase size={20} />, path: '/clientes' },
+    { name: 'Proveedores', icon: <Truck size={20} />, path: '/proveedores' },
+    { name: 'Empresa', icon: <Building2 size={20} />, path: '/empresa' },
+    { name: 'Sincronizar BD', icon: <Database size={20} />, path: '/import-db' },
+    { name: 'Usuarios', icon: <User size={20} />, path: '/usuarios' },
+    { name: 'Config', icon: <Settings size={20} />, path: '/config' },
   ];
 
   return (
@@ -31,7 +33,7 @@ const Navbar = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="fixed top-6 left-6 z-[100] w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all overflow-hidden print:hidden"
       >
-        {isOpen ? <X size={24} /> : <img src="logo.png" alt="Menu" className="w-full h-full object-cover scale-110" />}
+        {isOpen ? <X size={24} /> : <img src={logoImg} alt="Menu" className="w-full h-full object-cover scale-110" />}
       </button>
 
       {/* Backdrop */}
@@ -50,7 +52,7 @@ const Navbar = () => {
         <div className="flex flex-col h-full gap-2">
           {/* Logo in Drawer */}
           <div className="flex items-center gap-4 mb-10 px-2">
-            <img src="logo.png" alt="SISCON Logo" className="w-12 h-12 rounded-xl shadow-lg shadow-primary/20" />
+            <img src={logoImg} alt="SISCON Logo" className="w-12 h-12 rounded-xl shadow-lg shadow-primary/20" />
             <span className="font-black text-2xl text-slate-800 tracking-tighter">SISCON<span className="text-primary">-AI</span></span>
           </div>
 

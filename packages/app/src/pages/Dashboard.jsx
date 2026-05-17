@@ -3,6 +3,8 @@ import api, { getBaseURL } from '../lib/api';
 import { TrendingUp, Users, AlertCircle, ArrowUpRight, Calendar, ExternalLink, ShieldCheck, Zap, BarChart3, Briefcase, Truck, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import logoImg from '../assets/logo.png';
+
 const CountUp = ({ end, prefix = '', duration = 1000 }) => {
   const [count, setCount] = useState(0);
 
@@ -31,7 +33,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState(null);
   const apiUrl = getBaseURL();
-  const baseUrl = apiUrl.replace(/\/api$/, '');
+  const baseUrl = apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '');
 
   useEffect(() => {
     fetchStats();
@@ -89,7 +91,7 @@ const Dashboard = () => {
           <div className="hidden lg:flex flex-col items-center justify-center flex-1 gap-8 z-10 animate-in zoom-in duration-700 delay-300">
             <div className="relative group">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/40 transition-all duration-700"></div>
-              <img src="/logo.png" alt="SISCON Logo" className="relative w-64 h-64 object-contain hover:scale-110 transition-transform duration-700 drop-shadow-2xl" />
+              <img src={logoImg} alt="SISCON Logo" className="relative w-64 h-64 object-contain hover:scale-110 transition-transform duration-700 drop-shadow-2xl" />
             </div>
             {company?.pago_firma && (
               <div className="bg-white/5 backdrop-blur-md p-8 rounded-[3rem] border border-white/10 shadow-2xl hover:bg-white/10 transition-all duration-500">

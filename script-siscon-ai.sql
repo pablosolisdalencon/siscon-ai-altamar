@@ -2,25 +2,16 @@
 -- Este script adapta la base de datos legacy para el nuevo sistema SISCON-AI
 -- Se utiliza CHARSET=latin1 para máxima compatibilidad con el esquema existente.
 
--- 1. Actualización de tabla 'ventas'
--- Nota: Si los campos ya existen, el script podría dar un error que puede ignorarse.
-ALTER TABLE `ventas` ADD `comicion` FLOAT DEFAULT 0;
-ALTER TABLE `ventas` ADD `id_agente` INT DEFAULT NULL;
+-- 1. Actualización de tabla 'ventas' (Ya aplicadas)
+-- ALTER TABLE `ventas` ADD `comicion` FLOAT DEFAULT 0;
+-- ALTER TABLE `ventas` ADD `id_agente` INT DEFAULT NULL;
 
--- 2. Actualización de tabla 'usuarios'
-ALTER TABLE `usuarios` ADD `role` VARCHAR(255) DEFAULT 'user';
-ALTER TABLE `usuarios` ADD `comicion` FLOAT DEFAULT 0;
+-- 2. Actualización de tabla 'usuarios' (Ya aplicadas)
+-- ALTER TABLE `usuarios` ADD `role` VARCHAR(255) DEFAULT 'user';
+-- ALTER TABLE `usuarios` ADD `comicion` FLOAT DEFAULT 0;
 
--- 3. Creación de tabla 'agentes'
-CREATE TABLE IF NOT EXISTS `agentes` (
-  `id_agente` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(255) NOT NULL,
-  `rut` varchar(255) DEFAULT NULL,
-  `mail` varchar(255) DEFAULT NULL,
-  `fono` varchar(255) DEFAULT NULL,
-  `comision_default` float DEFAULT 0,
-  PRIMARY KEY (`id_agente`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+-- 3. Eliminación de tabla 'agentes' (Legacy)
+DROP TABLE IF EXISTS `agentes`;
 
 -- 4. Creación de tabla 'configuraciones'
 CREATE TABLE IF NOT EXISTS `configuraciones` (
@@ -34,5 +25,15 @@ CREATE TABLE IF NOT EXISTS `configuraciones` (
 -- 5. Insertar configuración por defecto
 INSERT IGNORE INTO `configuraciones` (`clave`, `valor`) VALUES ('cantidad de registros ventas', '100');
 INSERT IGNORE INTO `configuraciones` (`clave`, `valor`) VALUES ('system_name', 'SISCON-AI Altamar');
+
+-- 6. Limpieza y Configuración de Usuarios (Ajuste estricto)
+-- Eliminar a cualquier usuario que no sea carlos o psolis
+DELETE FROM `usuarios` WHERE `user` NOT IN ('carlos', 'psolis');
+
+-- Asegurar que carlos es admin
+UPDATE `usuarios` SET `role` = 'admin', `comicion` = 0 WHERE `user` = 'carlos';
+
+-- Asegurar que psolis existe y es agente (se inserta si no existe)
+INSERT IGNORE INTO `usuarios` (`user`, `pass`, `mail`, `role`, `comicion`) VALUES ('psolis', 'CometaHalley.,2026', 'pablo.solis.dalencon@gmail.com', 'agente', 25);
 
 -- Fin del script.

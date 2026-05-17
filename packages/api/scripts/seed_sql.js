@@ -18,28 +18,45 @@ async function run() {
       console.log('ℹ️ La columna "comicion" ya existe en la tabla "usuarios".');
     }
 
-    // 0. Crear usuario admin por defecto si no existe
-    const [[adminExists]] = await sequelize.query("SELECT * FROM usuarios WHERE user = 'admin'");
-    if (!adminExists) {
-      await sequelize.query("INSERT INTO usuarios (user, pass, mail, role, comicion) VALUES ('admin', 'TiburonBlanco.,2026', 'admin@test.com', 'admin', 0)");
-      console.log('✅ Usuario "admin" creado.');
-    } else {
-      console.log('ℹ️ El usuario "admin" ya existe.');
+    // 0. Eliminar tabla legacy 'agentes' (si existe)
+    try {
+      await sequelize.query('DROP TABLE IF EXISTS agentes');
+      console.log('✅ Tabla legacy "agentes" eliminada (los agentes ahora son un rol en "usuarios").');
+    } catch (err) {
+      console.log('ℹ️ Error al intentar eliminar la tabla "agentes" o ya no existía.');
     }
 
-    // 1. Crear usuario psolis si no existe
+    // 1. Limpieza estricta de usuarios (Prod manda)
+    try {
+      await sequelize.query("DELETE FROM usuarios WHERE user NOT IN ('carlos', 'psolis')");
+      console.log('✅ Usuarios no deseados eliminados.');
+    } catch (err) {
+      console.log('ℹ️ Error limpiando usuarios:', err);
+    }
+
+    // 2. Crear o asegurar usuario carlos como admin
+    const [[carlosExists]] = await sequelize.query("SELECT * FROM usuarios WHERE user = 'carlos'");
+    if (!carlosExists) {
+      await sequelize.query("INSERT INTO usuarios (user, pass, mail, role, comicion) VALUES ('carlos', 'tiburonblanco', 'czuniga@surfotos.cl', 'admin', 0)");
+      console.log('✅ Usuario "carlos" (admin) creado.');
+    } else {
+      await sequelize.query("UPDATE usuarios SET role = 'admin', comicion = 0 WHERE user = 'carlos'");
+      console.log('ℹ️ El usuario "carlos" ya existe, asegurado como admin.');
+    }
+
+    // 3. Crear usuario psolis si no existe (agente)
     const [[userExists]] = await sequelize.query("SELECT * FROM usuarios WHERE user = 'psolis'");
     let userId;
     if (!userExists) {
       const [insertUser] = await sequelize.query("INSERT INTO usuarios (user, pass, mail, role, comicion) VALUES ('psolis', 'CometaHalley.,2026', 'pablo.solis.dalencon@gmail.com', 'agente', 25)");
       userId = insertUser;
-      console.log('✅ Usuario "psolis" creado.');
+      console.log('✅ Usuario "psolis" (agente) creado.');
     } else {
       userId = userExists.id_user;
       console.log('ℹ️ El usuario "psolis" ya existe.');
     }
 
-    // 2. Crear cliente genérico si no existe (ya que ventas requiere id_cliente)
+    // 4. Crear cliente genérico si no existe (ya que ventas requiere id_cliente)
     const [[clientExists]] = await sequelize.query("SELECT * FROM clientes WHERE razon = 'Cliente Generico'");
     let clientId;
     if (!clientExists) {
@@ -51,36 +68,14 @@ async function run() {
       console.log('ℹ️ El cliente "Cliente Generico" ya existe.');
     }
 
-    // 3. Crear venta de muestra si no existe
+    // 5. Crear venta de muestra si no existe
     const [[saleExists]] = await sequelize.query(`SELECT * FROM ventas WHERE id_agente = ${userId} AND total = 1000000`);
     if (!saleExists) {
       const sqlSale = `INSERT INTO ventas (fecha, n_factura, n_cot, n_oc, id_cliente, id_agente, item, detalle, monto, iva, total, estado, pagado, comicion) VALUES ('${new Date().toISOString().split('T')[0]}', 9999, 0, 0, ${clientId}, ${userId}, 'Servicio de Prueba', 'Venta de muestra para dashboard', 840336, 159664, 1000000, 1, 'NO', 250000)`;
       await sequelize.query(sqlSale);
-      console.log('✅ Venta de muestra creada.');
+      console.log('✅ Venta de muestra creada para agente psolis.');
     } else {
       console.log('ℹ️ La venta de muestra ya existe.');
-    }
-
-    // 4. Crear usuario colaborador1 si no existe
-    const [[colabExists]] = await sequelize.query("SELECT * FROM usuarios WHERE user = 'colaborador1'");
-    let colabId;
-    if (!colabExists) {
-      const [insertColab] = await sequelize.query("INSERT INTO usuarios (user, pass, mail, role, comicion) VALUES ('colaborador1', 'CometaHalley.,2026', 'colaborador1@test.com', 'agente', 20)");
-      colabId = insertColab;
-      console.log('✅ Usuario "colaborador1" creado.');
-    } else {
-      colabId = colabExists.id_user;
-      console.log('ℹ️ El usuario "colaborador1" ya existe.');
-    }
-
-    // 5. Crear venta de muestra para colaborador1
-    const [[saleColabExists]] = await sequelize.query(`SELECT * FROM ventas WHERE id_agente = ${colabId} AND total = 500000`);
-    if (!saleColabExists) {
-      const sqlSaleColab = `INSERT INTO ventas (fecha, n_factura, n_cot, n_oc, id_cliente, id_agente, item, detalle, monto, iva, total, estado, pagado, comicion) VALUES ('${new Date().toISOString().split('T')[0]}', 8888, 0, 0, ${clientId}, ${colabId}, 'Servicio Colaborador', 'Venta de muestra para colaborador', 420168, 79832, 500000, 1, 'NO', 100000)`;
-      await sequelize.query(sqlSaleColab);
-      console.log('✅ Venta de muestra para colaborador creada.');
-    } else {
-      console.log('ℹ️ La venta de muestra para colaborador ya existe.');
     }
 
     process.exit(0);
