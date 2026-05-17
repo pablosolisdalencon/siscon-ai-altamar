@@ -80,7 +80,7 @@ const Navbar = () => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('role');
                 localStorage.removeItem('id_agente');
-                navigate('login');
+                navigate('/login');
               }}
               className="flex items-center gap-4 p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50/50 transition-all w-full"
             >
