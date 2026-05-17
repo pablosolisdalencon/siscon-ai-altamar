@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import api, { getBaseURL } from '../lib/api';
 import { 
   Building2, Phone, Mail, User, Save, Upload, 
@@ -7,7 +8,7 @@ import { cn } from '../utils/cn';
 
 const Empresa = () => {
   const apiUrl = getBaseURL();
-  const baseUrl = apiUrl.replace(/\/api$/, '');
+  const baseUrl = apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '');
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
