@@ -140,12 +140,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Montamos el router en raíz — el middleware ya limpió la URL
-app.use(apiRouter);
-
-// Static Files (Legacy Parity for Documents)
+// Static Files (Legacy Parity for Documents) - Registered BEFORE apiRouter to bypass token authorization
 const path = require('path');
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
+
+// Montamos el router en raíz — el middleware ya limpió la URL
+app.use(apiRouter);
 
 // CATCH-ALL 404: Reemplaza el 'Cannot GET' con info diagnóstica
 app.use((req, res) => {
@@ -162,12 +162,15 @@ app.use((req, res) => {
 const startServer = async () => {
   await connectDB();
   
-  // Sync User model to add comicion column if missing
+  // Sync main tables to automatically add missing columns in production (id_agente, comicion)
   try {
     await User.sync({ alter: true });
-    console.log('✅ User table synced successfully.');
+    await Sale.sync({ alter: true });
+    await Purchase.sync({ alter: true });
+    await Client.sync({ alter: true });
+    console.log('✅ Database tables synced successfully.');
   } catch (err) {
-    console.error('❌ Error syncing User table:', err);
+    console.error('❌ Error syncing database tables:', err);
   }
 
   // Test Model Load

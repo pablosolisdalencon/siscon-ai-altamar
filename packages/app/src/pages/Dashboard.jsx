@@ -33,7 +33,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState(null);
   const apiUrl = getBaseURL();
-  const baseUrl = apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '');
+  const baseUrl = (apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '')).replace(/\/$/, '');
 
   useEffect(() => {
     fetchStats();

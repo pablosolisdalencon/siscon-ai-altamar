@@ -134,7 +134,7 @@ const FormSelect = ({ label, value, options, onChange, required = false, showCir
 
 const Compras = () => {
   const apiUrl = getBaseURL();
-  const baseUrl = apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '');
+  const baseUrl = (apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '')).replace(/\/$/, '');
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);

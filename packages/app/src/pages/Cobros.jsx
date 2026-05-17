@@ -118,7 +118,7 @@ import logoImg from '../assets/logo.png';
 
 const Cobros = () => {
   const apiUrl = getBaseURL();
-  const baseUrl = apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '');
+  const baseUrl = (apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '')).replace(/\/$/, '');
   const [collections, setCollections] = useState([]);
   const [clients, setClients] = useState([]);
   const [agents, setAgents] = useState([]);

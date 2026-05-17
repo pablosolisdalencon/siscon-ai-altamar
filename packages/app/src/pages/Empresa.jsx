@@ -8,7 +8,7 @@ import { cn } from '../utils/cn';
 
 const Empresa = () => {
   const apiUrl = getBaseURL();
-  const baseUrl = apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '');
+  const baseUrl = (apiUrl.includes('/siscon-ai/api') ? apiUrl : apiUrl.replace(/\/api$/, '')).replace(/\/$/, '');
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
