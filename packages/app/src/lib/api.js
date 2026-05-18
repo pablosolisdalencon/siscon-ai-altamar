@@ -43,4 +43,30 @@ api.interceptors.request.use(
   }
 );
 
+// Global response interceptor for handling token expiration (401/403)
+const handleAuthError = (error) => {
+  const status = error.response ? error.response.status : null;
+  if ((status === 401 || status === 403) && !window.location.pathname.includes('/login')) {
+    console.warn('[SISCON-AI] Session expired or unauthorized request. Redirecting to login...');
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    localStorage.removeItem('id_agente');
+    
+    const basePath = window.location.pathname.startsWith('/siscon-ai') ? '/siscon-ai' : '';
+    window.location.href = `${window.location.origin}${basePath}/login`;
+  }
+  return Promise.reject(error);
+};
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => handleAuthError(error)
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => handleAuthError(error)
+);
+
 export default api;

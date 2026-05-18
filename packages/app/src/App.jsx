@@ -24,7 +24,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     if (role === 'agente') {
       return <Navigate to="/agent-dashboard" replace />;
     }
-    return <Navigate to="/" replace />;
+    // Protección anti-bucles: si el rol es inválido o no tiene accesos mínimos, limpiamos la sesión y redirigimos a login
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    localStorage.removeItem('id_agente');
+    return <Navigate to="/login" replace />;
   }
 
   return children;
