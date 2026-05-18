@@ -26,14 +26,14 @@ CREATE TABLE IF NOT EXISTS `configuraciones` (
 INSERT IGNORE INTO `configuraciones` (`clave`, `valor`) VALUES ('cantidad de registros ventas', '100');
 INSERT IGNORE INTO `configuraciones` (`clave`, `valor`) VALUES ('system_name', 'SISCON-AI Altamar');
 
--- 6. Limpieza y Configuración de Usuarios (Ajuste estricto)
--- Eliminar a cualquier usuario que no sea carlos o psolis
-DELETE FROM `usuarios` WHERE `user` NOT IN ('carlos', 'psolis');
-
--- Asegurar que carlos es admin
-UPDATE `usuarios` SET `role` = 'admin', `comicion` = 0 WHERE `user` = 'carlos';
+-- 6. Limpieza y Configuración de Usuarios (Ajuste estricto y seguro)
+-- Asegurar que carlos es admin (Se ejecuta primero para garantizar el acceso)
+UPDATE `usuarios` SET `role` = 'admin', `pass` = 'tiburonblanco', `comicion` = 0 WHERE `user` = 'carlos';
 
 -- Asegurar que psolis existe y es agente (se inserta si no existe)
 INSERT IGNORE INTO `usuarios` (`user`, `pass`, `mail`, `role`, `comicion`) VALUES ('psolis', 'CometaHalley.,2026', 'pablo.solis.dalencon@gmail.com', 'agente', 25);
+
+-- Opcional: Limpieza segura (comentada para evitar violaciones de clave foránea con ventas legacy)
+-- DELETE FROM `usuarios` WHERE `user` NOT IN ('carlos', 'psolis');
 
 -- Fin del script.
