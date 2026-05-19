@@ -1,4 +1,4 @@
-const { Purchase, Client, Provider } = require('../models/associations');
+const { Purchase, Client, Provider, SaleState } = require('../models/associations');
 const { successResponse, errorResponse } = require('../utils/response');
 const { Op } = require('sequelize');
 
@@ -29,6 +29,8 @@ exports.getPurchases = async (req, res) => {
         order = [[sortBy, direction]];
       } else if (sortBy === 'cliente') {
         order = [[{ model: Client, as: 'client' }, 'razon', direction]];
+      } else if (sortBy === 'estado') {
+        order = [[{ model: SaleState, as: 'status' }, 'estado', direction]];
       }
     }
 
@@ -39,6 +41,10 @@ exports.getPurchases = async (req, res) => {
           model: Client,
           as: 'client',
           attributes: ['razon', 'rut']
+        },
+        {
+          model: SaleState,
+          as: 'status'
         }
       ],
       order,

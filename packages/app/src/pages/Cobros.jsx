@@ -503,9 +503,6 @@ SISCON-AI`;
                       >
                         <div className={cn("flex items-center gap-1", col.center && "justify-center", col.right && "justify-end")}>
                           <span className={cn(col.key === 'fecha' && "lowercase")}>{col.label}</span>
-                          {itemSortBy === col.key && (
-                            itemSortOrder === 'ASC' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
-                          )}
                         </div>
                       </th>
                     ))}

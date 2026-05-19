@@ -18,6 +18,10 @@ const cleanSaleData = (data) => {
   if ('estado' in result) result.estado = cleanInt(result.estado) || 1;
   if ('comicion' in result) result.comicion = cleanFloat(result.comicion) || 0;
   
+  if ('monto' in result) result.monto = cleanFloat(result.monto) || 0;
+  if ('iva' in result) result.iva = cleanFloat(result.iva) || 0;
+  if ('total' in result) result.total = cleanFloat(result.total) || 0;
+
   if ('fecha_entrega' in result) result.fecha_entrega = cleanDate(result.fecha_entrega);
   if ('fecha_pago' in result) result.fecha_pago = cleanDate(result.fecha_pago);
   if ('fecha' in result) result.fecha = cleanDate(result.fecha);
@@ -154,21 +158,19 @@ exports.getSaleById = async (req, res) => {
 
 exports.createSale = async (req, res) => {
   try {
-    const { monto, ...rest } = req.body;
+    const { monto, iva, total, ...rest } = req.body;
 
-    // Auto calculations (Parity with ventas.php)
     const neto = parseFloat(monto) || 0;
-    const iva = neto * 0.19;
-    const total = neto + iva;
+    const computedIva = iva !== undefined ? parseFloat(iva) : neto * 0.19;
+    const computedTotal = total !== undefined ? parseFloat(total) : neto + computedIva;
 
-    // Handle empty strings and types for robust insertion
     const dataToSave = cleanSaleData(rest);
 
     const sale = await Sale.create({
       ...dataToSave,
       monto: neto,
-      iva,
-      total
+      iva: computedIva,
+      total: computedTotal
     });
 
     return successResponse(res, sale, 'Sale created successfully', 211);
@@ -180,20 +182,20 @@ exports.createSale = async (req, res) => {
 
 exports.updateSale = async (req, res) => {
   try {
-    const { monto } = req.body;
+    const { monto, iva, total } = req.body;
     const sale = await Sale.findByPk(req.params.id);
     if (!sale) return errorResponse(res, 'Sale not found', 404);
 
     const updateData = cleanSaleData(req.body);
-    if (monto) {
-      const neto = parseFloat(monto) || 0;
-      updateData.iva = neto * 0.19;
-      updateData.total = neto + updateData.iva;
-    }
+    
+    if (monto !== undefined) updateData.monto = parseFloat(monto) || 0;
+    if (iva !== undefined) updateData.iva = parseFloat(iva) || 0;
+    if (total !== undefined) updateData.total = parseFloat(total) || 0;
 
     await sale.update(updateData);
     return successResponse(res, sale, 'Sale updated successfully');
   } catch (error) {
+    console.error('Error updating sale:', error);
     return errorResponse(res, 'Error updating sale');
   }
 };

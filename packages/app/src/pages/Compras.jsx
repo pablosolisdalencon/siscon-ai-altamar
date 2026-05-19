@@ -378,9 +378,11 @@ const Compras = () => {
                 { label: 'IVA $', key: 'iva', right: true },
                 { label: 'Total $', key: 'total', right: true },
                 { label: 'Fecha Entrega', key: 'fecha_entrega', center: true },
+                { label: 'Dias Entrega', key: 'dias', center: true },
                 { label: 'Estado', key: 'estado', center: true },
                 { label: 'Fecha de pago', key: 'fecha_pago', center: true },
                 { label: 'Pagado', key: 'pagado', center: true },
+                { label: 'Dias Vencidos', key: 'dias_pago', center: true },
                 { label: 'Accion', key: 'accion', center: true },
               ].map((col) => (
                 <th 
@@ -399,12 +401,6 @@ const Compras = () => {
                     col.right && "justify-end"
                   )}>
                     {col.label}
-                    {col.key !== 'accion' && (
-                      <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ChevronUp size={8} className={cn(filters.sortBy === col.key && filters.sortOrder === 'ASC' ? "text-primary opacity-100" : "text-slate-500")} />
-                        <ChevronDown size={8} className={cn(filters.sortBy === col.key && filters.sortOrder === 'DESC' ? "text-primary opacity-100" : "text-slate-500")} />
-                      </div>
-                    )}
                   </div>
                 </th>
               ))}
@@ -423,22 +419,9 @@ const Compras = () => {
                     <div className="w-4 h-4 rounded shadow-sm" style={{ backgroundColor: purchase.status?.color || '#cbd5e1' }} />
                   </td>
                   <td className="px-2 py-3 whitespace-nowrap text-[11px] font-bold text-slate-500">{purchase.fecha}</td>
-                  
-                  <td className="px-2 py-3 text-center">
-                    <div className="flex items-center gap-1 justify-center">
-                      <span className="text-[11px] text-blue-600 font-bold">{purchase.n_cot || 0}</span>
-                    </div>
-                  </td>
-                  
                   <td className="px-2 py-3 text-center">
                     <div className="flex items-center gap-1 justify-center">
                       <span className="text-[11px] text-slate-600">{purchase.n_oc || 0}</span>
-                    </div>
-                  </td>
-                  
-                  <td className="px-2 py-3 text-center">
-                    <div className="flex items-center gap-1 justify-center">
-                      <span className="text-[11px] text-slate-900 font-black">{purchase.n_factura || 0}</span>
                     </div>
                   </td>
 
@@ -524,7 +507,7 @@ const Compras = () => {
           </tbody>
           <tfoot className="bg-slate-50 border-t border-slate-200">
             <tr>
-              <td colSpan={11} className="px-6 py-4 text-xs font-bold text-slate-400 text-right">Totales Globales ({totalItems} registros)</td>
+              <td colSpan={9} className="px-6 py-4 text-xs font-bold text-slate-400 text-right">Totales Globales ({totalItems} registros)</td>
               <td className="px-2 py-3 text-right">
                 <div className="text-[11px] font-black text-slate-800">
                   ${purchases.reduce((acc, p) => acc + (p.total || (p.monto * 1.19)), 0).toLocaleString()}

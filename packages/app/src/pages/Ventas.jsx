@@ -166,6 +166,8 @@ const Ventas = () => {
     item: '',
     detalle: '',
     monto: 0,
+    iva: 0,
+    total: 0,
     estado: 1,
     pagado: 'NO',
     entregado: 'NO',
@@ -260,6 +262,8 @@ const Ventas = () => {
         item: sale.item || '',
         detalle: sale.detalle || '',
         monto: sale.monto || 0,
+        iva: sale.iva !== undefined && sale.iva !== null ? sale.iva : Math.round((sale.monto || 0) * 0.19),
+        total: sale.total !== undefined && sale.total !== null ? sale.total : Math.round((sale.monto || 0) * 1.19),
         estado: sale.estado,
         pagado: sale.pagado || 'NO',
         entregado: sale.entregado || 'NO',
@@ -283,6 +287,8 @@ const Ventas = () => {
         item: '',
         detalle: '',
         monto: 0,
+        iva: 0,
+        total: 0,
         estado: 1,
         pagado: 'NO',
         entregado: 'NO',
@@ -377,6 +383,47 @@ const Ventas = () => {
     }
   };
 
+  const handleEconomicChange = (field, value) => {
+    if (isEditMode) {
+      // al Editar Venta, no debe actuar la calculadora en ningun sentido
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else {
+      // al Agregar Nueva Venta, dejar editable el valor, iva y total, con calculadora activa
+      const numericValue = Math.round(parseFloat(value)) || 0;
+      if (field === 'monto') {
+        const ivaVal = Math.round(numericValue * 0.19);
+        const totalVal = numericValue + ivaVal;
+        setFormData(prev => ({
+          ...prev,
+          monto: value,
+          iva: ivaVal,
+          total: totalVal
+        }));
+      } else if (field === 'iva') {
+        const netoVal = Math.round(numericValue / 0.19);
+        const totalVal = netoVal + numericValue;
+        setFormData(prev => ({
+          ...prev,
+          monto: netoVal,
+          iva: value,
+          total: totalVal
+        }));
+      } else if (field === 'total') {
+        const netoVal = Math.round(numericValue / 1.19);
+        const ivaVal = numericValue - netoVal;
+        setFormData(prev => ({
+          ...prev,
+          monto: netoVal,
+          iva: ivaVal,
+          total: value
+        }));
+      }
+    }
+  };
+
   const calculateDays = (dateStr) => {
     if (!dateStr || dateStr === '0000-00-00') return null;
     const diff = new Date(dateStr) - new Date();
@@ -393,73 +440,69 @@ const Ventas = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-20">
       {/* Header */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center gap-4">
-        <div className="w-full flex justify-end">
-          <div className="flex items-center gap-3">
-            <button 
-              className="btn-glass text-green-600 border-green-100 hover:bg-green-50 flex items-center gap-2 text-[10px]" 
-              onClick={handleExportExcel}
-            >
-              <Download size={16} />
-              Excel
-            </button>
-          </div>
-        </div>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800 text-center max-w-[50%] leading-tight uppercase tracking-tighter">
+      <div className="bg-white py-2 px-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center w-full">
+        <h1 className="text-sm font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2">
           Ventas
-          <div className="text-[10px] font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest mt-1 inline-block">
+          <span className="text-[9px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full tracking-widest normal-case">
             {totalItems} Registros (Pág. {currentPage}/{totalPages})
-          </div>
+          </span>
         </h1>
+        <button 
+          className="btn-glass text-green-600 border-green-100 hover:bg-green-50 flex items-center gap-1.5 text-[9px] px-2 py-1" 
+          onClick={handleExportExcel}
+        >
+          <Download size={12} />
+          Excel
+        </button>
       </div>
 
-      {/* Legacy Filter Bar */}
-      <div className="glass-card p-6 flex flex-wrap gap-4 items-center">
+      {/* Compact Filter Bar */}
+      <div className="glass-card py-1.5 px-3 flex flex-wrap gap-2 items-center text-[10px]">
         <input
           type="text" placeholder="N° FAC"
-          className="w-24 px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:border-primary/50 text-sm font-bold"
+          className="w-20 px-2 py-1 bg-slate-50/50 border border-slate-100 rounded-lg outline-none focus:border-primary/50 text-[10px] font-bold"
           value={filters.nFactura} onChange={(e) => setFilters({ ...filters, nFactura: e.target.value })}
         />
         <input
           type="text" placeholder="N° COT"
-          className="w-24 px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:border-primary/50 text-sm font-bold"
+          className="w-20 px-2 py-1 bg-slate-50/50 border border-slate-100 rounded-lg outline-none focus:border-primary/50 text-[10px] font-bold"
           value={filters.nCot} onChange={(e) => setFilters({ ...filters, nCot: e.target.value })}
         />
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-400 uppercase">Desde</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[9px] font-black text-slate-400 uppercase">Desde</span>
           <input
             type="date"
-            className="px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none text-xs font-bold"
+            className="px-2 py-1 bg-slate-50/50 border border-slate-100 rounded-lg outline-none text-[10px] font-bold"
             value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })}
           />
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-400 uppercase">Hasta</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[9px] font-black text-slate-400 uppercase">Hasta</span>
           <input
             type="date"
-            className="px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none text-xs font-bold"
+            className="px-2 py-1 bg-slate-50/50 border border-slate-100 rounded-lg outline-none text-[10px] font-bold"
             value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })}
           />
         </div>
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+        <div className="relative flex-1 min-w-[150px]">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-300" size={10} />
           <input
             type="text" placeholder="Buscar Cliente..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:border-primary/50 text-sm font-bold"
+            className="w-full pl-6 pr-2 py-1 bg-slate-50/50 border border-slate-100 rounded-lg outline-none focus:border-primary/50 text-[10px] font-bold"
             value={filters.clientSearch} onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
           />
         </div>
-        <div className="flex items-center gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
-          <span className="text-xs font-bold text-slate-400 uppercase px-2">Pagado</span>
+        <div className="flex items-center gap-2 bg-slate-50/50 px-2 py-0.5 rounded-lg border border-slate-100">
+          <span className="text-[9px] font-black text-slate-400 uppercase px-1">Pagado</span>
           {['SI', 'NO', 'TODAS'].map((opt) => (
-            <label key={opt} className="flex items-center gap-2 cursor-pointer group">
+            <label key={opt} className="flex items-center gap-1 cursor-pointer group">
               <input
                 type="radio" name="pagado" value={opt}
                 checked={filters.pagado === opt}
                 onChange={(e) => setFilters({ ...filters, pagado: e.target.value })}
-                className="w-4 h-4 text-primary focus:ring-0 border-slate-200"
+                className="w-3 h-3 text-primary focus:ring-0 border-slate-200"
               />
-              <span className={cn("text-xs font-bold transition-colors", filters.pagado === opt ? "text-primary" : "text-slate-400 group-hover:text-slate-600")}>
+              <span className={cn("text-[10px] font-bold transition-colors", filters.pagado === opt ? "text-primary" : "text-slate-400 group-hover:text-slate-600")}>
                 {opt}
               </span>
             </label>
@@ -472,7 +515,6 @@ const Ventas = () => {
         <table className="w-full text-left border-collapse min-w-[1200px] md:min-w-[1600px]">
           <thead className="text-white select-none">
             <tr>
-              <th className="px-2 py-3 text-[10px] font-black uppercase tracking-wider sticky top-0 z-10 bg-slate-800"></th>
               {[
                 { label: 'fecha', key: 'fecha' },
                 { label: 'N° Cot', key: 'n_cot', center: true },
@@ -507,10 +549,6 @@ const Ventas = () => {
                     col.right && "justify-end"
                   )}>
                     {col.label}
-                    <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ChevronUp size={8} className={cn(filters.sortBy === col.key && filters.sortOrder === 'ASC' ? "text-primary opacity-100" : "text-slate-500")} />
-                      <ChevronDown size={8} className={cn(filters.sortBy === col.key && filters.sortOrder === 'DESC' ? "text-primary opacity-100" : "text-slate-500")} />
-                    </div>
                   </div>
                 </th>
               ))}
@@ -528,9 +566,6 @@ const Ventas = () => {
                 const overdueDays = calculateOverdue(sale.fecha_pago, sale.pagado);
                 return (
                   <tr key={sale.id_venta} className="hover:bg-slate-50/80 transition-all group">
-                    <td className="px-2 py-3">
-                      <div className="w-4 h-4 rounded shadow-sm" style={{ backgroundColor: sale.status?.color || '#cbd5e1' }} />
-                    </td>
                     <td className="px-2 py-3 whitespace-nowrap text-[11px] font-bold text-slate-500">{sale.fecha}</td>
                     
                     <td className="px-2 py-3 text-center">
@@ -652,7 +687,7 @@ const Ventas = () => {
           </tbody>
           <tfoot className="bg-slate-50 border-t border-slate-200">
             <tr>
-              <td colSpan={11} className="px-6 py-4 text-xs font-bold text-slate-400 text-right">Totales Globales ({totalItems} registros)</td>
+              <td colSpan={10} className="px-6 py-4 text-xs font-bold text-slate-400 text-right">Totales Globales ({totalItems} registros)</td>
               <td className="px-2 py-3 text-right">
                 <div className="text-[11px] font-black text-slate-800">
                   ${sales.reduce((acc, s) => acc + (s.total || 0), 0).toLocaleString()}
@@ -845,15 +880,33 @@ const Ventas = () => {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Monto Neto ($)</label>
-                      <input type="number" required className="input-modern text-lg font-black text-primary" value={formData.monto} onChange={(e) => setFormData({ ...formData, monto: e.target.value })} />
+                      <input 
+                        type="number" 
+                        required 
+                        className="input-modern text-lg font-black text-primary" 
+                        value={formData.monto} 
+                        onChange={(e) => handleEconomicChange('monto', e.target.value)} 
+                      />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">IVA (19%)</label>
-                      <div className="input-modern bg-slate-50 text-slate-400 flex items-center">${(parseFloat(formData.monto) * 0.19 || 0).toLocaleString()}</div>
+                      <input 
+                        type="number" 
+                        required 
+                        className="input-modern text-lg font-black text-slate-600" 
+                        value={formData.iva} 
+                        onChange={(e) => handleEconomicChange('iva', e.target.value)} 
+                      />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Total</label>
-                      <div className="input-modern bg-slate-50 text-slate-900 font-black flex items-center">${(parseFloat(formData.monto) * 1.19 || 0).toLocaleString()}</div>
+                      <input 
+                        type="number" 
+                        required 
+                        className="input-modern text-lg font-black text-slate-900" 
+                        value={formData.total} 
+                        onChange={(e) => handleEconomicChange('total', e.target.value)} 
+                      />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-400 uppercase ml-2">% Comisión Agente</label>
