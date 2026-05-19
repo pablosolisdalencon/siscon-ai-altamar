@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api, { getBaseURL } from '../lib/api';
-import { Search, Plus, FileText, Download, Trash2, Save, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Search, Plus, FileText, Download, Trash2, Save, Pencil, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const StatusDropdown = ({ currentStatus, states, onSelect }) => {
@@ -148,6 +148,7 @@ const Ventas = () => {
     to: '',
     clientSearch: '',
     pagado: 'TODAS',
+    status: '',
     sortBy: 'id_venta',
     sortOrder: 'DESC'
   });
@@ -484,14 +485,7 @@ const Ventas = () => {
             value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })}
           />
         </div>
-        <div className="relative flex-1 min-w-[150px]">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-300" size={10} />
-          <input
-            type="text" placeholder="Buscar Cliente..."
-            className="w-full pl-6 pr-2 py-1 bg-slate-50/50 border border-slate-100 rounded-lg outline-none focus:border-primary/50 text-[10px] font-bold"
-            value={filters.clientSearch} onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
-          />
-        </div>
+
         <div className="flex items-center gap-2 bg-slate-50/50 px-2 py-0.5 rounded-lg border border-slate-100">
           <span className="text-[9px] font-black text-slate-400 uppercase px-1">Pagado</span>
           {['SI', 'NO', 'TODAS'].map((opt) => (
@@ -508,9 +502,26 @@ const Ventas = () => {
             </label>
           ))}
         </div>
+        <div className="flex items-center gap-2 bg-slate-50/50 px-2 py-0.5 rounded-lg border border-slate-100">
+          <span className="text-[9px] font-black text-slate-400 uppercase px-1">Estado</span>
+          <select
+            value={filters.status}
+            onChange={(e) => {
+              setFilters({ ...filters, status: e.target.value });
+              setCurrentPage(1);
+            }}
+            className="bg-transparent border-none outline-none text-[10px] font-bold text-slate-600 cursor-pointer focus:ring-0 py-0 pr-6"
+          >
+            <option value="">TODOS</option>
+            {auxData.states.map((s) => (
+              <option key={s.id_estado} value={s.id_estado}>
+                {s.estado}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Advanced Data Table */}
       <div className="table-container">
         <table className="w-full text-left border-collapse min-w-[1200px] md:min-w-[1600px]">
           <thead className="text-white select-none">
@@ -670,12 +681,26 @@ const Ventas = () => {
                     <td className="px-2 py-3">
                       <div className="flex justify-center gap-1">
                         <button onClick={() => handleOpenModal(sale)} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all" title="Editar">
-                          <Save size={12} />
+                          <Pencil size={12} />
                         </button>
                         <button className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all" title="Documento">
                           <FileText size={12} />
                         </button>
-                        <button onClick={async () => { if (confirm('¿Estás seguro de eliminar esta venta?')) { await api.delete(`sales/${sale.id_venta}`); fetchSales(); } }} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" title="Eliminar">
+                        <button 
+                          onClick={async () => { 
+                            if (window.confirm('¿Estás seguro de que deseas eliminar esta venta permanentemente?')) { 
+                              try {
+                                await api.delete(`sales/${sale.id_venta}`); 
+                                alert('Venta eliminada con éxito.');
+                                fetchSales(); 
+                              } catch (err) {
+                                alert('Error al eliminar la venta: ' + (err.response?.data?.message || err.message));
+                              }
+                            } 
+                          }} 
+                          className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-red-600 transition-all" 
+                          title="Eliminar"
+                        >
                           <Trash2 size={12} />
                         </button>
                       </div>
