@@ -329,6 +329,10 @@ const Ventas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.id_cliente) {
+      alert('Debe seleccionar un Cliente para registrar la venta.');
+      return;
+    }
     try {
       setLoading(true);
 
@@ -440,8 +444,8 @@ const Ventas = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-20">
       {/* Header */}
-      <div className="bg-white py-2 px-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center w-full">
-        <h1 className="text-sm font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2">
+      <div className="bg-white py-2 px-4 rounded-2xl shadow-sm border border-slate-100 flex justify-center items-center gap-6 w-full">
+        <h1 className="text-sm font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2 justify-center">
           Ventas
           <span className="text-[9px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full tracking-widest normal-case">
             {totalItems} Registros (Pág. {currentPage}/{totalPages})

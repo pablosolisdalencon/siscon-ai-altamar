@@ -166,6 +166,10 @@ exports.createSale = async (req, res) => {
 
     const dataToSave = cleanSaleData(rest);
 
+    if (!dataToSave.id_cliente) {
+      return errorResponse(res, 'El campo id_cliente es obligatorio', 400);
+    }
+
     const sale = await Sale.create({
       ...dataToSave,
       monto: neto,
@@ -187,6 +191,10 @@ exports.updateSale = async (req, res) => {
     if (!sale) return errorResponse(res, 'Sale not found', 404);
 
     const updateData = cleanSaleData(req.body);
+
+    if ('id_cliente' in updateData && !updateData.id_cliente) {
+      return errorResponse(res, 'El campo id_cliente es obligatorio', 400);
+    }
     
     if (monto !== undefined) updateData.monto = parseFloat(monto) || 0;
     if (iva !== undefined) updateData.iva = parseFloat(iva) || 0;
