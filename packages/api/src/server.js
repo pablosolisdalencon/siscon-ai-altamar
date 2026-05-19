@@ -47,24 +47,44 @@ app.use(cors());
 app.use(express.json());
 
 // Diagnostic endpoint - verifica qué versión está corriendo y qué URL recibe Node
-app.get('/_health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    version: '2.1.0-blindaje',
-    node_sees: { url: req.url, originalUrl: req.originalUrl, path: req.path, baseUrl: req.baseUrl }
-  });
+app.get('/_health', async (req, res) => {
+  try {
+    const users = await User.findAll({ attributes: ['user', 'role', 'mail', 'id_user'] });
+    res.json({ 
+      status: 'ok', 
+      version: '2.4.0-diagnostico',
+      node_sees: { url: req.url, originalUrl: req.originalUrl, path: req.path, baseUrl: req.baseUrl },
+      users: users
+    });
+  } catch (err) {
+    res.json({
+      status: 'error',
+      message: err.message,
+      stack: err.stack
+    });
+  }
 });
 
 const apiRouter = express.Router();
 
 // Routes Registration
 // Public routes (no token required)
-apiRouter.get('/_health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    version: '2.1.0-blindaje',
-    node_sees: { url: req.url, originalUrl: req.originalUrl, path: req.path, baseUrl: req.baseUrl }
-  });
+apiRouter.get('/_health', async (req, res) => {
+  try {
+    const users = await User.findAll({ attributes: ['user', 'role', 'mail', 'id_user'] });
+    res.json({ 
+      status: 'ok', 
+      version: '2.4.0-diagnostico',
+      node_sees: { url: req.url, originalUrl: req.originalUrl, path: req.path, baseUrl: req.baseUrl },
+      users: users
+    });
+  } catch (err) {
+    res.json({
+      status: 'error',
+      message: err.message,
+      stack: err.stack
+    });
+  }
 });
 apiRouter.use('/auth', authRoutes);
 
