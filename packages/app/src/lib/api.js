@@ -46,6 +46,10 @@ api.interceptors.request.use(
 // Global response interceptor for handling token expiration (401/403)
 const handleAuthError = (error) => {
   const status = error.response ? error.response.status : null;
+  const responseData = error.response ? error.response.data : null;
+  
+  console.warn(`[SISCON-AI] Auth Error Status: ${status}, Response:`, responseData);
+  
   if ((status === 401 || status === 403) && !window.location.pathname.includes('/login')) {
     console.warn('[SISCON-AI] Session expired or unauthorized request. Redirecting to login...');
     localStorage.removeItem('token');
