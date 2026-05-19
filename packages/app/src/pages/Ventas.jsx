@@ -244,11 +244,318 @@ const Ventas = () => {
           setItemsPerPage(configCantidad);
         }
       }
+
     } catch (err) {
       console.error('Error fetching aux data:', err);
     }
   };
 
+  const handlePrintSaleDetail = async (sale) => {
+    try {
+      const companyRes = await api.get('company');
+      const company = companyRes.data || {};
+      
+      const printWindow = window.open('', '_blank', 'width=800,height=900');
+      if (!printWindow) {
+        alert('Por favor permite los popups para descargar la ficha.');
+        return;
+      }
+      
+      const signatureUrl = company.pago_firma 
+        ? `${baseUrl}/docs/FIRMAS/${company.pago_firma}` 
+        : '';
+
+      const formatCurrency = (val) => {
+        return (val || 0).toLocaleString('es-CL', { style: 'currency', currency: 'CLP' });
+      };
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Ficha Detalle de Venta #${sale.id_venta}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap');
+            body {
+              font-family: 'Outfit', sans-serif;
+              color: #1e293b;
+              margin: 40px;
+              line-height: 1.5;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #f1f5f9;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .signature {
+              max-height: 100px;
+              object-fit: contain;
+              margin-bottom: 15px;
+            }
+            .company-name {
+              font-size: 20px;
+              font-weight: 900;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              color: #0f172a;
+            }
+            .company-details {
+              font-size: 11px;
+              color: #64748b;
+              font-weight: 600;
+            }
+            .title-section {
+              text-align: center;
+              margin-bottom: 40px;
+            }
+            .title-section h1 {
+              font-size: 24px;
+              font-weight: 900;
+              margin: 0;
+              text-transform: uppercase;
+              letter-spacing: 2px;
+              color: #3b82f6;
+            }
+            .title-section p {
+              font-size: 12px;
+              font-weight: 800;
+              color: #94a3b8;
+              margin: 5px 0 0 0;
+              letter-spacing: 3px;
+              text-transform: uppercase;
+            }
+            .info-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 20px;
+              margin-bottom: 30px;
+            }
+            .info-card {
+              background: #f8fafc;
+              border: 1px solid #f1f5f9;
+              border-radius: 16px;
+              padding: 20px;
+            }
+            .info-card h2 {
+              font-size: 11px;
+              font-weight: 900;
+              text-transform: uppercase;
+              letter-spacing: 1.5px;
+              color: #3b82f6;
+              margin: 0 0 15px 0;
+              border-bottom: 1px solid #e2e8f0;
+              padding-bottom: 5px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: 12px;
+              margin-bottom: 8px;
+            }
+            .info-row:last-child {
+              margin-bottom: 0;
+            }
+            .info-label {
+              font-weight: 600;
+              color: #64748b;
+            }
+            .info-value {
+              font-weight: 800;
+              color: #0f172a;
+              text-align: right;
+            }
+            .details-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 30px;
+              margin-bottom: 30px;
+            }
+            .details-table th {
+              background: #f8fafc;
+              font-size: 10px;
+              font-weight: 900;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              color: #475569;
+              padding: 12px;
+              border-bottom: 2px solid #e2e8f0;
+              text-align: left;
+            }
+            .details-table td {
+              font-size: 12px;
+              padding: 12px;
+              border-bottom: 1px solid #f1f5f9;
+              color: #334155;
+            }
+            .details-table th.right, .details-table td.right {
+              text-align: right;
+            }
+            .financial-summary {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-end;
+              margin-top: 20px;
+              padding-right: 12px;
+            }
+            .financial-row {
+              display: flex;
+              justify-content: space-between;
+              width: 250px;
+              font-size: 13px;
+              margin-bottom: 6px;
+            }
+            .financial-row.total {
+              border-top: 2px solid #e2e8f0;
+              padding-top: 6px;
+              font-size: 16px;
+              font-weight: 900;
+              color: #0f172a;
+            }
+            .financial-row .label {
+              font-weight: 600;
+              color: #64748b;
+            }
+            .financial-row .val {
+              font-weight: 800;
+            }
+            .footer {
+              margin-top: 60px;
+              text-align: center;
+              font-size: 10px;
+              font-weight: 600;
+              color: #94a3b8;
+              border-top: 1px solid #f1f5f9;
+              padding-top: 20px;
+            }
+            @media print {
+              body { margin: 20px; }
+              button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            ${signatureUrl ? `<img src="${signatureUrl}" class="signature" />` : ''}
+            <div class="company-name">${company.razon || 'SISCON-AI'}</div>
+            <div class="company-details">
+              RUT: ${company.rut || 'N/A'} &nbsp;|&nbsp; Giro: ${company.giro || 'N/A'}<br/>
+              Dirección: ${company.direccion || 'N/A'}<br/>
+              Fono: ${company.fono || 'N/A'} &nbsp;|&nbsp; Email: ${company.mail || 'N/A'}
+            </div>
+          </div>
+
+          <div class="title-section">
+            <h1>Ficha de Venta</h1>
+            <p>Registro Operacional #${sale.id_venta}</p>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h2>Detalles del Cliente</h2>
+              <div class="info-row">
+                <span class="info-label">Razón Social:</span>
+                <span class="info-value">${sale.client?.razon || 'Sin Cliente'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">RUT:</span>
+                <span class="info-value">${sale.client?.rut || 'N/A'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Giro:</span>
+                <span class="info-value">${sale.client?.giro || 'N/A'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Dirección:</span>
+                <span class="info-value">${sale.client?.direccion || 'N/A'}</span>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h2>Información de la Venta</h2>
+              <div class="info-row">
+                <span class="info-label">Fecha:</span>
+                <span class="info-value">${sale.fecha || 'N/A'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">N° Factura:</span>
+                <span class="info-value">${sale.n_factura || 'N/A'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">N° Cotización:</span>
+                <span class="info-value">${sale.n_cot || 'N/A'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">N° O. Compra:</span>
+                <span class="info-value">${sale.n_oc || 'N/A'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Vendedor:</span>
+                <span class="info-value">${sale.agent?.user || 'Sin Agente'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Estado Pago:</span>
+                <span class="info-value" style="color: ${sale.pagado === 'SI' ? '#22c55e' : '#ef4444'}">${sale.pagado || 'NO'}</span>
+              </div>
+            </div>
+          </div>
+
+          <table class="details-table">
+            <thead>
+              <tr>
+                <th>Item / Concepto</th>
+                <th>Descripción / Detalle</th>
+                <th class="right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 800;">${sale.item || 'Venta de Servicios/Productos'}</td>
+                <td>${sale.detalle || 'Sin detalle adicional'}</td>
+                <td class="right" style="font-weight: 800;">${formatCurrency(sale.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="financial-summary">
+            <div class="financial-row">
+              <span class="label">Monto Neto:</span>
+              <span class="val">${formatCurrency(sale.monto)}</span>
+            </div>
+            <div class="financial-row">
+              <span class="label">IVA (19%):</span>
+              <span class="val">${formatCurrency(sale.iva)}</span>
+            </div>
+            <div class="financial-row total">
+              <span class="label">Total General:</span>
+              <span class="val">${formatCurrency(sale.total)}</span>
+            </div>
+          </div>
+
+          <div class="footer">
+            Documento operacional generado automáticamente por el Sistema de Control Interno (SISCON-AI).<br/>
+            &copy; ${new Date().getFullYear()} ${company.razon || 'ALTAMAR MKT'} - Todos los derechos reservados.
+          </div>
+
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 300);
+            };
+          </script>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error al generar la ficha detalle.');
+    }
+  };
   const handleOpenModal = (sale = null) => {
     if (sale) {
       setIsEditMode(true);
@@ -485,6 +792,14 @@ const Ventas = () => {
             value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })}
           />
         </div>
+        <div className="relative flex-1 min-w-[150px]">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-300" size={10} />
+          <input
+            type="text" placeholder="Buscar Cliente..."
+            className="w-full pl-6 pr-2 py-1 bg-slate-50/50 border border-slate-100 rounded-lg outline-none focus:border-primary/50 text-[10px] font-bold"
+            value={filters.clientSearch} onChange={(e) => setFilters({ ...filters, clientSearch: e.target.value })}
+          />
+        </div>
 
         <div className="flex items-center gap-2 bg-slate-50/50 px-2 py-0.5 rounded-lg border border-slate-100">
           <span className="text-[9px] font-black text-slate-400 uppercase px-1">Pagado</span>
@@ -683,7 +998,11 @@ const Ventas = () => {
                         <button onClick={() => handleOpenModal(sale)} className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-blue-600 transition-all" title="Editar">
                           <Pencil size={12} />
                         </button>
-                        <button className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all" title="Documento">
+                        <button 
+                          onClick={() => handlePrintSaleDetail(sale)}
+                          className="p-1 hover:bg-white rounded shadow-sm border border-slate-100 text-slate-400 hover:text-primary transition-all" 
+                          title="Ficha Detalle (PDF)"
+                        >
                           <FileText size={12} />
                         </button>
                         <button 
