@@ -329,10 +329,6 @@ const Ventas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.id_cliente) {
-      alert('Debe seleccionar un Cliente para registrar la venta.');
-      return;
-    }
     try {
       setLoading(true);
 
@@ -844,9 +840,11 @@ const Ventas = () => {
                     <FormSelect 
                       label="Cliente"
                       value={formData.id_cliente}
-                      options={auxData.clients.map(c => ({ value: c.id_cliente, label: `${c.razon} (${c.rut})` }))}
+                      options={[
+                        { value: '', label: 'Sin Cliente' },
+                        ...auxData.clients.map(c => ({ value: c.id_cliente, label: `${c.razon} (${c.rut})` }))
+                      ]}
                       onChange={(val) => setFormData({ ...formData, id_cliente: val })}
-                      required
                     />
                     <FormSelect 
                       label="Agente (Comisionista)"

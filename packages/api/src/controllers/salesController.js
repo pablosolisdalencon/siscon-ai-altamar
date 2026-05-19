@@ -7,11 +7,11 @@ const cleanSaleData = (data) => {
   const cleanInt = (val) => (val === '' || val === undefined) ? null : parseInt(val);
   const cleanFloat = (val) => (val === '' || val === undefined) ? null : parseFloat(val);
   const cleanDate = (val) => (val === '' || val === undefined) ? null : val;
-
   const result = { ...data };
   
   if ('id_agente' in result) result.id_agente = cleanInt(result.id_agente);
-  if ('id_cliente' in result) result.id_cliente = cleanInt(result.id_cliente);
+  result.id_cliente = ('id_cliente' in result) ? (cleanInt(result.id_cliente) || 0) : 0;
+
   if ('n_factura' in result) result.n_factura = cleanInt(result.n_factura) || 0;
   if ('n_cot' in result) result.n_cot = cleanInt(result.n_cot) || 0;
   if ('n_oc' in result) result.n_oc = cleanInt(result.n_oc) || 0;
@@ -166,10 +166,6 @@ exports.createSale = async (req, res) => {
 
     const dataToSave = cleanSaleData(rest);
 
-    if (!dataToSave.id_cliente) {
-      return errorResponse(res, 'El campo id_cliente es obligatorio', 400);
-    }
-
     const sale = await Sale.create({
       ...dataToSave,
       monto: neto,
@@ -191,10 +187,6 @@ exports.updateSale = async (req, res) => {
     if (!sale) return errorResponse(res, 'Sale not found', 404);
 
     const updateData = cleanSaleData(req.body);
-
-    if ('id_cliente' in updateData && !updateData.id_cliente) {
-      return errorResponse(res, 'El campo id_cliente es obligatorio', 400);
-    }
     
     if (monto !== undefined) updateData.monto = parseFloat(monto) || 0;
     if (iva !== undefined) updateData.iva = parseFloat(iva) || 0;
